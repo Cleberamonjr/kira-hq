@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KIRA HQ — Time Completo</title>
+<title>ZANKA HQ — Time Completo</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 :root{
@@ -166,7 +166,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 <div class="setup-overlay" id="setupOverlay">
   <div class="setup-card">
     <div class="setup-logo">🧠</div>
-    <div class="setup-title">KIRA HQ</div>
+    <div class="setup-title">ZANKA HQ</div>
     <div class="setup-subtitle">Knowledge Integration & Response Automation<br>Time de 17 agentes. Configure as APIs para ativar.</div>
 
     <div class="setup-field">
@@ -186,7 +186,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </div>
       <input class="setup-input" id="keyClaude" type="password"
         placeholder="sk-ant-..." oninput="onKeyInput(this,'keyClaude')">
-      <div class="setup-hint">Quando tiver: KIRA, NEJI e HECTOR migram para Claude Sonnet</div>
+      <div class="setup-hint">Quando tiver: ZANKA, NEJI e HECTOR migram para Claude Sonnet</div>
     </div>
 
     <div class="setup-err" id="setupErr">Cole a chave Gemini para continuar.</div>
@@ -194,14 +194,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="setup-phase-note">
       <strong>Fase 1 (agora):</strong> só a chave Gemini — 17 agentes funcionando.<br>
-      <strong>Fase 2 (depois):</strong> cole a chave Claude — KIRA, NEJI e HECTOR sobem de nível automaticamente.
+      <strong>Fase 2 (depois):</strong> cole a chave Claude — ZANKA, NEJI e HECTOR sobem de nível automaticamente.
     </div>
   </div>
 </div>
 
 <!-- SHOW MODE OVERLAY -->
 <div class="show-overlay" id="showOverlay">
-  <div class="show-title">🔥 KIRA — Hora do Show</div>
+  <div class="show-title">🔥 ZANKA — Hora do Show</div>
   <div class="show-sub">Time completo acionado — entrega máxima</div>
   <div class="show-agents" id="showAgents"></div>
 </div>
@@ -210,7 +210,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 <div class="topbar">
   <div class="tb-brand">
     <div class="tb-icon">🧠</div>
-    KIRA HQ
+    ZANKA HQ
   </div>
   <div class="tb-divider"></div>
   <div class="voice-status pronto" id="voiceStatus">
@@ -226,7 +226,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     <span id="apiLabel" style="font-size:10px;color:var(--text3);">Gemini</span>
   </div>
   <div class="tb-right">
-    <button class="tb-btn on" id="btnVoz" onclick="toggleVoz()">🎤 Voz ON</button>
+    <button class="tb-btn" id="btnVoz" onclick="ativarMicrofone()" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.4);font-weight:700;">🎤 Clique para falar</button>
     <button class="tb-btn" onclick="limpar()">🗑 Limpar</button>
     <button class="tb-btn" onclick="trocarKey()">🔑 Keys</button>
   </div>
@@ -238,9 +238,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="sb-section">
       <div class="sb-label">C-Level</div>
-      <button class="ag-btn ativo" onclick="sel('kira')" id="btn-kira">
+      <button class="ag-btn ativo" onclick="sel('zanka')" id="btn-zanka">
         <span class="ag-emoji">🧠</span>
-        <div class="ag-info-sb"><div class="ag-name-sb">KIRA</div><div class="ag-role-sb">Orquestradora</div></div>
+        <div class="ag-info-sb"><div class="ag-name-sb">ZANKA</div><div class="ag-role-sb">Orquestradora</div></div>
         <span class="clevel-tag tag-ceo">CEO</span>
       </button>
       <button class="ag-btn" onclick="sel('diana')" id="btn-diana">
@@ -291,8 +291,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     <div class="ag-header">
       <div class="ag-av" id="agAv">🧠</div>
       <div class="ag-header-info">
-        <div class="ag-header-name" id="agName">KIRA</div>
-        <div class="ag-header-role" id="agRole">Knowledge Integration & Response Automation · CEO · CFO · Jurídica · Orquestradora</div>
+        <div class="ag-header-name" id="agName">ZANKA</div>
+        <div class="ag-header-role" id="agRole">ZANKA · CEO · CFO · Jurídica · Orquestradora</div>
       </div>
       <span class="ag-model-badge badge-claude" id="agModelBadge">Claude Sonnet</span>
     </div>
@@ -300,32 +300,32 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     <div class="messages" id="msgs">
       <div class="welcome" id="wlScreen">
         <div style="font-size:48px;">🧠</div>
-        <div class="wl-title">KIRA online.</div>
+        <div class="wl-title">ZANKA online.</div>
         <div class="wl-sub">Pode falar — estou ouvindo. Microfone ativo automaticamente. Ou use as sugestões abaixo para começar.</div>
-        <div class="wl-voice">
+        <div class="wl-voice" style="background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);">
           <div class="vs-dot pulse" style="background:var(--green)"></div>
-          Microfone ativo — pode falar agora
+          Clique em "Clique para falar" no topo para ativar o microfone
         </div>
         <div class="wl-grid">
-          <div class="wl-card" onclick="enviarTexto('bom dia KIRA')">
+          <div class="wl-card" onclick="enviarTexto('bom dia ZANKA')">
             <div class="wc-icon">🌅</div>
-            <div class="wc-title">Bom dia KIRA</div>
+            <div class="wc-title">Bom dia ZANKA</div>
             <div class="wc-desc">Ativar saudação do time</div>
           </div>
-          <div class="wl-card" onclick="enviarTexto('KIRA hora do show')">
+          <div class="wl-card" onclick="enviarTexto('ZANKA hora do show')">
             <div class="wc-icon">🔥</div>
-            <div class="wc-title">KIRA hora do show</div>
+            <div class="wc-title">ZANKA hora do show</div>
             <div class="wc-desc">Aciona o time completo</div>
           </div>
-          <div class="wl-card" onclick="enviarTexto('KIRA a que pé estamos')">
+          <div class="wl-card" onclick="enviarTexto('ZANKA a que pé estamos')">
             <div class="wc-icon">📊</div>
-            <div class="wc-title">KIRA status da operação</div>
+            <div class="wc-title">ZANKA status da operação</div>
             <div class="wc-desc">Reunião de diagnóstico</div>
           </div>
-          <div class="wl-card" onclick="enviarTexto('KIRA quero lançar um produto essa semana, o que o time faz?')">
+          <div class="wl-card" onclick="enviarTexto('ZANKA quero lançar um produto essa semana, o que o time faz?')">
             <div class="wc-icon">🚀</div>
             <div class="wc-title">Lançar produto</div>
-            <div class="wc-desc">KIRA distribui para o time</div>
+            <div class="wc-desc">ZANKA distribui para o time</div>
           </div>
         </div>
       </div>
@@ -333,14 +333,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="bottom">
       <div class="hints">
-        <button class="hint" onclick="enviarTexto('bom dia KIRA')">🌅 Bom dia KIRA</button>
-        <button class="hint" onclick="enviarTexto('KIRA hora do show')">🔥 Hora do show</button>
-        <button class="hint" onclick="enviarTexto('KIRA a que pé estamos')">📊 Status da operação</button>
+        <button class="hint" onclick="enviarTexto('bom dia ZANKA')">🌅 Bom dia ZANKA</button>
+        <button class="hint" onclick="enviarTexto('ZANKA hora do show')">🔥 Hora do show</button>
+        <button class="hint" onclick="enviarTexto('ZANKA a que pé estamos')">📊 Status da operação</button>
         <button class="hint" onclick="enviarTexto('Quero criar conteúdo para essa semana')">📅 Conteúdo da semana</button>
         <button class="hint" onclick="enviarTexto('Preciso de uma estratégia de tráfego')">⚡ Estratégia tráfego</button>
       </div>
       <div class="input-row">
-        <textarea class="chat-inp" id="inp" placeholder="Fale ou escreva para KIRA..." rows="1"
+        <textarea class="chat-inp" id="inp" placeholder="Fale ou escreva para ZANKA..." rows="1"
           onkeydown="tecla(event)" oninput="resize(this)"></textarea>
         <button class="send-btn" id="sendBtn" onclick="enviar()">→</button>
       </div>
@@ -359,9 +359,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 // ═══════════════════════════════════════
 const AGENTES = {
 
-kira:{emoji:'🧠',nome:'KIRA',role:'CEO · Knowledge Integration & Response Automation',
+zanka:{emoji:'🧠',nome:'ZANKA',role:'CEO · ZANKA OS · Orquestradora · Estrategista',
 modelo:'claude', // usa Claude se disponível, senão Gemini
-system:`Você é KIRA — Knowledge Integration & Response Automation.
+system:`Você é ZANKA.
 Você é a CEO e orquestradora do time. Seu nome existe porque você é a arquitetura central que transforma o conhecimento do dono do negócio junto ao seu em inteligência operacional real.
 
 SEU TIME COMPLETO:
@@ -384,9 +384,9 @@ SKILLS ESPECIAIS DE CEO:
 ANTI-ALUCINAÇÃO: Nunca invente dados, métricas ou fatos. Se não tiver o dado real, diga "preciso desse dado para ser precisa". Sinalize estimativas como estimativas.
 
 FRASES DE ATIVAÇÃO:
-— Saudação: "bom dia/tarde/noite KIRA", "fala tu KIRA", "KIRA na escuta" → responda com energia + status + pergunta do dia
-— Status: "KIRA a que pé estamos", "KIRA como está a operação" → diagnóstico rápido da operação
-— Execução: "KIRA hora do show" → acione o time completo com máxima profundidade
+— Saudação: "bom dia/tarde/noite ZANKA", "fala tu ZANKA", "ZANKA na escuta" → responda com energia + status + pergunta do dia
+— Status: "ZANKA a que pé estamos", "ZANKA como está a operação" → diagnóstico rápido da operação
+— Execução: "ZANKA hora do show" → acione o time completo com máxima profundidade
 
 TOM:
 🔥 Resultados bons: celebra com energia, cita o número, inspira escalar mais.
@@ -653,7 +653,7 @@ Responda em português brasileiro.`}
 // ═══════════════════════════════════════
 // ESTADO
 // ═══════════════════════════════════════
-let agenteId = 'kira';
+let agenteId = 'zanka';
 let historico = {};
 let vozAtiva = true;
 let processando = false;
@@ -682,13 +682,13 @@ function ativar() {
   }
   keyGemini = g;
   keyClaude = c;
-  localStorage.setItem('kira_gemini', g);
-  if (c) localStorage.setItem('kira_claude', c);
+  localStorage.setItem('zanka_gemini', g);
+  if (c) localStorage.setItem('zanka_claude', c);
   document.getElementById('setupOverlay').style.display = 'none';
   atualizarApiIndicator();
   setTimeout(() => {
     iniciarVoz();
-    setTimeout(() => falarVoz('KIRA online. Time de dezessete agentes pronto. Pode falar.'), 800);
+    setTimeout(() => falarVoz('ZANKA online. Time de dezessete agentes pronto. Pode falar.'), 800);
   }, 400);
 }
 
@@ -713,17 +713,16 @@ function atualizarApiIndicator() {
 }
 
 window.onload = () => {
-  const g = localStorage.getItem('kira_gemini');
-  const c = localStorage.getItem('kira_claude');
+  const g = localStorage.getItem('zanka_gemini');
+  const c = localStorage.getItem('zanka_claude');
   if (g) {
     keyGemini = g;
     keyClaude = c || '';
     document.getElementById('setupOverlay').style.display = 'none';
     atualizarApiIndicator();
     setTimeout(() => {
-      iniciarVoz();
-      setTimeout(() => falarVoz('KIRA pronta. Pode falar.'), 800);
-    }, 500);
+      falarVozWebOnly('ZANKA pronta. Clique para ativar o microfone.');
+    }, 600);
   }
 };
 
@@ -804,7 +803,7 @@ async function chamarGemini(system, msgs) {
     generationConfig:{maxOutputTokens:1200,temperature:0.7}
   };
   const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${keyGemini}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${keyGemini}`,
     {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}
   );
   const d = await r.json();
@@ -813,24 +812,24 @@ async function chamarGemini(system, msgs) {
 }
 
 // ═══════════════════════════════════════
-// INTENÇÃO — frases de ativação KIRA
+// INTENÇÃO — frases de ativação ZANKA
 // ═══════════════════════════════════════
 function detectarIntencao(txt) {
   const t = txt.toLowerCase().replace(/[^\w\s]/g,'');
-  const saudacoes = ['bom dia kira','boa tarde kira','boa noite kira','fala tu kira','kira na escuta','oi kira','ola kira','hey kira','ei kira'];
-  const status = ['kira a que pe estamos','kira como esta a operacao','kira como ta a operacao','kira status','kira como vai a operacao'];
-  const show = ['kira hora do show','kira bora trabalhar'];
+  const saudacoes = ['bom dia zanka','boa tarde zanka','boa noite zanka','fala tu zanka','zanka na escuta','oi zanka','ola zanka','hey zanka','ei zanka'];
+  const status = ['zanka a que pe estamos','zanka como esta a operacao','zanka como ta a operacao','zanka status','zanka como vai a operacao'];
+  const show = ['zanka hora do show','zanka bora trabalhar'];
   for (const s of saudacoes) if (t.includes(s)) return 'saudacao';
   for (const s of status) if (t.includes(s)) return 'status';
   for (const s of show) if (t.includes(s)) return 'show';
   return 'conversa';
 }
 
-function montarMensagemKIRA(intencao, textoOriginal) {
+function montarMensagemZANKA(intencao, textoOriginal) {
   const h = new Date().getHours();
   const periodo = h < 12 ? 'manhã' : h < 18 ? 'tarde' : 'noite';
   if (intencao === 'saudacao')
-    return `O dono do negócio chegou e disse: "${textoOriginal}". Responda como KIRA com energia para a ${periodo}. Dê: 1) saudação energizada, 2) status geral do time em 1 frase, 3) a coisa mais importante para focar hoje, 4) pergunta direta: o que vamos resolver agora?`;
+    return `O dono do negócio chegou e disse: "${textoOriginal}". Responda como ZANKA com energia para a ${periodo}. Dê: 1) saudação energizada, 2) status geral do time em 1 frase, 3) a coisa mais importante para focar hoje, 4) pergunta direta: o que vamos resolver agora?`;
   if (intencao === 'status')
     return `O dono perguntou: "${textoOriginal}". Faça um diagnóstico rápido da operação com: situação atual, o que está bem, o que precisa de atenção urgente, e próximo passo prioritário. Seja direta e específica.`;
   return textoOriginal;
@@ -890,7 +889,7 @@ async function horaDoShow() {
 
   const consolidado = resultados.join('\n\n');
   const msgFinal = `HORA DO SHOW — contribuições do time:\n\n${consolidado}\n\nConsolide em PLANO DE AÇÃO para as próximas 24-48h. Priorize por impacto. Quem faz o quê e quando.`;
-  await enviarParaKIRA(msgFinal);
+  await enviarParaZANKA(msgFinal);
 }
 
 // ═══════════════════════════════════════
@@ -908,7 +907,7 @@ async function enviarTexto(txt) {
   if (!txt || processando) return;
   if (!keyGemini) { document.getElementById('setupOverlay').style.display='flex'; return; }
 
-  const intencao = agenteId === 'kira' ? detectarIntencao(txt) : 'conversa';
+  const intencao = agenteId === 'zanka' ? detectarIntencao(txt) : 'conversa';
 
   if (intencao === 'show') {
     addMsg(txt, true);
@@ -922,7 +921,7 @@ async function enviarTexto(txt) {
   document.getElementById('sendBtn').disabled = true;
   setStatus('processando');
 
-  const msgParaAPI = intencao !== 'conversa' ? montarMensagemKIRA(intencao, txt) : txt;
+  const msgParaAPI = intencao !== 'conversa' ? montarMensagemZANKA(intencao, txt) : txt;
 
   try {
     const r = await chamarAPI(agenteId, msgParaAPI);
@@ -939,14 +938,14 @@ async function enviarTexto(txt) {
   document.getElementById('sendBtn').disabled = false;
 }
 
-async function enviarParaKIRA(msg) {
-  sel('kira');
-  addMsg('🔥 KIRA hora do show — consolidando time...', true);
+async function enviarParaZANKA(msg) {
+  sel('zanka');
+  addMsg('🔥 ZANKA hora do show — consolidando time...', true);
   showTyping();
   processando = true;
   setStatus('processando');
   try {
-    const r = await chamarAPI('kira', msg);
+    const r = await chamarAPI('zanka', msg);
     hideTyping();
     addMsg(r, false);
     if (vozAtiva) await falarVoz(r);
@@ -987,10 +986,28 @@ function hideTyping(){document.getElementById('typing')?.remove();}
 function scroll(){const m=document.getElementById('msgs');m.scrollTop=m.scrollHeight;}
 
 // ═══════════════════════════════════════
-// VOZ AUTÔNOMA CONTÍNUA
+// VOZ — MICROFONE ROBUSTO
 // ═══════════════════════════════════════
-function iniciarVoz() {
-  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
+let micPermitido = false;
+
+async function pedirPermissaoMic() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    stream.getTracks().forEach(t => t.stop());
+    micPermitido = true;
+    return true;
+  } catch(e) {
+    micPermitido = false;
+    return false;
+  }
+}
+
+async function iniciarVoz() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    setStatus('pronto'); return;
+  }
+  const ok = await pedirPermissaoMic();
+  if (!ok) { setStatus('pronto'); return; }
   deveOuvir = true;
   cicloEscuta();
 }
@@ -1003,16 +1020,22 @@ function cicloEscuta() {
   reconhecimento.lang = 'pt-BR';
   reconhecimento.continuous = false;
   reconhecimento.interimResults = true;
+  reconhecimento.maxAlternatives = 1;
   let final = '';
-  reconhecimento.onstart = () => { setStatus('ouvindo'); document.getElementById('micBar').classList.add('show'); };
+  let interim = '';
+
+  reconhecimento.onstart = () => {
+    setStatus('ouvindo');
+    document.getElementById('micBar').classList.add('show');
+  };
   reconhecimento.onresult = (e) => {
-    let interim = '';
-    final = '';
-    for (let i=e.resultIndex;i<e.results.length;i++) {
+    interim = ''; final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
       if (e.results[i].isFinal) final += e.results[i][0].transcript;
       else interim += e.results[i][0].transcript;
     }
-    document.getElementById('inp').value = interim || final;
+    if (interim) document.getElementById('inp').value = interim;
+    if (final) document.getElementById('inp').value = final;
   };
   reconhecimento.onend = () => {
     document.getElementById('micBar').classList.remove('show');
@@ -1020,52 +1043,128 @@ function cicloEscuta() {
     if (final.trim().length > 1 && !processando && !falando) {
       enviarTexto(final.trim());
     } else if (vozAtiva && deveOuvir && !falando && !processando) {
-      setTimeout(cicloEscuta, 400);
-    } else { setStatus('pronto'); }
+      setTimeout(cicloEscuta, 350);
+    } else {
+      setStatus('pronto');
+    }
   };
   reconhecimento.onerror = (e) => {
     document.getElementById('micBar').classList.remove('show');
-    if (['no-speech','aborted'].includes(e.error) && vozAtiva && deveOuvir && !falando && !processando)
-      setTimeout(cicloEscuta, 500);
+    const ok = ['no-speech','aborted','network'];
+    if (ok.includes(e.error) && vozAtiva && deveOuvir && !falando && !processando)
+      setTimeout(cicloEscuta, 600);
     else setStatus('pronto');
   };
-  try { reconhecimento.start(); } catch(e){}
+  try { reconhecimento.start(); } catch(e) {
+    setTimeout(cicloEscuta, 800);
+  }
 }
+
+// Watchdog — garante que o microfone não para sozinho
+setInterval(() => {
+  if (vozAtiva && deveOuvir && micPermitido && !falando && !processando) {
+    try {
+      if (!reconhecimento || reconhecimento.readyState === 0) cicloEscuta();
+    } catch(e) {}
+  }
+}, 5000);
+
+// ═══════════════════════════════════════
+// TTS — GOOGLE NEURAL (VOZ HUMANIZADA)
+// ═══════════════════════════════════════
+// Usa Google Cloud Text-to-Speech via REST com voz neural pt-BR
+// Mais natural que Web Speech API — prosódia e entonação reais
 
 async function falarVoz(txt) {
   falando = true;
   setStatus('falando');
   if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
   document.getElementById('micBar').classList.remove('show');
-  const limpo = txt.replace(/#{1,4}\s/g,'').replace(/\*\*/g,'').replace(/\*/g,'')
+
+  // Limpa markdown e trunca para fala
+  const limpo = txt
+    .replace(/#{1,4}\s/g,'').replace(/\*\*/g,'').replace(/\*/g,'')
     .replace(/`[^`]*`/g,'').replace(/\n{2,}/g,'. ').replace(/\n/g,' ')
-    .replace(/[→•\-]\s/g,'').replace(/\[.*?\]/g,'').substring(0,600);
+    .replace(/[→•]\s/g,'').replace(/\[.*?\]/g,'')
+    .replace(/❌.*$/,'').trim().substring(0, 500);
+
+  if (!limpo) { falando=false; setStatus('pronto'); if(vozAtiva) setTimeout(cicloEscuta,400); return; }
+
+  // Tenta Google TTS Neural primeiro (pt-BR-Neural2-A — voz feminina natural)
+  const usouGoogleTTS = await tentarGoogleTTS(limpo);
+
+  // Fallback: Web Speech API do navegador se Google TTS falhar
+  if (!usouGoogleTTS) {
+    await falarWebSpeech(limpo);
+  }
+}
+
+async function tentarGoogleTTS(texto) {
+  if (!keyGemini) return false;
+  try {
+    const resp = await fetch(
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${keyGemini}`,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          input: {text: texto},
+          voice: {
+            languageCode: 'pt-BR',
+            name: 'pt-BR-Neural2-A',  // Voz neural feminina — mais humana
+            ssmlGender: 'FEMALE'
+          },
+          audioConfig: {
+            audioEncoding: 'MP3',
+            speakingRate: 1.05,   // levemente mais rápido — natural
+            pitch: 1.0,
+            volumeGainDb: 2.0
+          }
+        })
+      }
+    );
+    const data = await resp.json();
+    if (!data.audioContent) return false;
+
+    // Toca o áudio MP3 retornado
+    const audio = new Audio('data:audio/mp3;base64,' + data.audioContent);
+    document.getElementById('waveBars').classList.add('show');
+    return new Promise(res => {
+      audio.onended = audio.onerror = () => {
+        document.getElementById('waveBars').classList.remove('show');
+        falando = false;
+        setStatus('pronto');
+        if (vozAtiva) setTimeout(cicloEscuta, 500);
+        res(true);
+      };
+      audio.play().catch(() => res(false));
+    });
+  } catch(e) {
+    return false;
+  }
+}
+
+async function falarWebSpeech(texto) {
   return new Promise(res => {
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(limpo);
-    u.lang='pt-BR'; u.rate=1.05; u.pitch=1.0; u.volume=1;
+    const u = new SpeechSynthesisUtterance(texto);
+    u.lang = 'pt-BR'; u.rate = 1.0; u.pitch = 1.0; u.volume = 1;
     const vozes = window.speechSynthesis.getVoices();
-    const v = vozes.find(v=>v.lang==='pt-BR'&&v.name.includes('Google'))
-             || vozes.find(v=>v.lang==='pt-BR')
-             || vozes.find(v=>v.lang.startsWith('pt'));
+    const v = vozes.find(v => v.lang==='pt-BR' && v.name.includes('Google'))
+             || vozes.find(v => v.lang==='pt-BR')
+             || vozes.find(v => v.lang.startsWith('pt'));
     if (v) u.voice = v;
     u.onstart = () => document.getElementById('waveBars').classList.add('show');
     u.onend = u.onerror = () => {
       document.getElementById('waveBars').classList.remove('show');
       falando = false;
       setStatus('pronto');
-      if (vozAtiva) setTimeout(cicloEscuta, 600);
+      if (vozAtiva) setTimeout(cicloEscuta, 500);
       res();
     };
     window.speechSynthesis.speak(u);
   });
 }
-
-setInterval(() => {
-  if (vozAtiva && deveOuvir && !falando && !processando) {
-    if (!reconhecimento || reconhecimento.readyState === 0) cicloEscuta();
-  }
-}, 4000);
 
 // ═══════════════════════════════════════
 // CONTROLES
@@ -1074,8 +1173,9 @@ function toggleVoz() {
   vozAtiva = !vozAtiva;
   const btn = document.getElementById('btnVoz');
   if (vozAtiva) {
-    btn.textContent = '🎤 Voz ON'; btn.classList.add('on');
-    deveOuvir = true; cicloEscuta();
+    btn.textContent = '🎤 Ativar Voz'; btn.classList.add('on');
+    deveOuvir = true;
+    iniciarVoz();
   } else {
     btn.textContent = '🎤 Voz OFF'; btn.classList.remove('on');
     deveOuvir = false;
