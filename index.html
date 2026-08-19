@@ -197,46 +197,50 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="setup-field">
       <div class="setup-label">
-        ElevenLabs API Key
+        Inworld API Key
         <span class="lbadge lb-optional">Opcional — voz ultra-realista</span>
       </div>
-      <input class="setup-input" id="keyElevenLabs" type="password"
-        placeholder="sk_..." oninput="onKeyInput(this,'keyElevenLabs')">
-      <div class="setup-hint">Voz masculina pt-BR ultra-real — elevenlabs.io. Sem ela, usa Google TTS.</div>
+      <input class="setup-input" id="keyInworld" type="password"
+        placeholder="Cole sua chave Inworld..." oninput="onKeyInput(this,'keyInworld')">
+      <div class="setup-hint">Sub-100ms de latência, top-ranked em qualidade — inworld.ai</div>
     </div>
 
-    <div class="setup-field">
+    <div class="setup-field" id="fieldVoiceId">
       <div class="setup-label">
-        ElevenLabs Voice ID
-        <span class="lbadge lb-optional">Opcional — ID da voz escolhida</span>
+        Inworld Voice ID
+        <span class="lbadge lb-optional">Opcional — deixe vazio para listar vozes</span>
       </div>
-      <input class="setup-input" id="voiceIdElevenLabs" type="text"
-        placeholder="Ex: 21m00Tcm4TlvDq8ikWAM" oninput="onKeyInput(this,'voiceId')">
-      <div class="setup-hint">Copie o Voice ID da voz masculina pt-BR em elevenlabs.io/voice-library</div>
+      <div style="display:flex;gap:6px;margin-top:0;">
+        <input class="setup-input" id="voiceIdInworld" type="text"
+          placeholder="Ex: Dennis, ou deixe vazio para buscar" oninput="onKeyInput(this,'voiceId')" style="flex:1;margin-bottom:0;">
+        <button onclick="listarVozesInworld()" style="padding:8px 12px;background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3);border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">🔍 Ver vozes</button>
+      </div>
+      <div id="vozesInworldList" style="margin-top:6px;font-size:10px;color:var(--text2);display:none;max-height:120px;overflow-y:auto;background:var(--s3);border-radius:6px;padding:8px;"></div>
+      <div class="setup-hint">Deixe vazio e clique "Ver vozes" para listar as disponíveis na sua conta</div>
     </div>
 
     <div class="setup-tts-mode">
       <div class="setup-label" style="margin-bottom:8px;">Modo de voz</div>
       <div style="display:flex;flex-direction:column;gap:6px;">
-        <label class="tts-option" id="opt-elevenlabs">
-          <input type="radio" name="ttsMode" value="elevenlabs" checked onchange="onTTSMode(this)">
+        <label class="tts-option" id="opt-inworld">
+          <input type="radio" name="ttsMode" value="inworld" checked onchange="onTTSMode(this)">
           <div class="tts-opt-body">
-            <div class="tts-opt-title">🎙️ ElevenLabs <span class="lbadge lb-optional" style="margin-left:4px;">Requer API key acima</span></div>
-            <div class="tts-opt-desc">Voz humana real. Cole a API key e o Voice ID acima.</div>
+            <div class="tts-opt-title">🎙️ Inworld TTS-2 <span class="lbadge lb-optional" style="margin-left:4px;">Sub-100ms · Top-ranked</span></div>
+            <div class="tts-opt-desc">Melhor qualidade disponível. Requer API key acima. Streaming nativo.</div>
           </div>
         </label>
         <label class="tts-option" id="opt-kokoro">
           <input type="radio" name="ttsMode" value="kokoro" onchange="onTTSMode(this)">
           <div class="tts-opt-body">
-            <div class="tts-opt-title">🔊 Kokoro Local <span class="lbadge lb-required" style="margin-left:4px;background:rgba(96,165,250,.1);color:#60a5fa;border-color:rgba(96,165,250,.3);">Download ~300MB</span></div>
-            <div class="tts-opt-desc">Modelo neural offline. Download único no Chrome, depois em cache para sempre. Sem API key.</div>
+            <div class="tts-opt-title">🔊 Kokoro Local <span class="lbadge lb-required" style="margin-left:4px;background:rgba(96,165,250,.1);color:#60a5fa;border-color:rgba(96,165,250,.3);">Download ~300MB · 1x</span></div>
+            <div class="tts-opt-desc">Modelo neural offline. Download único no Chrome, depois em cache. Sem API key.</div>
           </div>
         </label>
         <label class="tts-option" id="opt-google">
           <input type="radio" name="ttsMode" value="google" onchange="onTTSMode(this)">
           <div class="tts-opt-body">
             <div class="tts-opt-title">🔈 Google TTS <span class="lbadge" style="background:var(--green-bg);color:var(--green);border:1px solid rgba(52,211,153,.3);">Usa chave Gemini</span></div>
-            <div class="tts-opt-desc">Wavenet pt-BR — qualidade boa, usa sua chave Gemini existente.</div>
+            <div class="tts-opt-desc">Wavenet pt-BR masculino — usa sua chave Gemini existente, sem custo extra.</div>
           </div>
         </label>
       </div>
@@ -716,8 +720,8 @@ let deveOuvir = true;
 let falando = false;
 let keyGemini = '';
 let keyClaude = '';
-let keyElevenLabs = '';
-let voiceIdElevenLabs = 'pNInz6obpgDQGcFmaJgB'; // Adam — voz masculina padrão
+let keyInworld = '';
+let voiceIdInworld = 'Dennis'; // Dennis — voz masculina padrão Inworld
 let modoTTS = 'elevenlabs'; // 'elevenlabs' | 'kokoro' | 'google'
 let kokoroTTS = null; // instância do Kokoro quando carregado
 let kokoroCarregando = false;
@@ -744,10 +748,10 @@ function ativar() {
   keyClaude = c;
   localStorage.setItem('zanka_gemini', g);
   if (c) localStorage.setItem('zanka_claude', c);
-  const el = document.getElementById('keyElevenLabs').value.trim();
-  const vid = document.getElementById('voiceIdElevenLabs').value.trim();
-  if (el) { keyElevenLabs = el; localStorage.setItem('zanka_elevenlabs', el); }
-  if (vid) { voiceIdElevenLabs = vid; localStorage.setItem('zanka_voice_id', vid); }
+  const iw = document.getElementById('keyInworld').value.trim();
+  const vid = document.getElementById('voiceIdInworld').value.trim();
+  if (iw) { keyInworld = iw; localStorage.setItem('zanka_inworld', iw); }
+  if (vid) { voiceIdInworld = vid; localStorage.setItem('zanka_voice_id', vid); }
   modoTTS = document.querySelector('input[name="ttsMode"]:checked')?.value || 'google';
   localStorage.setItem('zanka_tts_mode', modoTTS);
   // Se escolheu Kokoro, começa a carregar o modelo
@@ -763,8 +767,8 @@ function ativar() {
 function trocarKey() {
   document.getElementById('keyGemini').value = keyGemini;
   document.getElementById('keyClaude').value = keyClaude;
-  document.getElementById('keyElevenLabs').value = keyElevenLabs;
-  document.getElementById('voiceIdElevenLabs').value = voiceIdElevenLabs;
+  document.getElementById('keyInworld').value = keyInworld;
+  document.getElementById('voiceIdInworld').value = voiceIdInworld;
   // Marcar o modo atual
   const radio = document.querySelector(`input[name="ttsMode"][value="${modoTTS}"]`);
   if (radio) radio.checked = true;
@@ -789,7 +793,7 @@ function atualizarApiIndicator() {
   }
   // Badge TTS
   const ttsMap = {
-    elevenlabs: {label:'🎙️ ElevenLabs', color:'#f59e0b'},
+    inworld:     {label:'🎙️ Inworld TTS-2', color:'#f59e0b'},
     kokoro:     {label:'🔊 Kokoro Local', color:'#60a5fa'},
     google:     {label:'🔈 Google TTS', color:'#34d399'},
   };
@@ -808,11 +812,11 @@ function atualizarApiIndicator() {
 window.onload = () => {
   const g = localStorage.getItem('zanka_gemini');
   const c = localStorage.getItem('zanka_claude');
-  const el = localStorage.getItem('zanka_elevenlabs');
+  const iw = localStorage.getItem('zanka_inworld');
   const vid = localStorage.getItem('zanka_voice_id');
   const ttsMode = localStorage.getItem('zanka_tts_mode');
-  if (el) keyElevenLabs = el;
-  if (vid) voiceIdElevenLabs = vid;
+  if (iw) keyInworld = iw;
+  if (vid) voiceIdInworld = vid;
   if (ttsMode) {
     modoTTS = ttsMode;
     const radio = document.querySelector(`input[name="ttsMode"][value="${ttsMode}"]`);
@@ -1225,8 +1229,8 @@ async function falarVoz(txt) {
   if (!limpo) { falando=false; setStatus('pronto'); if(vozAtiva) setTimeout(cicloEscuta,400); return; }
 
   let ok = false;
-  if (modoTTS === 'elevenlabs' && keyElevenLabs) {
-    ok = await falarElevenLabs(limpo);
+  if (modoTTS === 'inworld' && keyInworld) {
+    ok = await falarInworld(limpo);
   } else if (modoTTS === 'kokoro' && kokoroTTS) {
     ok = await falarKokoro(limpo);
   } else if (modoTTS === 'google' || (!ok && keyGemini)) {
@@ -1236,52 +1240,81 @@ async function falarVoz(txt) {
 }
 
 // ═══════════════════════════════════════
-// TTS — ELEVENLABS (NUVEM — MELHOR QUALIDADE)
+// TTS — INWORLD TTS-2 (SUB-100MS · TOP-RANKED)
 // ═══════════════════════════════════════
-async function falarElevenLabs(texto) {
+async function falarInworld(texto) {
   try {
-    const resp = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceIdElevenLabs}/stream`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': keyElevenLabs
+    const resp = await fetch('https://api.inworld.ai/tts/v1/voice', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${keyInworld}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text: texto,
+        voiceId: voiceIdInworld,
+        modelId: 'inworld-tts-2',
+        audioConfig: {
+          audioEncoding: 'MP3',
+          sampleRateHertz: 24000
         },
-        body: JSON.stringify({
-          text: texto,
-          model_id: 'eleven_multilingual_v2',
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.8,
-            style: 0.2,
-            use_speaker_boost: true
-          }
-        })
-      }
-    );
-    if (!resp.ok) { console.warn('ElevenLabs erro:', resp.status); return false; }
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
+        applyTextNormalization: 'ON'
+      })
+    });
+    if (!resp.ok) { console.warn('Inworld erro:', resp.status, await resp.text()); return false; }
+    const data = await resp.json();
+    if (!data.audioContent) return false;
+    const audio = new Audio('data:audio/mp3;base64,' + data.audioContent);
     document.getElementById('waveBars').classList.add('show');
     return new Promise(res => {
       audio.onended = () => {
         document.getElementById('waveBars').classList.remove('show');
-        URL.revokeObjectURL(url);
         falando = false; setStatus('pronto');
         if (vozAtiva) setTimeout(cicloEscuta, 500);
         res(true);
       };
       audio.onerror = () => {
         document.getElementById('waveBars').classList.remove('show');
-        URL.revokeObjectURL(url);
         falando = false; setStatus('pronto');
         res(false);
       };
       audio.play().catch(() => res(false));
     });
-  } catch(e) { console.warn('ElevenLabs catch:', e); return false; }
+  } catch(e) { console.warn('Inworld catch:', e); return false; }
+}
+
+// Lista vozes disponíveis na conta Inworld (para escolher no setup)
+async function listarVozesInworld() {
+  const key = document.getElementById('keyInworld').value.trim() || keyInworld;
+  const div = document.getElementById('vozesInworldList');
+  if (!key) { div.style.display='block'; div.textContent='Cole a API key antes de listar vozes.'; return; }
+  div.style.display='block';
+  div.textContent='Carregando vozes...';
+  try {
+    const resp = await fetch('https://api.inworld.ai/tts/v1/voices', {
+      headers: { 'Authorization': `Basic ${key}` }
+    });
+    if (!resp.ok) { div.textContent = `Erro ${resp.status} — verifique a chave.`; return; }
+    const data = await resp.json();
+    const vozes = data.voices || data || [];
+    if (!vozes.length) { div.textContent = 'Nenhuma voz encontrada.'; return; }
+    div.innerHTML = vozes.map(v => {
+      const id = v.voiceId || v.name || v.id || '';
+      const lang = v.languageCode || v.language || '';
+      const gender = v.ssmlGender || v.gender || '';
+      return `<div onclick="selecionarVoz('${id}')" style="padding:4px 6px;cursor:pointer;border-radius:4px;margin-bottom:2px;" onmouseover="this.style.background='rgba(124,58,237,.15)'" onmouseout="this.style.background='transparent'">
+        <strong>${id}</strong> <span style="color:var(--text3)">${lang} ${gender}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    div.textContent = 'Erro ao carregar vozes: ' + e.message;
+  }
+}
+
+function selecionarVoz(id) {
+  document.getElementById('voiceIdInworld').value = id;
+  voiceIdInworld = id;
+  document.getElementById('vozesInworldList').style.display = 'none';
 }
 
 // ═══════════════════════════════════════
