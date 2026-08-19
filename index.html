@@ -1000,7 +1000,10 @@ async function enviarTexto(txt) {
     else setStatus('pronto');
   } catch(e) {
     hideTyping();
-    addMsg(`❌ Erro: ${e.message}`, false);
+    // Só mostra erro se for da API — erros de voz são silenciosos
+    if (!e.message.includes('is not defined') && !e.message.includes('TTS')) {
+      addMsg(`❌ Erro: ${e.message}`, false);
+    }
     setStatus('pronto');
   }
   processando = false;
@@ -1190,19 +1193,64 @@ async function falarVoz(txt) {
   if (!limpo) { falando=false; setStatus('pronto'); if(vozAtiva) setTimeout(cicloEscuta,400); return; }
 
   let ok = false;
-  // Inworld via n8n webhook (sem CORS)
-  if (inworldWebhookUrl) {
-    ok = await falarInworldN8N(limpo);
+  try {
+    // Inworld via Cloudflare Worker (melhor qualidade)
+    if (inworldWebhookUrl && keyInworld) {
+      ok = await falarInworldN8N(limpo);
+    }
+    // Google TTS (fallback principal)
+    if (!ok) ok = await falarGoogleTTS(limpo);
+    // Web Speech (último recurso)
+    if (!ok) await falarWebSpeech(limpo);
+  } catch(e) {
+    // Erro de voz — silencioso, não mostrar no chat
+    falando = false;
+    setStatus('pronto');
+    if (vozAtiva) setTimeout(cicloEscuta, 500);
+    console.warn('TTS erro:', e.message);
   }
-  // Google TTS como padrão e fallback
-  if (!ok) ok = await falarGoogleTTS(limpo);
-  // Web Speech como último recurso
-  if (!ok) await falarWebSpeech(limpo);
 }
 
 // ═══════════════════════════════════════
 // TTS — INWORLD TTS-2 (SUB-100MS · TOP-RANKED)
 // ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// TTS — INWORLD VIA CLOUDFLARE WORKER
+// ═══════════════════════════════════════
+async function falarInworldN8N(texto) {
+  if (!inworldWebhookUrl) return false;
+  try {
+    const resp = await fetch(inworldWebhookUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        text: texto,
+        voiceId: voiceIdInworld || 'Dennis',
+        inworldKey: keyInworld
+      })
+    });
+    if (!resp.ok) return false;
+    const data = await resp.json();
+    if (!data.audioContent) return false;
+    const audio = new Audio('data:audio/mp3;base64,' + data.audioContent);
+    document.getElementById('waveBars').classList.add('show');
+    return new Promise(res => {
+      audio.onended = () => {
+        document.getElementById('waveBars').classList.remove('show');
+        falando = false; setStatus('pronto');
+        if (vozAtiva) setTimeout(cicloEscuta, 500);
+        res(true);
+      };
+      audio.onerror = () => {
+        document.getElementById('waveBars').classList.remove('show');
+        falando = false; setStatus('pronto');
+        res(false);
+      };
+      audio.play().catch(() => res(false));
+    });
+  } catch(e) { return false; }
+}
+
 async function falarGoogleTTS(texto) {
   if (!keyGemini) return false;
   try {
