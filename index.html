@@ -139,6 +139,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .setup-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .setup-err{font-size:11px;color:var(--red);margin-top:6px;display:none;}
 .setup-phase-note{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text2);line-height:1.6;margin-top:12px;}
+.setup-tts-mode{margin-bottom:12px;}
+.tts-option{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .12s;margin-bottom:5px;}
+.tts-option:has(input:checked){border-color:var(--purple);background:rgba(124,58,237,.06);}
+.tts-option input[type=radio]{flex-shrink:0;margin-top:3px;accent-color:#7c3aed;}
+.tts-opt-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.tts-opt-desc{font-size:11px;color:var(--text2);line-height:1.5;}
 .setup-phase-note strong{color:var(--text);}
 
 /* MIC BAR */
@@ -191,20 +197,57 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="setup-field">
       <div class="setup-label">
-        LiveKit API Key
-        <span class="lbadge lb-optional">Opcional — voz avançada</span>
+        ElevenLabs API Key
+        <span class="lbadge lb-optional">Opcional — voz ultra-realista</span>
       </div>
-      <input class="setup-input" id="keyLivekit" type="password"
-        placeholder="APIKey_..." oninput="onKeyInput(this,'keyLivekit')">
-      <div class="setup-hint">Voz ultra-natural com LiveKit — livekit.io. Sem ela, usa Google TTS Neural.</div>
+      <input class="setup-input" id="keyElevenLabs" type="password"
+        placeholder="sk_..." oninput="onKeyInput(this,'keyElevenLabs')">
+      <div class="setup-hint">Voz masculina pt-BR ultra-real — elevenlabs.io. Sem ela, usa Google TTS.</div>
+    </div>
+
+    <div class="setup-field">
+      <div class="setup-label">
+        ElevenLabs Voice ID
+        <span class="lbadge lb-optional">Opcional — ID da voz escolhida</span>
+      </div>
+      <input class="setup-input" id="voiceIdElevenLabs" type="text"
+        placeholder="Ex: 21m00Tcm4TlvDq8ikWAM" oninput="onKeyInput(this,'voiceId')">
+      <div class="setup-hint">Copie o Voice ID da voz masculina pt-BR em elevenlabs.io/voice-library</div>
+    </div>
+
+    <div class="setup-tts-mode">
+      <div class="setup-label" style="margin-bottom:8px;">Modo de voz</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label class="tts-option" id="opt-elevenlabs">
+          <input type="radio" name="ttsMode" value="elevenlabs" checked onchange="onTTSMode(this)">
+          <div class="tts-opt-body">
+            <div class="tts-opt-title">🎙️ ElevenLabs <span class="lbadge lb-optional" style="margin-left:4px;">Requer API key acima</span></div>
+            <div class="tts-opt-desc">Voz humana real. Cole a API key e o Voice ID acima.</div>
+          </div>
+        </label>
+        <label class="tts-option" id="opt-kokoro">
+          <input type="radio" name="ttsMode" value="kokoro" onchange="onTTSMode(this)">
+          <div class="tts-opt-body">
+            <div class="tts-opt-title">🔊 Kokoro Local <span class="lbadge lb-required" style="margin-left:4px;background:rgba(96,165,250,.1);color:#60a5fa;border-color:rgba(96,165,250,.3);">Download ~300MB</span></div>
+            <div class="tts-opt-desc">Modelo neural offline. Download único no Chrome, depois em cache para sempre. Sem API key.</div>
+          </div>
+        </label>
+        <label class="tts-option" id="opt-google">
+          <input type="radio" name="ttsMode" value="google" onchange="onTTSMode(this)">
+          <div class="tts-opt-body">
+            <div class="tts-opt-title">🔈 Google TTS <span class="lbadge" style="background:var(--green-bg);color:var(--green);border:1px solid rgba(52,211,153,.3);">Usa chave Gemini</span></div>
+            <div class="tts-opt-desc">Wavenet pt-BR — qualidade boa, usa sua chave Gemini existente.</div>
+          </div>
+        </label>
+      </div>
     </div>
 
     <div class="setup-err" id="setupErr">Cole a chave Gemini para continuar.</div>
     <button class="setup-btn" onclick="ativar()">🚀 Ativar o Time</button>
 
     <div class="setup-phase-note">
-      <strong>Fase 1 (agora):</strong> só a chave Gemini — 17 agentes funcionando.<br>
-      <strong>Fase 2 (depois):</strong> cole a chave Claude — ZANKA, NEJI e HECTOR sobem de nível automaticamente.
+      <strong>Fase 1 (agora):</strong> Gemini obrigatória + modo de voz escolhido.<br>
+      <strong>Fase 2 (depois):</strong> cole a chave Claude — ZANKA, NEJI e HECTOR sobem de nível.
     </div>
   </div>
 </div>
@@ -673,7 +716,11 @@ let deveOuvir = true;
 let falando = false;
 let keyGemini = '';
 let keyClaude = '';
-let keyLivekit = '';
+let keyElevenLabs = '';
+let voiceIdElevenLabs = 'pNInz6obpgDQGcFmaJgB'; // Adam — voz masculina padrão
+let modoTTS = 'elevenlabs'; // 'elevenlabs' | 'kokoro' | 'google'
+let kokoroTTS = null; // instância do Kokoro quando carregado
+let kokoroCarregando = false;
 let modoSilencioso = false;
 
 Object.keys(AGENTES).forEach(k => historico[k] = []);
@@ -697,8 +744,14 @@ function ativar() {
   keyClaude = c;
   localStorage.setItem('zanka_gemini', g);
   if (c) localStorage.setItem('zanka_claude', c);
-  const lk = document.getElementById('keyLivekit').value.trim();
-  if (lk) { keyLivekit = lk; localStorage.setItem('zanka_livekit', lk); }
+  const el = document.getElementById('keyElevenLabs').value.trim();
+  const vid = document.getElementById('voiceIdElevenLabs').value.trim();
+  if (el) { keyElevenLabs = el; localStorage.setItem('zanka_elevenlabs', el); }
+  if (vid) { voiceIdElevenLabs = vid; localStorage.setItem('zanka_voice_id', vid); }
+  modoTTS = document.querySelector('input[name="ttsMode"]:checked')?.value || 'google';
+  localStorage.setItem('zanka_tts_mode', modoTTS);
+  // Se escolheu Kokoro, começa a carregar o modelo
+  if (modoTTS === 'kokoro') iniciarKokoro();
   document.getElementById('setupOverlay').style.display = 'none';
   atualizarApiIndicator();
   setTimeout(() => {
@@ -710,12 +763,21 @@ function ativar() {
 function trocarKey() {
   document.getElementById('keyGemini').value = keyGemini;
   document.getElementById('keyClaude').value = keyClaude;
+  document.getElementById('keyElevenLabs').value = keyElevenLabs;
+  document.getElementById('voiceIdElevenLabs').value = voiceIdElevenLabs;
+  // Marcar o modo atual
+  const radio = document.querySelector(`input[name="ttsMode"][value="${modoTTS}"]`);
+  if (radio) radio.checked = true;
   document.getElementById('setupOverlay').style.display = 'flex';
+}
+function onTTSMode(el) {
+  modoTTS = el.value;
 }
 
 function atualizarApiIndicator() {
   const lbl = document.getElementById('apiLabel');
   const dot = document.querySelector('.api-dot');
+  // Modelo de linguagem
   if (keyClaude) {
     lbl.textContent = 'Gemini + Claude';
     lbl.style.color = '#a78bfa';
@@ -725,18 +787,43 @@ function atualizarApiIndicator() {
     lbl.style.color = 'var(--teal)';
     dot.style.background = 'var(--teal)';
   }
+  // Badge TTS
+  const ttsMap = {
+    elevenlabs: {label:'🎙️ ElevenLabs', color:'#f59e0b'},
+    kokoro:     {label:'🔊 Kokoro Local', color:'#60a5fa'},
+    google:     {label:'🔈 Google TTS', color:'#34d399'},
+  };
+  const ttsInfo = ttsMap[modoTTS] || ttsMap.google;
+  let badge = document.getElementById('ttsBadge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'ttsBadge';
+    badge.className = 'tb-api-indicator';
+    badge.style.cssText = 'margin-left:6px;';
+    document.getElementById('apiIndicator').after(badge);
+  }
+  badge.innerHTML = `<span style="font-size:10px;font-weight:600;color:${ttsInfo.color}">${ttsInfo.label}</span>`;
 }
 
 window.onload = () => {
   const g = localStorage.getItem('zanka_gemini');
   const c = localStorage.getItem('zanka_claude');
-  const lk = localStorage.getItem('zanka_livekit');
-  if (lk) keyLivekit = lk;
+  const el = localStorage.getItem('zanka_elevenlabs');
+  const vid = localStorage.getItem('zanka_voice_id');
+  const ttsMode = localStorage.getItem('zanka_tts_mode');
+  if (el) keyElevenLabs = el;
+  if (vid) voiceIdElevenLabs = vid;
+  if (ttsMode) {
+    modoTTS = ttsMode;
+    const radio = document.querySelector(`input[name="ttsMode"][value="${ttsMode}"]`);
+    if (radio) radio.checked = true;
+  }
   if (g) {
     keyGemini = g;
     keyClaude = c || '';
     document.getElementById('setupOverlay').style.display = 'none';
     atualizarApiIndicator();
+    if (modoTTS === 'kokoro') iniciarKokoro();
     setTimeout(() => {
       falarVozWebOnly('ZANKA pronta. Clique para ativar o microfone.');
     }, 600);
@@ -1092,99 +1179,201 @@ setInterval(() => {
 // Usa Google Cloud Text-to-Speech via REST com voz neural pt-BR
 // Mais natural que Web Speech API — prosódia e entonação reais
 
-// ─── Pré-processador de texto para voz ───────────────────────────────────
-// Converte siglas, termos técnicos e nomes para pronúncia natural em pt-BR
+// ═══════════════════════════════════════
+// PRÉ-PROCESSADOR DE VOZ — siglas e nomes
+// ═══════════════════════════════════════
 function prepararParaVoz(txt) {
-  // Remove markdown
   let t = txt
     .replace(/#{1,4}\s/g,'').replace(/\*\*/g,'').replace(/\*/g,'')
     .replace(/`[^`]*`/g,'').replace(/\n{2,}/g,'. ').replace(/\n/g,' ')
     .replace(/[→•]\s/g,'').replace(/\[.*?\]/g,'')
     .replace(/❌.*$/,'').trim();
-
-  // Nome do sistema — pronunciar naturalmente
   t = t.replace(/\bZANKA\b/g, 'Zanka');
-
-  // Siglas de negócios — expandir para português falado
   const siglas = {
-    'ROI': 'Retorno sobre Investimento',
-    'ROAS': 'Retorno sobre Gasto com Anúncio',
-    'CPL': 'Custo por Lead',
-    'CPC': 'Custo por Clique',
-    'CTR': 'Taxa de Clique',
-    'CAC': 'Custo de Aquisição de Cliente',
-    'LTV': 'Valor do Tempo de Vida do Cliente',
-    'MRR': 'Receita Recorrente Mensal',
-    'ARR': 'Receita Recorrente Anual',
-    'KPI': 'Indicador de Desempenho',
-    'KPIs': 'Indicadores de Desempenho',
-    'SaaS': 'Sas',
-    'B2B': 'Bê dois Bê',
-    'B2C': 'Bê dois Cê',
-    'CRM': 'Cê Erre Eme',
-    'SEO': 'Esse Ê Ó',
-    'CEO': 'Cê Ê Ó',
-    'CFO': 'Cê Fê Ó',
-    'COO': 'Cê Ó Ó',
-    'SDR': 'Esse Dê Erre',
-    'UX': 'Experiência do Usuário',
-    'UI': 'Interface do Usuário',
-    'BI': 'Business Intelligence',
-    'QA': 'Controle de Qualidade',
-    'ICE': 'Aí Cê I',
-    'API': 'Á Pê I',
-    'APIs': 'Á Pê Is',
-    'NPS': 'Êne Pê Esse',
-    'CTA': 'Chamada para Ação',
-    'LP': 'Landing Page',
-    'AIDA': 'Aída',
-    'PAS': 'Pás',
-    'PR': 'Pê Erre',
-    'P&L': 'Péle',
-    'AARRR': 'Á duplo R',
-    'PME': 'Pê Mê É',
-    'PMEs': 'Pê Mê És',
+    'ROI':'Retorno sobre Investimento','ROAS':'Retorno sobre Gasto com Anúncio',
+    'CPL':'Custo por Lead','CPC':'Custo por Clique','CTR':'Taxa de Clique',
+    'CAC':'Custo de Aquisição de Cliente','LTV':'Valor do Tempo de Vida do Cliente',
+    'MRR':'Receita Recorrente Mensal','ARR':'Receita Recorrente Anual',
+    'KPI':'Indicador de Desempenho','KPIs':'Indicadores de Desempenho',
+    'SaaS':'Sas','B2B':'Bê dois Bê','B2C':'Bê dois Cê',
+    'CRM':'Cê Erre Eme','SEO':'Esse Ê Ó','CEO':'Cê Ê Ó',
+    'CFO':'Cê Fê Ó','COO':'Cê Ó Ó','SDR':'Esse Dê Erre',
+    'UX':'Experiência do Usuário','UI':'Interface do Usuário',
+    'BI':'Bê I','QA':'Controle de Qualidade',
+    'API':'Á Pê I','APIs':'Á Pê Is','NPS':'Êne Pê Esse',
+    'CTA':'Chamada para Ação','ICE':'Aí Cê I',
   };
-
-  // Substituir siglas — só palavras inteiras (\b)
-  for (const [sigla, expansao] of Object.entries(siglas)) {
-    t = t.replace(new RegExp('\\b' + sigla + '\\b', 'g'), expansao);
+  for (const [s,e] of Object.entries(siglas)) {
+    t = t.replace(new RegExp('\\b'+s+'\\b','g'), e);
   }
-
-  // Números com unidades comuns
-  t = t.replace(/(\d+)x/g, '$1 vezes');
-  t = t.replace(/(\d+)%/g, '$1 por cento');
-  t = t.replace(/R\$(\d)/g, '$1 reais');
-  t = t.replace(/\$(\d)/g, '$1 dólares');
-
-  // Remover URLs
-  t = t.replace(/https?:\/\/\S+/g, '');
-
-  // Truncar para no máximo 500 caracteres para manter fluidez
-  return t.substring(0, 500).trim();
+  t = t.replace(/(\d+)x/g,'$1 vezes').replace(/(\d+)%/g,'$1 por cento');
+  t = t.replace(/R\$(\d)/g,'$1 reais').replace(/\$(\d)/g,'$1 dólares');
+  t = t.replace(/https?:\/\/\S+/g,'');
+  return t.substring(0,500).trim();
 }
 
+// ═══════════════════════════════════════
+// TTS — ROTEADOR PRINCIPAL
+// ═══════════════════════════════════════
 async function falarVoz(txt) {
+  if (modoSilencioso) return;
   falando = true;
   setStatus('falando');
   if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
   document.getElementById('micBar').classList.remove('show');
-
-  // Pré-processa: limpa markdown, expande siglas, humaniza nomes
   const limpo = prepararParaVoz(txt);
-
   if (!limpo) { falando=false; setStatus('pronto'); if(vozAtiva) setTimeout(cicloEscuta,400); return; }
 
-  // Tenta Google TTS Neural primeiro (pt-BR-Neural2-A — voz feminina natural)
-  const usouGoogleTTS = await tentarGoogleTTS(limpo);
+  let ok = false;
+  if (modoTTS === 'elevenlabs' && keyElevenLabs) {
+    ok = await falarElevenLabs(limpo);
+  } else if (modoTTS === 'kokoro' && kokoroTTS) {
+    ok = await falarKokoro(limpo);
+  } else if (modoTTS === 'google' || (!ok && keyGemini)) {
+    ok = await falarGoogleTTS(limpo);
+  }
+  if (!ok) await falarWebSpeech(limpo);
+}
 
-  // Fallback: Web Speech API do navegador se Google TTS falhar
-  if (!usouGoogleTTS) {
-    await falarWebSpeech(limpo);
+// ═══════════════════════════════════════
+// TTS — ELEVENLABS (NUVEM — MELHOR QUALIDADE)
+// ═══════════════════════════════════════
+async function falarElevenLabs(texto) {
+  try {
+    const resp = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceIdElevenLabs}/stream`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'xi-api-key': keyElevenLabs
+        },
+        body: JSON.stringify({
+          text: texto,
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.8,
+            style: 0.2,
+            use_speaker_boost: true
+          }
+        })
+      }
+    );
+    if (!resp.ok) { console.warn('ElevenLabs erro:', resp.status); return false; }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    document.getElementById('waveBars').classList.add('show');
+    return new Promise(res => {
+      audio.onended = () => {
+        document.getElementById('waveBars').classList.remove('show');
+        URL.revokeObjectURL(url);
+        falando = false; setStatus('pronto');
+        if (vozAtiva) setTimeout(cicloEscuta, 500);
+        res(true);
+      };
+      audio.onerror = () => {
+        document.getElementById('waveBars').classList.remove('show');
+        URL.revokeObjectURL(url);
+        falando = false; setStatus('pronto');
+        res(false);
+      };
+      audio.play().catch(() => res(false));
+    });
+  } catch(e) { console.warn('ElevenLabs catch:', e); return false; }
+}
+
+// ═══════════════════════════════════════
+// TTS — KOKORO LOCAL (OFFLINE — ~300MB download 1x)
+// ═══════════════════════════════════════
+async function iniciarKokoro() {
+  if (kokoroTTS || kokoroCarregando) return;
+  kokoroCarregando = true;
+  addMsg('🔊 Carregando modelo Kokoro (~300MB)... Aguarde, será feito uma única vez.', false);
+  try {
+    // Carregar via CDN — kokoro-js
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.textContent = `
+      import { KokoroTTS } from 'https://cdn.jsdelivr.net/npm/kokoro-js@1/dist/kokoro.js';
+      const tts = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', {
+        dtype: 'q4',
+        progress_callback: (p) => {
+          if (p.status === 'progress') {
+            const pct = Math.round((p.loaded / p.total) * 100);
+            window._kokoroProgress = pct;
+          }
+        }
+      });
+      window._kokoroInstance = tts;
+      window.dispatchEvent(new Event('kokoro-ready'));
+    `;
+    document.head.appendChild(script);
+
+    // Monitorar progresso
+    const progressInterval = setInterval(() => {
+      const pct = window._kokoroProgress || 0;
+      const btn = document.getElementById('btnVoz');
+      if (btn && pct > 0) btn.textContent = `⏳ Kokoro ${pct}%`;
+    }, 500);
+
+    await new Promise((res, rej) => {
+      window.addEventListener('kokoro-ready', () => {
+        clearInterval(progressInterval);
+        kokoroTTS = window._kokoroInstance;
+        kokoroCarregando = false;
+        addMsg('✅ Kokoro carregado! Voz offline ativa — qualidade neural local.', false);
+        res();
+      });
+      setTimeout(() => rej(new Error('Timeout')), 120000);
+    });
+  } catch(e) {
+    kokoroCarregando = false;
+    addMsg('❌ Kokoro falhou ao carregar. Usando Google TTS como fallback.', false);
+    modoTTS = 'google';
+    console.warn('Kokoro erro:', e);
   }
 }
 
-async function tentarGoogleTTS(texto) {
+async function falarKokoro(texto) {
+  if (!kokoroTTS) return false;
+  try {
+    document.getElementById('waveBars').classList.add('show');
+    // pm_alex = voz masculina pt-BR do Kokoro
+    const stream = await kokoroTTS.stream(texto, { voice: 'pm_alex', speed: 1.0 });
+    const chunks = [];
+    for await (const chunk of stream) {
+      chunks.push(chunk.audio);
+    }
+    // Concatenar e tocar
+    const totalLen = chunks.reduce((s, c) => s + c.length, 0);
+    const combined = new Float32Array(totalLen);
+    let offset = 0;
+    for (const c of chunks) { combined.set(c, offset); offset += c.length; }
+    const ctx = new AudioContext();
+    const buf = ctx.createBuffer(1, combined.length, 24000);
+    buf.copyToChannel(combined, 0);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    return new Promise(res => {
+      src.onended = () => {
+        document.getElementById('waveBars').classList.remove('show');
+        falando = false; setStatus('pronto');
+        if (vozAtiva) setTimeout(cicloEscuta, 500);
+        ctx.close();
+        res(true);
+      };
+      src.start();
+    });
+  } catch(e) { console.warn('Kokoro falar erro:', e); return false; }
+}
+
+// ═══════════════════════════════════════
+// TTS — GOOGLE WAVENET (USA CHAVE GEMINI)
+// ═══════════════════════════════════════
+async function falarGoogleTTS(texto) {
   if (!keyGemini) return false;
   try {
     const resp = await fetch(
@@ -1193,58 +1382,45 @@ async function tentarGoogleTTS(texto) {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          input: {ssml: `<speak><prosody rate="medium" pitch="-2st">${texto.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</prosody></speak>`},
-          voice: {
-            languageCode: 'pt-BR',
-            name: 'pt-BR-Wavenet-B',  // Wavenet B — voz masculina natural
-            ssmlGender: 'MALE'
-          },
-          audioConfig: {
-            audioEncoding: 'MP3',
-            speakingRate: 0.95,   // levemente mais lento — mais natural e claro
-            pitch: 1.0,
-            volumeGainDb: 2.0
-          }
+          input: {ssml: `<speak><prosody rate="medium" pitch="-2st">${texto.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</prosody></speak>`},
+          voice: { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
+          audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95, volumeGainDb: 2.0 }
         })
       }
     );
     const data = await resp.json();
     if (!data.audioContent) return false;
-
-    // Toca o áudio MP3 retornado
     const audio = new Audio('data:audio/mp3;base64,' + data.audioContent);
     document.getElementById('waveBars').classList.add('show');
     return new Promise(res => {
       audio.onended = audio.onerror = () => {
         document.getElementById('waveBars').classList.remove('show');
-        falando = false;
-        setStatus('pronto');
+        falando = false; setStatus('pronto');
         if (vozAtiva) setTimeout(cicloEscuta, 500);
-        res(true);
+        res(!!audio.onended);
       };
       audio.play().catch(() => res(false));
     });
-  } catch(e) {
-    return false;
-  }
+  } catch(e) { return false; }
 }
 
+// ═══════════════════════════════════════
+// TTS — FALLBACK WEB SPEECH (ÚLTIMO RECURSO)
+// ═══════════════════════════════════════
 async function falarWebSpeech(texto) {
   return new Promise(res => {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(texto);
-    u.lang = 'pt-BR'; u.rate = 1.0; u.pitch = 1.0; u.volume = 1;
+    u.lang = 'pt-BR'; u.rate = 1.0; u.pitch = 0.9; u.volume = 1;
     const vozes = window.speechSynthesis.getVoices();
-    const v = vozes.find(v => v.lang==='pt-BR' && v.name.includes('Google') && v.name.includes('Male'))
-             || vozes.find(v => v.lang==='pt-BR' && !v.name.toLowerCase().includes('female'))
+    const v = vozes.find(v => v.lang==='pt-BR' && !v.name.toLowerCase().includes('female'))
              || vozes.find(v => v.lang==='pt-BR')
              || vozes.find(v => v.lang.startsWith('pt'));
     if (v) u.voice = v;
     u.onstart = () => document.getElementById('waveBars').classList.add('show');
     u.onend = u.onerror = () => {
       document.getElementById('waveBars').classList.remove('show');
-      falando = false;
-      setStatus('pronto');
+      falando = false; setStatus('pronto');
       if (vozAtiva) setTimeout(cicloEscuta, 500);
       res();
     };
@@ -1252,60 +1428,19 @@ async function falarWebSpeech(texto) {
   });
 }
 
-// ═══════════════════════════════════════
-// CONTROLES
-// ═══════════════════════════════════════
-function toggleVoz() {
-  vozAtiva = !vozAtiva;
-  const btn = document.getElementById('btnVoz');
-  if (vozAtiva) {
-    btn.textContent = '🎤 Ativar Voz'; btn.classList.add('on');
-    deveOuvir = true;
-    iniciarVoz();
-  } else {
-    btn.textContent = '🎤 Voz OFF'; btn.classList.remove('on');
-    deveOuvir = false;
-    if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
-    window.speechSynthesis.cancel();
-    setStatus('pronto');
-  }
-}
-function toggleSilencio() {
-  modoSilencioso = !modoSilencioso;
-  const btn = document.getElementById('btnSilencio');
-  if (modoSilencioso) {
-    btn.textContent = '🔕 Mudo';
-    btn.style.cssText = 'background:rgba(248,113,113,.1);color:#f87171;border-color:rgba(248,113,113,.3);';
-    window.speechSynthesis.cancel();
-    // Pausa o microfone também
-    deveOuvir = false;
-    if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
-    document.getElementById('btnVoz').textContent = '🎤 Clique para falar';
-    document.getElementById('btnVoz').style.cssText = 'background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.4);font-weight:700;';
-    vozAtiva = false;
-    setStatus('pronto');
-    addMsg('🔕 Modo silencioso ativado — só texto. Clique em "Mudo" para reativar a voz.', false);
-  } else {
-    btn.textContent = '🔇 Silêncio';
-    btn.style.cssText = '';
-    addMsg('🔊 Voz reativada. Clique em "Clique para falar" para ativar o microfone.', false);
-  }
+function falarVozWebOnly(txt) {
+  if (modoSilencioso) return;
+  const limpo = prepararParaVoz(txt);
+  if (!limpo) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(limpo);
+  u.lang = 'pt-BR'; u.rate = 1.0; u.pitch = 0.9; u.volume = 1;
+  const vozes = window.speechSynthesis.getVoices();
+  const v = vozes.find(v=>v.lang==='pt-BR')||vozes.find(v=>v.lang.startsWith('pt'));
+  if (v) u.voice = v;
+  window.speechSynthesis.speak(u);
 }
 
-function limpar() { historico[agenteId]=[]; document.getElementById('msgs').innerHTML=''; }
-function setStatus(s) {
-  const el=document.getElementById('voiceStatus');
-  const dot=document.getElementById('vsDot');
-  const lbl=document.getElementById('vsLabel');
-  el.className='voice-status';
-  dot.className='vs-dot';
-  if(s==='ouvindo'){el.classList.add('ouvindo');dot.classList.add('pulse');lbl.textContent='Ouvindo você...';}
-  else if(s==='falando'){el.classList.add('falando');lbl.textContent='Falando...';}
-  else if(s==='processando'){el.classList.add('pronto');lbl.textContent='Processando...';}
-  else{el.classList.add('pronto');lbl.textContent=vozAtiva?'Pronto para ouvir':'Modo texto';}
-}
-function tecla(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviar();}}
-function resize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
 window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
 </script>
 </body>
