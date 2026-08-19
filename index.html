@@ -1277,6 +1277,121 @@ function falarVozWebOnly(txt) {
 }
 
 window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
+
+// ═══════════════════════════════════════
+// CONTROLES DE VOZ E SILÊNCIO
+// ═══════════════════════════════════════
+
+// Botão 🎤 — ativa microfone com permissão explícita
+async function ativarMicrofone() {
+  const btn = document.getElementById('btnVoz');
+
+  // Se já está ativo — desligar
+  if (vozAtiva && micPermitido) {
+    vozAtiva = false;
+    deveOuvir = false;
+    if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
+    window.speechSynthesis.cancel();
+    btn.textContent = '🎤 Clique para falar';
+    btn.style.cssText = 'background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.4);font-weight:700;';
+    setStatus('pronto');
+    return;
+  }
+
+  // Pedir permissão de microfone (obrigatório no browser)
+  btn.textContent = '⏳ Ativando...';
+  btn.style.cssText = '';
+  const ok = await pedirPermissaoMic();
+
+  if (ok) {
+    vozAtiva = true;
+    deveOuvir = true;
+    btn.textContent = '🔴 Ouvindo — clique para pausar';
+    btn.style.cssText = 'background:rgba(248,113,113,.15);color:#f87171;border-color:rgba(248,113,113,.4);font-weight:700;';
+    cicloEscuta();
+  } else {
+    btn.textContent = '❌ Microfone bloqueado';
+    btn.style.cssText = 'background:rgba(248,113,113,.1);color:#f87171;';
+    setTimeout(() => {
+      btn.textContent = '🎤 Clique para falar';
+      btn.style.cssText = 'background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.4);font-weight:700;';
+    }, 3000);
+  }
+}
+
+// Botão 🔇 — modo silencioso (sem voz, só texto)
+function toggleSilencio() {
+  modoSilencioso = !modoSilencioso;
+  const btn = document.getElementById('btnSilencio');
+
+  if (modoSilencioso) {
+    // Ativar silêncio
+    btn.textContent = '🔕 Mudo — clique para reativar';
+    btn.style.cssText = 'background:rgba(248,113,113,.15);color:#f87171;border-color:rgba(248,113,113,.4);font-weight:700;';
+    window.speechSynthesis.cancel();
+    // Para microfone também
+    vozAtiva = false;
+    deveOuvir = false;
+    if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
+    const btnVoz = document.getElementById('btnVoz');
+    btnVoz.textContent = '🎤 Clique para falar';
+    btnVoz.style.cssText = 'background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.4);font-weight:700;';
+    setStatus('pronto');
+    addMsg('🔕 Modo silencioso ativado. Só texto — sem voz.', false);
+  } else {
+    // Desativar silêncio
+    btn.textContent = '🔇 Silêncio';
+    btn.style.cssText = '';
+    addMsg('🔊 Voz reativada. Clique em "Clique para falar" para ativar o microfone.', false);
+  }
+}
+
+// Limpar conversa
+function limpar() {
+  historico[agenteId] = [];
+  document.getElementById('msgs').innerHTML = '';
+}
+
+// Status bar
+function setStatus(s) {
+  const el  = document.getElementById('voiceStatus');
+  const dot = document.getElementById('vsDot');
+  const lbl = document.getElementById('vsLabel');
+  const wb  = document.getElementById('waveBars');
+  el.className = 'voice-status';
+  dot.className = 'vs-dot';
+  if (wb) wb.classList.remove('show');
+  if (s === 'ouvindo') {
+    el.classList.add('ouvindo');
+    dot.classList.add('pulse');
+    lbl.textContent = 'Ouvindo você...';
+    document.getElementById('micBar').classList.add('show');
+  } else if (s === 'falando') {
+    el.classList.add('falando');
+    lbl.textContent = 'Falando...';
+    if (wb) wb.classList.add('show');
+    document.getElementById('micBar').classList.remove('show');
+  } else if (s === 'processando') {
+    el.classList.add('pronto');
+    lbl.textContent = 'Processando...';
+    document.getElementById('micBar').classList.remove('show');
+  } else {
+    el.classList.add('pronto');
+    lbl.textContent = modoSilencioso ? '🔕 Silêncio ativo' : (vozAtiva ? 'Pronto para ouvir' : 'Modo texto');
+    document.getElementById('micBar').classList.remove('show');
+  }
+}
+
+// Tecla Enter para enviar
+function tecla(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); }
+}
+
+// Resize do textarea
+function resize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
 </script>
 </body>
 </html>
