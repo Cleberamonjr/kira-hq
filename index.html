@@ -139,12 +139,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .setup-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .setup-err{font-size:11px;color:var(--red);margin-top:6px;display:none;}
 .setup-phase-note{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text2);line-height:1.6;margin-top:12px;}
-.setup-tts-mode{margin-bottom:12px;}
-.tts-option{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .12s;margin-bottom:5px;}
-.tts-option:has(input:checked){border-color:var(--purple);background:rgba(124,58,237,.06);}
-.tts-option input[type=radio]{flex-shrink:0;margin-top:3px;accent-color:#7c3aed;}
-.tts-opt-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
-.tts-opt-desc{font-size:11px;color:var(--text2);line-height:1.5;}
+
 .setup-phase-note strong{color:var(--text);}
 
 /* MIC BAR */
@@ -197,64 +192,33 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="setup-field">
       <div class="setup-label">
-        Inworld API Key
+        Cloudflare Worker URL — Voz Inworld
         <span class="lbadge lb-optional">Opcional — voz ultra-realista</span>
       </div>
-      <input class="setup-input" id="keyInworld" type="password"
-        placeholder="Cole sua chave Inworld..." oninput="onKeyInput(this,'keyInworld')">
-      <div class="setup-hint">Sub-100ms de latência, top-ranked em qualidade — inworld.ai</div>
+      <input class="setup-input" id="inworldWebhook" type="text"
+        placeholder="https://blue-salad-129c.cleberamjr.workers.dev"
+        oninput="onKeyInput(this,'inworldWebhook')">
+      <div class="setup-hint">URL do Cloudflare Worker que faz proxy para o Inworld. Sem isso, usa Google TTS.</div>
     </div>
 
-    <div class="setup-field" id="fieldVoiceId">
+    <div class="setup-field">
+      <div class="setup-label">
+        Inworld API Key
+        <span class="lbadge lb-optional">Necessária para voz Inworld</span>
+      </div>
+      <input class="setup-input" id="keyInworldInput" type="password"
+        placeholder="Cole sua chave Inworld..." oninput="onKeyInput(this,'keyInworld')">
+      <div class="setup-hint">Sua chave da API Inworld — inworld.ai. Fica salva no navegador.</div>
+    </div>
+
+    <div class="setup-field">
       <div class="setup-label">
         Inworld Voice ID
-        <span class="lbadge lb-optional">Opcional — deixe vazio para listar vozes</span>
+        <span class="lbadge lb-optional">ID da voz masculina</span>
       </div>
-      <div style="display:flex;gap:6px;margin-top:0;">
-        <input class="setup-input" id="voiceIdInworld" type="text"
-          placeholder="Ex: Dennis, ou deixe vazio para buscar" oninput="onKeyInput(this,'voiceId')" style="flex:1;margin-bottom:0;">
-        <button onclick="listarVozesInworld()" style="padding:8px 12px;background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3);border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">🔍 Ver vozes</button>
-      </div>
-      <div id="vozesInworldList" style="margin-top:6px;font-size:10px;color:var(--text2);display:none;max-height:120px;overflow-y:auto;background:var(--s3);border-radius:6px;padding:8px;"></div>
-      <div class="setup-hint">Deixe vazio e clique "Ver vozes" para listar as disponíveis na sua conta</div>
-    </div>
-
-    <div class="setup-field" id="fieldProxy" style="display:none;">
-      <div class="setup-label">
-        n8n Proxy URL (Inworld)
-        <span class="lbadge lb-optional">Para resolver CORS</span>
-      </div>
-      <input class="setup-input" id="inworldProxy" type="text"
-        placeholder="https://cleberamonjr.app.n8n.cloud/webhook/inworld-tts"
-        oninput="inworldProxyUrl=this.value;localStorage.setItem('zanka_inworld_proxy',this.value)">
-      <div class="setup-hint">Se aparecer erro 403, configure um webhook no n8n para fazer proxy da chamada Inworld.</div>
-    </div>
-
-    <div class="setup-tts-mode">
-      <div class="setup-label" style="margin-bottom:8px;">Modo de voz</div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        <label class="tts-option" id="opt-inworld">
-          <input type="radio" name="ttsMode" value="inworld" onchange="onTTSMode(this)">
-          <div class="tts-opt-body">
-            <div class="tts-opt-title">🎙️ Inworld TTS-2 <span class="lbadge lb-optional" style="margin-left:4px;">Sub-100ms · Top-ranked</span></div>
-            <div class="tts-opt-desc">Melhor qualidade disponível. Requer API key acima. Streaming nativo.</div>
-          </div>
-        </label>
-        <label class="tts-option" id="opt-kokoro">
-          <input type="radio" name="ttsMode" value="kokoro" onchange="onTTSMode(this)">
-          <div class="tts-opt-body">
-            <div class="tts-opt-title">🔊 Kokoro Local <span class="lbadge lb-required" style="margin-left:4px;background:rgba(96,165,250,.1);color:#60a5fa;border-color:rgba(96,165,250,.3);">Download ~300MB · 1x</span></div>
-            <div class="tts-opt-desc">Modelo neural offline. Download único no Chrome, depois em cache. Sem API key.</div>
-          </div>
-        </label>
-        <label class="tts-option" id="opt-google">
-          <input type="radio" name="ttsMode" value="google" checked onchange="onTTSMode(this)">
-          <div class="tts-opt-body">
-            <div class="tts-opt-title">🔈 Google TTS <span class="lbadge" style="background:var(--green-bg);color:var(--green);border:1px solid rgba(52,211,153,.3);">Usa chave Gemini</span></div>
-            <div class="tts-opt-desc">Wavenet pt-BR masculino — usa sua chave Gemini existente, sem custo extra.</div>
-          </div>
-        </label>
-      </div>
+      <input class="setup-input" id="voiceIdInworldInput" type="text"
+        placeholder="Ex: Dennis" oninput="onKeyInput(this,'voiceId')">
+      <div class="setup-hint">Nome da voz no Inworld. Deixe vazio para usar "Dennis" (masculino padrão).</div>
     </div>
 
     <div class="setup-err" id="setupErr">Cole a chave Gemini para continuar.</div>
@@ -732,10 +696,8 @@ let falando = false;
 let keyGemini = '';
 let keyClaude = '';
 let keyInworld = '';
-let voiceIdInworld = 'Dennis'; // Dennis — voz masculina padrão Inworld
-let modoTTS = 'elevenlabs'; // 'elevenlabs' | 'kokoro' | 'google'
-let kokoroTTS = null; // instância do Kokoro quando carregado
-let kokoroCarregando = false;
+let voiceIdInworld = 'Dennis';
+let inworldWebhookUrl = '';
 let modoSilencioso = false;
 
 Object.keys(AGENTES).forEach(k => historico[k] = []);
@@ -759,14 +721,12 @@ function ativar() {
   keyClaude = c;
   localStorage.setItem('zanka_gemini', g);
   if (c) localStorage.setItem('zanka_claude', c);
-  const iw = document.getElementById('keyInworld').value.trim();
-  const vid = document.getElementById('voiceIdInworld').value.trim();
-  if (iw) { keyInworld = iw; localStorage.setItem('zanka_inworld', iw); }
-  if (vid) { voiceIdInworld = vid; localStorage.setItem('zanka_voice_id', vid); }
-  modoTTS = document.querySelector('input[name="ttsMode"]:checked')?.value || 'google';
-  localStorage.setItem('zanka_tts_mode', modoTTS);
-  // Se escolheu Kokoro, começa a carregar o modelo
-  if (modoTTS === 'kokoro') iniciarKokoro();
+  const wh = document.getElementById('inworldWebhook').value.trim();
+  if (wh) { inworldWebhookUrl = wh; localStorage.setItem('zanka_inworld_webhook', wh); }
+  const ik = document.getElementById('keyInworldInput').value.trim();
+  if (ik) { keyInworld = ik; localStorage.setItem('zanka_inworld_key', ik); }
+  const vid = document.getElementById('voiceIdInworldInput').value.trim();
+  if (vid) { voiceIdInworld = vid; localStorage.setItem('zanka_inworld_voice', vid); }
   document.getElementById('setupOverlay').style.display = 'none';
   atualizarApiIndicator();
   setTimeout(() => {
@@ -778,18 +738,15 @@ function ativar() {
 function trocarKey() {
   document.getElementById('keyGemini').value = keyGemini;
   document.getElementById('keyClaude').value = keyClaude;
-  document.getElementById('keyInworld').value = keyInworld;
-  document.getElementById('voiceIdInworld').value = voiceIdInworld;
-  // Marcar o modo atual
-  const radio = document.querySelector(`input[name="ttsMode"][value="${modoTTS}"]`);
-  if (radio) radio.checked = true;
+  const whEl = document.getElementById('inworldWebhook');
+  if (whEl) whEl.value = inworldWebhookUrl;
+  const ikEl = document.getElementById('keyInworldInput');
+  if (ikEl) ikEl.value = keyInworld;
+  const vidEl = document.getElementById('voiceIdInworldInput');
+  if (vidEl) vidEl.value = voiceIdInworld;
   document.getElementById('setupOverlay').style.display = 'flex';
 }
-function onTTSMode(el) {
-  modoTTS = el.value;
-  const proxyField = document.getElementById('fieldProxy');
-  if (proxyField) proxyField.style.display = el.value === 'inworld' ? 'block' : 'none';
-}
+
 
 function atualizarApiIndicator() {
   const lbl = document.getElementById('apiLabel');
@@ -805,12 +762,8 @@ function atualizarApiIndicator() {
     dot.style.background = 'var(--teal)';
   }
   // Badge TTS
-  const ttsMap = {
-    inworld:     {label:'🎙️ Inworld TTS-2', color:'#f59e0b'},
-    kokoro:     {label:'🔊 Kokoro Local', color:'#60a5fa'},
-    google:     {label:'🔈 Google TTS', color:'#34d399'},
-  };
-  const ttsInfo = ttsMap[modoTTS] || ttsMap.google;
+  const vozLabel = inworldWebhookUrl ? '🎙️ Inworld via n8n' : '🔈 Google TTS';
+  const vozColor = inworldWebhookUrl ? '#f59e0b' : '#34d399';
   let badge = document.getElementById('ttsBadge');
   if (!badge) {
     badge = document.createElement('div');
@@ -819,28 +772,23 @@ function atualizarApiIndicator() {
     badge.style.cssText = 'margin-left:6px;';
     document.getElementById('apiIndicator').after(badge);
   }
-  badge.innerHTML = `<span style="font-size:10px;font-weight:600;color:${ttsInfo.color}">${ttsInfo.label}</span>`;
+  badge.innerHTML = `<span style="font-size:10px;font-weight:600;color:${vozColor}">${vozLabel}</span>`;
 }
 
 window.onload = () => {
   const g = localStorage.getItem('zanka_gemini');
   const c = localStorage.getItem('zanka_claude');
-  const iw = localStorage.getItem('zanka_inworld');
-  const vid = localStorage.getItem('zanka_voice_id');
-  const ttsMode = localStorage.getItem('zanka_tts_mode');
-  if (iw) keyInworld = iw;
+  const wh = localStorage.getItem('zanka_inworld_webhook');
+  if (wh) inworldWebhookUrl = wh;
+  const ik = localStorage.getItem('zanka_inworld_key');
+  if (ik) keyInworld = ik;
+  const vid = localStorage.getItem('zanka_inworld_voice');
   if (vid) voiceIdInworld = vid;
-  if (ttsMode) {
-    modoTTS = ttsMode;
-    const radio = document.querySelector(`input[name="ttsMode"][value="${ttsMode}"]`);
-    if (radio) radio.checked = true;
-  }
   if (g) {
     keyGemini = g;
     keyClaude = c || '';
     document.getElementById('setupOverlay').style.display = 'none';
     atualizarApiIndicator();
-    if (modoTTS === 'kokoro') iniciarKokoro();
     setTimeout(() => {
       falarVozWebOnly('ZANKA pronta. Clique para ativar o microfone.');
     }, 600);
@@ -1242,259 +1190,53 @@ async function falarVoz(txt) {
   if (!limpo) { falando=false; setStatus('pronto'); if(vozAtiva) setTimeout(cicloEscuta,400); return; }
 
   let ok = false;
-  if (modoTTS === 'kokoro' && kokoroTTS) {
-    ok = await falarKokoro(limpo);
-  } else if (modoTTS === 'inworld' && keyInworld) {
-    ok = await falarInworld(limpo); // tem fallback interno para Google TTS
-  } else {
-    ok = await falarGoogleTTS(limpo);
+  // Inworld via n8n webhook (sem CORS)
+  if (inworldWebhookUrl) {
+    ok = await falarInworldN8N(limpo);
   }
+  // Google TTS como padrão e fallback
+  if (!ok) ok = await falarGoogleTTS(limpo);
+  // Web Speech como último recurso
   if (!ok) await falarWebSpeech(limpo);
 }
 
 // ═══════════════════════════════════════
 // TTS — INWORLD TTS-2 (SUB-100MS · TOP-RANKED)
 // ═══════════════════════════════════════
-async function falarInworld(texto) {
-  // Inworld bloqueia chamadas diretas do browser (CORS/403).
-  // Se tiver n8n configurado como proxy, usa. Senão, cai no Google TTS.
-  if (inworldProxyUrl) {
-    return await falarInworldViaProxy(texto);
-  }
-  // Tentativa direta — pode funcionar dependendo da conta
+async function falarGoogleTTS(texto) {
+  if (!keyGemini) return false;
   try {
-    const resp = await fetch('https://api.inworld.ai/tts/v1/voice', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${keyInworld}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        text: texto,
-        voiceId: voiceIdInworld,
-        modelId: 'inworld-tts-2',
-        audioConfig: { audioEncoding: 'MP3', sampleRateHertz: 24000 },
-        applyTextNormalization: 'ON'
-      })
-    });
-    if (!resp.ok) {
-      console.warn(`Inworld ${resp.status} — CORS/403. Use proxy n8n ou Google TTS.`);
-      // Fallback silencioso para Google TTS
-      return await falarGoogleTTS(texto);
-    }
-    const data = await resp.json();
-    if (!data.audioContent) return false;
-    return await tocarBase64MP3(data.audioContent);
-  } catch(e) {
-    console.warn('Inworld CORS bloqueado — usando Google TTS:', e.message);
-    return await falarGoogleTTS(texto);
-  }
-}
-
-// Proxy via n8n — contorna CORS (configure o webhook no seu n8n)
-let inworldProxyUrl = localStorage.getItem('zanka_inworld_proxy') || '';
-async function falarInworldViaProxy(texto) {
-  try {
-    const resp = await fetch(inworldProxyUrl, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        text: texto,
-        voiceId: voiceIdInworld,
-        inworldKey: keyInworld
-      })
-    });
-    if (!resp.ok) return false;
-    const data = await resp.json();
-    if (!data.audioContent) return false;
-    return await tocarBase64MP3(data.audioContent);
-  } catch(e) { return false; }
-}
-
-// Tocar MP3 em base64 — usado por Inworld e Google TTS
-async function tocarBase64MP3(base64) {
-  const audio = new Audio('data:audio/mp3;base64,' + base64);
-  document.getElementById('waveBars').classList.add('show');
-  return new Promise(res => {
-    audio.onended = () => {
-      document.getElementById('waveBars').classList.remove('show');
-      falando = false; setStatus('pronto');
-      if (vozAtiva) setTimeout(cicloEscuta, 500);
-      res(true);
-    };
-    audio.onerror = () => {
-      document.getElementById('waveBars').classList.remove('show');
-      falando = false; setStatus('pronto');
-      res(false);
-    };
-    audio.play().catch(() => res(false));
-  });
-}
-
-// Lista vozes disponíveis na conta Inworld (para escolher no setup)
-async function listarVozesInworld() {
-  const key = document.getElementById('keyInworld').value.trim() || keyInworld;
-  const div = document.getElementById('vozesInworldList');
-  if (!key) { div.style.display='block'; div.textContent='Cole a API key antes de listar vozes.'; return; }
-  div.style.display='block';
-  div.textContent='Carregando vozes...';
-  try {
-    const resp = await fetch('https://api.inworld.ai/tts/v1/voices', {
-      headers: { 'Authorization': `Basic ${key}` }
-    });
-    if (!resp.ok) { div.textContent = `Erro ${resp.status} — verifique a chave.`; return; }
-    const data = await resp.json();
-    const vozes = data.voices || data || [];
-    if (!vozes.length) { div.textContent = 'Nenhuma voz encontrada.'; return; }
-    div.innerHTML = vozes.map(v => {
-      const id = v.voiceId || v.name || v.id || '';
-      const lang = v.languageCode || v.language || '';
-      const gender = v.ssmlGender || v.gender || '';
-      return `<div onclick="selecionarVoz('${id}')" style="padding:4px 6px;cursor:pointer;border-radius:4px;margin-bottom:2px;" onmouseover="this.style.background='rgba(124,58,237,.15)'" onmouseout="this.style.background='transparent'">
-        <strong>${id}</strong> <span style="color:var(--text3)">${lang} ${gender}</span>
-      </div>`;
-    }).join('');
-  } catch(e) {
-    div.textContent = 'Erro ao carregar vozes: ' + e.message;
-  }
-}
-
-function selecionarVoz(id) {
-  document.getElementById('voiceIdInworld').value = id;
-  voiceIdInworld = id;
-  document.getElementById('vozesInworldList').style.display = 'none';
-}
-
-// ═══════════════════════════════════════
-// TTS — KOKORO LOCAL (OFFLINE — ~300MB download 1x)
-// ═══════════════════════════════════════
-async function iniciarKokoro() {
-  if (kokoroTTS || kokoroCarregando) return;
-  kokoroCarregando = true;
-  addMsg('🔊 Carregando modelo Kokoro (~300MB)... Aguarde, será feito uma única vez.', false);
-  try {
-    // Carregar via CDN — kokoro-js
-    // Usa transformers.js direto — mais estável que kokoro-js no browser
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.textContent = `
-      try {
-        const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js');
-        env.allowLocalModels = false;
-        env.backends.onnx.wasm.numThreads = 1;
-        const synth = await pipeline('text-to-speech', 'Xenova/mms-tts-por', {
-          progress_callback: (p) => {
-            if (p.status === 'progress' && p.total) {
-              window._kokoroProgress = Math.round((p.loaded / p.total) * 100);
-            }
-          }
-        });
-        window._kokoroInstance = synth;
-        window.dispatchEvent(new Event('kokoro-ready'));
-      } catch(err) {
-        console.error('Kokoro load error:', err);
-        window.dispatchEvent(new CustomEvent('kokoro-error', { detail: err.message }));
+    const resp = await fetch(
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${keyGemini}`,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          input: { text: texto },
+          voice: { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
+          audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95, pitch: -2.0, volumeGainDb: 2.0 }
+        })
       }
-    `;
-    document.head.appendChild(script);
-
-    // Ouvir erro também
-    window.addEventListener('kokoro-error', (e) => {
-      clearInterval(progressInterval);
-      kokoroCarregando = false;
-      addMsg(`❌ Modelo de voz local falhou: ${e.detail}. Usando Google TTS.`, false);
-      modoTTS = 'google';
-    });
-
-    // Monitorar progresso
-    const progressInterval = setInterval(() => {
-      const pct = window._kokoroProgress || 0;
-      const btn = document.getElementById('btnVoz');
-      if (btn && pct > 0) btn.textContent = `⏳ Kokoro ${pct}%`;
-    }, 500);
-
-    await new Promise((res, rej) => {
-      window.addEventListener('kokoro-ready', () => {
-        clearInterval(progressInterval);
-        kokoroTTS = window._kokoroInstance;
-        kokoroCarregando = false;
-        addMsg('✅ Kokoro carregado! Voz offline ativa — qualidade neural local.', false);
-        res();
-      });
-      setTimeout(() => rej(new Error('Timeout')), 120000);
-    });
-  } catch(e) {
-    kokoroCarregando = false;
-    addMsg('❌ Kokoro falhou ao carregar. Usando Google TTS como fallback.', false);
-    modoTTS = 'google';
-    console.warn('Kokoro erro:', e);
-  }
-}
-
-async function falarKokoro(texto) {
-  if (!kokoroTTS) return false;
-  try {
+    );
+    const data = await resp.json();
+    if (!data.audioContent) return false;
+    const audio = new Audio('data:audio/mp3;base64,' + data.audioContent);
     document.getElementById('waveBars').classList.add('show');
-    const result = await kokoroTTS(texto, { language: 'por' });
-    const { audio, sampling_rate } = result;
-    const ctx = new AudioContext();
-    const buf = ctx.createBuffer(1, audio.length, sampling_rate || 16000);
-    buf.copyToChannel(audio instanceof Float32Array ? audio : new Float32Array(audio.data), 0);
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(ctx.destination);
     return new Promise(res => {
-      src.onended = () => {
+      audio.onended = () => {
         document.getElementById('waveBars').classList.remove('show');
         falando = false; setStatus('pronto');
         if (vozAtiva) setTimeout(cicloEscuta, 500);
-        ctx.close(); res(true);
+        res(true);
       };
-      src.start();
+      audio.onerror = () => {
+        document.getElementById('waveBars').classList.remove('show');
+        falando = false; setStatus('pronto');
+        res(false);
+      };
+      audio.play().catch(() => res(false));
     });
-  } catch(e) { console.warn('Kokoro falar erro:', e); return false; }
-}
-
-// ═══════════════════════════════════════
-// TTS — GOOGLE WAVENET (USA CHAVE GEMINI)
-// ═══════════════════════════════════════
-async function falarGoogleTTS(texto) {
-  if (!keyGemini) return false;
-  // Tenta primeiro Wavenet-B (masculino, melhor qualidade)
-  // Se falhar, tenta Standard-B (mais simples mas mais compatível)
-  const vozes = ['pt-BR-Wavenet-B', 'pt-BR-Standard-B', 'pt-BR-Neural2-C'];
-  for (const voz of vozes) {
-    try {
-      const isMasculina = voz.includes('-B') || voz.includes('-C');
-      const resp = await fetch(
-        `https://texttospeech.googleapis.com/v1/text:synthesize?key=${keyGemini}`,
-        {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            input: { text: texto },
-            voice: {
-              languageCode: 'pt-BR',
-              name: voz,
-              ssmlGender: isMasculina ? 'MALE' : 'NEUTRAL'
-            },
-            audioConfig: {
-              audioEncoding: 'MP3',
-              speakingRate: 0.95,
-              pitch: -2.0,
-              volumeGainDb: 2.0
-            }
-          })
-        }
-      );
-      const data = await resp.json();
-      if (data.audioContent) {
-        console.log('Google TTS usando:', voz);
-        return await tocarBase64MP3(data.audioContent);
-      }
-    } catch(e) { console.warn('Google TTS tentativa', voz, 'falhou:', e.message); }
-  }
-  return false;
+  } catch(e) { return false; }
 }
 
 // ═══════════════════════════════════════
