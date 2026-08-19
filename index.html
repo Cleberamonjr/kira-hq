@@ -189,6 +189,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       <div class="setup-hint">Quando tiver: ZANKA, NEJI e HECTOR migram para Claude Sonnet</div>
     </div>
 
+    <div class="setup-field">
+      <div class="setup-label">
+        LiveKit API Key
+        <span class="lbadge lb-optional">Opcional — voz avançada</span>
+      </div>
+      <input class="setup-input" id="keyLivekit" type="password"
+        placeholder="APIKey_..." oninput="onKeyInput(this,'keyLivekit')">
+      <div class="setup-hint">Voz ultra-natural com LiveKit — livekit.io. Sem ela, usa Google TTS Neural.</div>
+    </div>
+
     <div class="setup-err" id="setupErr">Cole a chave Gemini para continuar.</div>
     <button class="setup-btn" onclick="ativar()">🚀 Ativar o Time</button>
 
@@ -227,6 +237,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   </div>
   <div class="tb-right">
     <button class="tb-btn" id="btnVoz" onclick="ativarMicrofone()" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.4);font-weight:700;">🎤 Clique para falar</button>
+    <button class="tb-btn" id="btnSilencio" onclick="toggleSilencio()" title="Modo silencioso — desativa toda voz">🔇 Silêncio</button>
     <button class="tb-btn" onclick="limpar()">🗑 Limpar</button>
     <button class="tb-btn" onclick="trocarKey()">🔑 Keys</button>
   </div>
@@ -662,6 +673,8 @@ let deveOuvir = true;
 let falando = false;
 let keyGemini = '';
 let keyClaude = '';
+let keyLivekit = '';
+let modoSilencioso = false;
 
 Object.keys(AGENTES).forEach(k => historico[k] = []);
 
@@ -684,6 +697,8 @@ function ativar() {
   keyClaude = c;
   localStorage.setItem('zanka_gemini', g);
   if (c) localStorage.setItem('zanka_claude', c);
+  const lk = document.getElementById('keyLivekit').value.trim();
+  if (lk) { keyLivekit = lk; localStorage.setItem('zanka_livekit', lk); }
   document.getElementById('setupOverlay').style.display = 'none';
   atualizarApiIndicator();
   setTimeout(() => {
@@ -715,6 +730,8 @@ function atualizarApiIndicator() {
 window.onload = () => {
   const g = localStorage.getItem('zanka_gemini');
   const c = localStorage.getItem('zanka_claude');
+  const lk = localStorage.getItem('zanka_livekit');
+  if (lk) keyLivekit = lk;
   if (g) {
     keyGemini = g;
     keyClaude = c || '';
@@ -927,7 +944,7 @@ async function enviarTexto(txt) {
     const r = await chamarAPI(agenteId, msgParaAPI);
     hideTyping();
     addMsg(r, false);
-    if (vozAtiva) await falarVoz(r);
+    if (vozAtiva && !modoSilencioso) await falarVoz(r);
     else setStatus('pronto');
   } catch(e) {
     hideTyping();
@@ -948,7 +965,7 @@ async function enviarParaZANKA(msg) {
     const r = await chamarAPI('zanka', msg);
     hideTyping();
     addMsg(r, false);
-    if (vozAtiva) await falarVoz(r);
+    if (vozAtiva && !modoSilencioso) await falarVoz(r);
     else setStatus('pronto');
   } catch(e) {
     hideTyping();
@@ -1075,18 +1092,86 @@ setInterval(() => {
 // Usa Google Cloud Text-to-Speech via REST com voz neural pt-BR
 // Mais natural que Web Speech API — prosódia e entonação reais
 
+// ─── Pré-processador de texto para voz ───────────────────────────────────
+// Converte siglas, termos técnicos e nomes para pronúncia natural em pt-BR
+function prepararParaVoz(txt) {
+  // Remove markdown
+  let t = txt
+    .replace(/#{1,4}\s/g,'').replace(/\*\*/g,'').replace(/\*/g,'')
+    .replace(/`[^`]*`/g,'').replace(/\n{2,}/g,'. ').replace(/\n/g,' ')
+    .replace(/[→•]\s/g,'').replace(/\[.*?\]/g,'')
+    .replace(/❌.*$/,'').trim();
+
+  // Nome do sistema — pronunciar naturalmente
+  t = t.replace(/\bZANKA\b/g, 'Zanka');
+
+  // Siglas de negócios — expandir para português falado
+  const siglas = {
+    'ROI': 'Retorno sobre Investimento',
+    'ROAS': 'Retorno sobre Gasto com Anúncio',
+    'CPL': 'Custo por Lead',
+    'CPC': 'Custo por Clique',
+    'CTR': 'Taxa de Clique',
+    'CAC': 'Custo de Aquisição de Cliente',
+    'LTV': 'Valor do Tempo de Vida do Cliente',
+    'MRR': 'Receita Recorrente Mensal',
+    'ARR': 'Receita Recorrente Anual',
+    'KPI': 'Indicador de Desempenho',
+    'KPIs': 'Indicadores de Desempenho',
+    'SaaS': 'Sas',
+    'B2B': 'Bê dois Bê',
+    'B2C': 'Bê dois Cê',
+    'CRM': 'Cê Erre Eme',
+    'SEO': 'Esse Ê Ó',
+    'CEO': 'Cê Ê Ó',
+    'CFO': 'Cê Fê Ó',
+    'COO': 'Cê Ó Ó',
+    'SDR': 'Esse Dê Erre',
+    'UX': 'Experiência do Usuário',
+    'UI': 'Interface do Usuário',
+    'BI': 'Business Intelligence',
+    'QA': 'Controle de Qualidade',
+    'ICE': 'Aí Cê I',
+    'API': 'Á Pê I',
+    'APIs': 'Á Pê Is',
+    'NPS': 'Êne Pê Esse',
+    'CTA': 'Chamada para Ação',
+    'LP': 'Landing Page',
+    'AIDA': 'Aída',
+    'PAS': 'Pás',
+    'PR': 'Pê Erre',
+    'P&L': 'Péle',
+    'AARRR': 'Á duplo R',
+    'PME': 'Pê Mê É',
+    'PMEs': 'Pê Mê És',
+  };
+
+  // Substituir siglas — só palavras inteiras (\b)
+  for (const [sigla, expansao] of Object.entries(siglas)) {
+    t = t.replace(new RegExp('\\b' + sigla + '\\b', 'g'), expansao);
+  }
+
+  // Números com unidades comuns
+  t = t.replace(/(\d+)x/g, '$1 vezes');
+  t = t.replace(/(\d+)%/g, '$1 por cento');
+  t = t.replace(/R\$(\d)/g, '$1 reais');
+  t = t.replace(/\$(\d)/g, '$1 dólares');
+
+  // Remover URLs
+  t = t.replace(/https?:\/\/\S+/g, '');
+
+  // Truncar para no máximo 500 caracteres para manter fluidez
+  return t.substring(0, 500).trim();
+}
+
 async function falarVoz(txt) {
   falando = true;
   setStatus('falando');
   if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
   document.getElementById('micBar').classList.remove('show');
 
-  // Limpa markdown e trunca para fala
-  const limpo = txt
-    .replace(/#{1,4}\s/g,'').replace(/\*\*/g,'').replace(/\*/g,'')
-    .replace(/`[^`]*`/g,'').replace(/\n{2,}/g,'. ').replace(/\n/g,' ')
-    .replace(/[→•]\s/g,'').replace(/\[.*?\]/g,'')
-    .replace(/❌.*$/,'').trim().substring(0, 500);
+  // Pré-processa: limpa markdown, expande siglas, humaniza nomes
+  const limpo = prepararParaVoz(txt);
 
   if (!limpo) { falando=false; setStatus('pronto'); if(vozAtiva) setTimeout(cicloEscuta,400); return; }
 
@@ -1108,15 +1193,15 @@ async function tentarGoogleTTS(texto) {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          input: {text: texto},
+          input: {ssml: `<speak><prosody rate="medium" pitch="-2st">${texto.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</prosody></speak>`},
           voice: {
             languageCode: 'pt-BR',
-            name: 'pt-BR-Neural2-A',  // Voz neural feminina — mais humana
-            ssmlGender: 'FEMALE'
+            name: 'pt-BR-Wavenet-B',  // Wavenet B — voz masculina natural
+            ssmlGender: 'MALE'
           },
           audioConfig: {
             audioEncoding: 'MP3',
-            speakingRate: 1.05,   // levemente mais rápido — natural
+            speakingRate: 0.95,   // levemente mais lento — mais natural e claro
             pitch: 1.0,
             volumeGainDb: 2.0
           }
@@ -1150,7 +1235,8 @@ async function falarWebSpeech(texto) {
     const u = new SpeechSynthesisUtterance(texto);
     u.lang = 'pt-BR'; u.rate = 1.0; u.pitch = 1.0; u.volume = 1;
     const vozes = window.speechSynthesis.getVoices();
-    const v = vozes.find(v => v.lang==='pt-BR' && v.name.includes('Google'))
+    const v = vozes.find(v => v.lang==='pt-BR' && v.name.includes('Google') && v.name.includes('Male'))
+             || vozes.find(v => v.lang==='pt-BR' && !v.name.toLowerCase().includes('female'))
              || vozes.find(v => v.lang==='pt-BR')
              || vozes.find(v => v.lang.startsWith('pt'));
     if (v) u.voice = v;
@@ -1184,6 +1270,28 @@ function toggleVoz() {
     setStatus('pronto');
   }
 }
+function toggleSilencio() {
+  modoSilencioso = !modoSilencioso;
+  const btn = document.getElementById('btnSilencio');
+  if (modoSilencioso) {
+    btn.textContent = '🔕 Mudo';
+    btn.style.cssText = 'background:rgba(248,113,113,.1);color:#f87171;border-color:rgba(248,113,113,.3);';
+    window.speechSynthesis.cancel();
+    // Pausa o microfone também
+    deveOuvir = false;
+    if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
+    document.getElementById('btnVoz').textContent = '🎤 Clique para falar';
+    document.getElementById('btnVoz').style.cssText = 'background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.4);font-weight:700;';
+    vozAtiva = false;
+    setStatus('pronto');
+    addMsg('🔕 Modo silencioso ativado — só texto. Clique em "Mudo" para reativar a voz.', false);
+  } else {
+    btn.textContent = '🔇 Silêncio';
+    btn.style.cssText = '';
+    addMsg('🔊 Voz reativada. Clique em "Clique para falar" para ativar o microfone.', false);
+  }
+}
+
 function limpar() { historico[agenteId]=[]; document.getElementById('msgs').innerHTML=''; }
 function setStatus(s) {
   const el=document.getElementById('voiceStatus');
