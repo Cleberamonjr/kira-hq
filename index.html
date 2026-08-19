@@ -804,7 +804,7 @@ async function chamarGemini(system, msgs) {
     generationConfig:{maxOutputTokens:1200,temperature:0.7}
   };
   const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keyGemini}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyGemini}`,
     {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}
   );
   const d = await r.json();
