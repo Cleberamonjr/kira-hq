@@ -963,55 +963,49 @@ function onKeyInput(el, id) {
 }
 
 function ativar() {
-  const g = document.getElementById('keyGemini').value.trim();
-  const c = document.getElementById('keyClaude') ? document.getElementById('keyClaude').value.trim() : '';
+  // Ler chave obrigatória
+  const gEl = document.getElementById('keyGemini');
+  const g = gEl ? gEl.value.trim() : '';
 
-  // Validação simples — só precisa ter algum conteúdo
   if (!g) {
     const err = document.getElementById('setupErr');
     if (err) { err.textContent = 'Cole a chave Gemini para continuar.'; err.style.display = 'block'; }
     return;
   }
 
-  // Salvar tudo
+  // Salvar chaves
   keyGemini = g;
-  keyClaude = c || '';
   localStorage.setItem('zanka_gemini', g);
-  if (c) localStorage.setItem('zanka_claude', c);
 
-  // Campos opcionais — verificar se existem antes de ler
+  const cEl = document.getElementById('keyClaude');
+  if (cEl && cEl.value.trim()) {
+    keyClaude = cEl.value.trim();
+    localStorage.setItem('zanka_claude', keyClaude);
+  }
+
   const whEl = document.getElementById('inworldWebhook');
   if (whEl && whEl.value.trim()) {
     inworldWebhookUrl = whEl.value.trim();
     localStorage.setItem('zanka_inworld_webhook', inworldWebhookUrl);
   }
+
   const ikEl = document.getElementById('keyInworldInput');
   if (ikEl && ikEl.value.trim()) {
     keyInworld = ikEl.value.trim();
     localStorage.setItem('zanka_inworld_key', keyInworld);
   }
+
   const vidEl = document.getElementById('voiceIdInworldInput');
   if (vidEl && vidEl.value.trim()) {
     voiceIdInworld = vidEl.value.trim();
     localStorage.setItem('zanka_inworld_voice', voiceIdInworld);
   }
 
-  // Fechar overlay
-  const overlay = document.getElementById('setupOverlay');
-  if (overlay) overlay.style.display = 'none';
+  // Fechar setup
+  document.getElementById('setupOverlay').style.display = 'none';
 
-  // Inicializar
-  try { atualizarApiIndicator(); } catch(e) {}
-  try { atualizarBadgeProjeto(); } catch(e) {}
-  try { iniciarConectores(); } catch(e) {}
-
-  setTimeout(() => {
-    try { abrirProjetos(); } catch(e) {
-      setTimeout(() => {
-        try { iniciarVoz(); } catch(e2) {}
-      }, 500);
-    }
-  }, 600);
+  // Inicializar sistema
+  inicializarSistema();
 }
 
 function trocarKey() {
@@ -1054,24 +1048,60 @@ function atualizarApiIndicator() {
   badge.innerHTML = `<span style="font-size:10px;font-weight:600;color:${vozColor}">${vozLabel}</span>`;
 }
 
+// ── INICIALIZAÇÃO CENTRAL ──────────────────────────────────────────────────
+// Chamada por ativar() e window.onload — ponto único de entrada do sistema
+function inicializarSistema() {
+  // 1. Atualizar indicadores visuais
+  try { atualizarApiIndicator(); } catch(e) { console.warn('apiIndicator:', e); }
+  try { atualizarBadgeProjeto(); } catch(e) { console.warn('badgeProjeto:', e); }
+  try { iniciarConectores(); } catch(e) { console.warn('conectores:', e); }
+
+  // 2. Verificar se já tem projeto selecionado
+  const projSalvo = localStorage.getItem('zanka_projeto_ativo');
+  if (projSalvo && projetos[projSalvo]) {
+    projetoAtivo = projSalvo;
+    try { atualizarBadgeProjeto(); } catch(e) {}
+    // Já tem projeto — iniciar direto
+    setTimeout(() => {
+      try { iniciarVoz(); } catch(e) { console.warn('voz:', e); }
+      try { falarVozWebOnly('ZANKA pronta. Projeto ' + (projetos[projSalvo]?.nome || '') + ' carregado.'); } catch(e) {}
+    }, 500);
+  } else {
+    // Sem projeto — abrir seletor
+    setTimeout(() => {
+      try {
+        renderProjetos();
+        analisarPortfolio();
+        document.getElementById('projOverlay').classList.add('show');
+      } catch(e) {
+        console.warn('projOverlay:', e);
+        // Fallback: iniciar sem seletor de projeto
+        try { iniciarVoz(); } catch(e2) {}
+      }
+    }, 600);
+  }
+}
+
 window.onload = () => {
-  const g = localStorage.getItem('zanka_gemini');
-  const c = localStorage.getItem('zanka_claude');
+  // Carregar todas as chaves salvas
+  const g  = localStorage.getItem('zanka_gemini');
+  const c  = localStorage.getItem('zanka_claude');
   const wh = localStorage.getItem('zanka_inworld_webhook');
-  if (wh) inworldWebhookUrl = wh;
   const ik = localStorage.getItem('zanka_inworld_key');
-  if (ik) keyInworld = ik;
   const vid = localStorage.getItem('zanka_inworld_voice');
-  if (vid) voiceIdInworld = vid;
+
+  if (wh)  inworldWebhookUrl = wh;
+  if (ik)  keyInworld        = ik;
+  if (vid) voiceIdInworld    = vid;
+
   if (g) {
+    // Chave já salva — fechar setup e inicializar
     keyGemini = g;
     keyClaude = c || '';
     document.getElementById('setupOverlay').style.display = 'none';
-    atualizarApiIndicator();
-    setTimeout(() => {
-      falarVozWebOnly('ZANKA pronta. Clique para ativar o microfone.');
-    }, 600);
+    inicializarSistema();
   }
+  // Se não tem chave salva, o setupOverlay permanece visível (default no HTML)
 };
 
 // ═══════════════════════════════════════
@@ -1100,6 +1130,9 @@ function sel(id) {
 async function chamarAPI(agId, mensagem) {
   const ag = AGENTES[agId];
   const usaClaude = ag.modelo === 'claude' && keyClaude;
+
+  // Injetar contexto do projeto ativo (sem recursão)
+  mensagem = projetoCtx(mensagem);
 
   if (!historico[agId]) historico[agId] = [];
   // Adicionar mensagem com ou sem arquivo
@@ -2180,24 +2213,18 @@ function salvarNovoProjeto() {
   });
 }
 
-// Injetar contexto do projeto ativo em cada chamada à API
-const _chamarAPIOriginal = chamarAPI;
-async function chamarAPI(agId, mensagem) {
-  let msgFinal = mensagem;
-  if (projetoAtivo && projetos[projetoAtivo]) {
-    const p = projetos[projetoAtivo];
-    const ctx = `[PROJETO ATIVO: ${p.emoji} ${p.nome} | ${p.descricao} | Mercados: ${p.mercados} | Produto: ${p.produto} | Modelo: ${p.modelo}]
+// ── contexto de projeto injetado diretamente no chamarAPI original ──
+// (sem wrapper — evita recursão infinita)
+// A injeção está dentro da função chamarAPI original abaixo via projetoCtx()
 
-`;
-    // Só adiciona se não for uma mensagem de sistema longa
-    if (mensagem.length < 800) msgFinal = ctx + mensagem;
-  }
-  return _chamarAPIOriginal(agId, msgFinal);
+function projetoCtx(mensagem) {
+  if (!projetoAtivo || !projetos[projetoAtivo]) return mensagem;
+  if (mensagem.length >= 800) return mensagem;
+  const p = projetos[projetoAtivo];
+  return `[PROJETO: ${p.emoji} ${p.nome} | ${p.descricao}]
+
+${mensagem}`;
 }
-
-// ── Inicialização ──
-// Inicialização
-iniciarConectores();
 
 // ═══════════════════════════════════════
 // CONTROLES DE VOZ E SILÊNCIO
