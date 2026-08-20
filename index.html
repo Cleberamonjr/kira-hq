@@ -159,6 +159,79 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+
+/* LOCK OVERLAY */
+.lock-overlay{position:fixed;inset:0;background:rgba(6,6,14,.97);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;backdrop-filter:blur(12px);}
+.lock-overlay.show{display:flex;}
+.lock-icon{font-size:64px;}
+.lock-title{font-size:24px;font-weight:900;color:var(--text);letter-spacing:-.5px;}
+.lock-sub{font-size:13px;color:var(--text2);text-align:center;max-width:320px;line-height:1.7;}
+.lock-input{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:14px;color:var(--text);font-family:inherit;outline:none;text-align:center;width:260px;transition:border-color .12s;}
+.lock-input:focus{border-color:var(--purple);}
+.lock-err{font-size:11px;color:var(--red);min-height:16px;transition:opacity .2s;}
+.lock-btn{padding:12px 32px;border:none;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+
+/* CONECTORES OVERLAY */
+.con-overlay{position:fixed;inset:0;background:rgba(6,6,14,.95);z-index:998;display:none;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;backdrop-filter:blur(8px);}
+.con-overlay.show{display:flex;}
+.con-card{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:28px;max-width:680px;width:100%;}
+.con-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.con-title{font-size:18px;font-weight:900;letter-spacing:-.3px;}
+.con-close{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;}
+.con-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.con-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .12s;position:relative;}
+.con-item:hover{border-color:var(--border2);}
+.con-item.nivel-0{opacity:.6;border-style:dashed;}
+.con-item.nivel-5{border-color:rgba(245,158,11,.5);background:var(--gold-bg);}
+.con-nivel{font-size:14px;margin-bottom:4px;}
+.con-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.con-status{font-size:10px;color:var(--text3);}
+.con-add{background:var(--s2);border:1px dashed var(--border2);border-radius:10px;padding:16px;margin-bottom:12px;}
+.con-label{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;}
+.con-row{display:flex;gap:7px;margin-bottom:7px;}
+.con-inp{flex:1;background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--text);font-family:inherit;outline:none;}
+.con-inp:focus{border-color:var(--purple);}
+.con-btn-add{padding:8px 16px;border:none;border-radius:7px;background:var(--purple);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+
+/* SELETOR DE PROJETO */
+.proj-overlay{position:fixed;inset:0;background:rgba(6,6,14,.97);z-index:997;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(12px);}
+.proj-overlay.show{display:flex;}
+.proj-card-wrap{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;}
+.proj-header{margin-bottom:20px;}
+.proj-title{font-size:20px;font-weight:900;letter-spacing:-.4px;margin-bottom:4px;}
+.proj-sub{font-size:12px;color:var(--text2);line-height:1.6;}
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.proj-item{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .15s;position:relative;}
+.proj-item:hover{border-color:var(--purple);transform:translateY(-2px);}
+.proj-item.selecionado{border:2px solid var(--purple);background:rgba(124,58,237,.08);}
+.proj-item.embriao{border-style:dashed;opacity:.75;}
+.proj-emoji{font-size:28px;margin-bottom:8px;}
+.proj-nome{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.proj-desc{font-size:10px;color:var(--text3);line-height:1.5;margin-bottom:8px;}
+.proj-badge{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700;display:inline-block;}
+.pb-ativo{background:var(--green-bg);color:var(--green);}
+.pb-embriao{background:var(--gold-bg);color:var(--gold);}
+.pb-pausado{background:var(--red-bg);color:var(--red);}
+.proj-alerta{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.65;}
+.proj-alerta strong{color:var(--gold);}
+.proj-btn-row{display:flex;gap:8px;}
+.proj-btn{flex:1;padding:12px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .12s;}
+.proj-btn-ok{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;}
+.proj-btn-ok:hover{opacity:.9;}
+.proj-btn-add{background:var(--s2);border:1px solid var(--border);color:var(--text2);}
+.proj-btn-add:hover{border-color:var(--border2);color:var(--text);}
+
+/* BADGE DE PROJETO ATIVO NA TOPBAR */
+.proj-ativo-badge{display:flex;align-items:center;gap:5px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.3);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:600;color:#a78bfa;cursor:pointer;transition:all .12s;}
+.proj-ativo-badge:hover{background:rgba(124,58,237,.18);}
+
+/* FORM NOVO PROJETO */
+.proj-form{background:var(--s2);border:1px dashed var(--border2);border-radius:10px;padding:14px;margin-top:10px;display:none;}
+.proj-form.show{display:block;}
+.proj-form-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px;}
+.proj-inp{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--text);font-family:inherit;outline:none;}
+.proj-inp:focus{border-color:var(--purple);}
+.stars{color:var(--gold);font-size:12px;letter-spacing:1px;}
 </style>
 </head>
 <body>
@@ -225,7 +298,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     <button class="setup-btn" onclick="ativar()">🚀 Ativar o Time</button>
 
     <div class="setup-phase-note">
-      <strong>Fase 1 (agora):</strong> Gemini obrigatória + modo de voz escolhido.<br>
+      <strong>Fase 1 (agora):</strong> Gemini obrigatória — 17 agentes online.<br>
       <strong>Fase 2 (depois):</strong> cole a chave Claude — ZANKA, NEJI e HECTOR sobem de nível.
     </div>
   </div>
@@ -243,6 +316,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <div class="tb-brand">
     <div class="tb-icon">🧠</div>
     ZANKA HQ
+  </div>
+  <div class="proj-ativo-badge" id="projBadge" onclick="abrirProjetos()">
+    <span id="projEmoji">🎯</span>
+    <span id="projNomeAtivo">Selecionar projeto</span>
   </div>
   <div class="tb-divider"></div>
   <div class="voice-status pronto" id="voiceStatus">
@@ -262,6 +339,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     <button class="tb-btn" id="btnSilencio" onclick="toggleSilencio()" title="Modo silencioso — desativa toda voz">🔇 Silêncio</button>
     <button class="tb-btn" onclick="limpar()">🗑 Limpar</button>
     <button class="tb-btn" onclick="trocarKey()">🔑 Keys</button>
+    <button class="tb-btn" id="btnHold" onclick="holdSistema()" title="Travar sistema">🔒 Hold</button>
+    <button class="tb-btn" onclick="abrirConectores()" title="Gerenciar conectores">🔌 Conectores</button>
   </div>
 </div>
 
@@ -372,7 +451,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <button class="hint" onclick="enviarTexto('Quero criar conteúdo para essa semana')">📅 Conteúdo da semana</button>
         <button class="hint" onclick="enviarTexto('Preciso de uma estratégia de tráfego')">⚡ Estratégia tráfego</button>
       </div>
+      <div id="uploadPreview" style="display:none;margin-bottom:8px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--text2);display:none;align-items:center;gap:8px;">
+        <span id="uploadIcon">📎</span>
+        <span id="uploadNome" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+        <button onclick="cancelarUpload()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0;">✕</button>
+      </div>
       <div class="input-row">
+        <label for="fileInput" style="cursor:pointer;width:36px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--border);border-radius:10px;color:var(--text3);font-size:16px;transition:all .12s;flex-shrink:0;" title="Enviar arquivo, foto ou documento" onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--text3)'">📎
+          <input type="file" id="fileInput" style="display:none;" accept="image/*,.pdf,.txt,.csv,.xlsx,.docx,.json,.md" onchange="onFileSelected(this)">
+        </label>
         <textarea class="chat-inp" id="inp" placeholder="Fale ou escreva para ZANKA..." rows="1"
           onkeydown="tecla(event)" oninput="resize(this)"></textarea>
         <button class="send-btn" id="sendBtn" onclick="enviar()">→</button>
@@ -384,6 +471,89 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 <div class="mic-bar" id="micBar">
   <div class="vs-dot pulse" style="background:var(--red)"></div>
   Ouvindo...
+</div>
+
+<!-- PROJETOS OVERLAY -->
+<div class="proj-overlay" id="projOverlay">
+  <div class="proj-card-wrap">
+    <div class="proj-header">
+      <div class="proj-title">🎯 Qual projeto hoje?</div>
+      <div class="proj-sub" id="projSub">ZANKA analisou o portfólio. Escolha o foco do dia — os demais continuam sendo monitorados.</div>
+    </div>
+
+    <div class="proj-alerta" id="projAlerta">
+      <strong>⚡ Análise do portfólio:</strong> carregando...
+    </div>
+
+    <div class="proj-grid" id="projGrid"></div>
+
+    <div class="proj-form" id="projForm">
+      <div class="proj-form-row">
+        <input class="proj-inp" id="pNome" placeholder="Nome do projeto">
+        <input class="proj-inp" id="pEmoji" placeholder="Emoji (ex: 🚀)">
+      </div>
+      <div class="proj-form-row">
+        <input class="proj-inp" id="pDesc" placeholder="Descrição curta">
+        <input class="proj-inp" id="pMercado" placeholder="Mercado alvo">
+      </div>
+      <div class="proj-form-row">
+        <input class="proj-inp" id="pProduto" placeholder="Produto / serviço">
+        <input class="proj-inp" id="pModelo" placeholder="Modelo de negócio">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="proj-btn proj-btn-ok" style="flex:0 0 auto;padding:8px 20px;" onclick="salvarNovoProjeto()">+ Adicionar</button>
+        <button class="proj-btn proj-btn-add" style="flex:0 0 auto;padding:8px 16px;" onclick="document.getElementById('projForm').classList.remove('show')">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="proj-btn-row" style="margin-top:14px;">
+      <button class="proj-btn proj-btn-ok" onclick="confirmarProjeto()">▶ Iniciar com este projeto</button>
+      <button class="proj-btn proj-btn-add" onclick="document.getElementById('projForm').classList.toggle('show')">+ Novo projeto</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOCK OVERLAY -->
+<div class="lock-overlay" id="lockOverlay">
+  <div class="lock-icon">🔒</div>
+  <div class="lock-title">Sistema travado</div>
+  <div class="lock-sub">Digite a senha ou fale "De volta ao show" para retomar a operação.</div>
+  <input class="lock-input" id="lockInput" type="password" placeholder="Digite a senha..."
+    onkeydown="if(event.key==='Enter')tentarDesbloquear()">
+  <div class="lock-err" id="lockErr"></div>
+  <button class="lock-btn" onclick="tentarDesbloquear()">Desbloquear</button>
+</div>
+
+<!-- CONECTORES OVERLAY -->
+<div class="con-overlay" id="conOverlay">
+  <div class="con-card">
+    <div class="con-header">
+      <div class="con-title">🔌 Conectores</div>
+      <button class="con-close" onclick="fecharConectores()">✕ Fechar</button>
+    </div>
+
+    <div class="con-grid" id="conGrid"></div>
+
+    <div class="con-add">
+      <div class="con-label">Adicionar novo conector</div>
+      <div class="con-row">
+        <input class="con-inp" id="conNome" placeholder="Nome (ex: HubSpot CRM)">
+        <input class="con-inp" id="conCat" placeholder="Categoria (ex: CRM)">
+      </div>
+      <div class="con-row">
+        <input class="con-inp" id="conUrl" placeholder="URL / Endpoint (ex: https://...)">
+        <input class="con-inp" id="conKey" type="password" placeholder="API Key (opcional)">
+      </div>
+      <div class="con-row">
+        <button class="con-btn-add" onclick="adicionarConector()">+ Adicionar</button>
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--text3);line-height:1.7;">
+      Conectores evoluem como Pokémons conforme você usa o ZANKA 🎮<br>
+      ⚪ Nível 0 — cadastrado · ⭐ Nível 1-4 — em uso · 🌟 Nível 5 — maestria
+    </div>
+  </div>
 </div>
 
 <script>
@@ -477,16 +647,37 @@ ANTI-ALUCINAÇÃO: Nunca aprove algo sem base. Se tiver dúvida, sinalize. Preci
 
 Responda em português brasileiro. Seja direto e preciso como um COO experiente.`},
 
-sabrina:{emoji:'💃',nome:'SABRINA',role:'Posts Diários · Instagram · TikTok · LinkedIn · Facebook',
+sabrina:{emoji:'💃',nome:'SABRINA',role:'Conteúdo Visual · Métricas Meta · Instagram · Facebook · TikTok',
 modelo:'gemini',
-system:`Você é SABRINA, criadora de conteúdo especialista em posts diários para redes sociais.
-— Instagram: carrosséis, reels, stories, feed
-— TikTok: scripts virais, hooks de 0-3s, tendências
-— LinkedIn: autoridade B2B, storytelling profissional
-— Facebook: engajamento, grupos, eventos
-Hook nas 2 primeiras linhas — ou perde o scroll. Frequência bate originalidade. Adapte tom por plataforma.
-Entregue: conteúdo pronto + melhor horário + 3 hashtags + sugestão visual.
-ANTI-ALUCINAÇÃO: não invente dados de engajamento ou tendências que não confirmou.
+system:`Você é SABRINA, especialista em conteúdo visual para redes sociais E analista de métricas Meta.
+
+CRIAÇÃO DE CONTEÚDO:
+— Instagram: feed (carrosséis, estáticos, reels), stories, close friends, collab
+— Facebook: posts de engajamento, grupos, Reels, eventos, página empresarial
+— TikTok: scripts virais, hooks 0-3s, duetos, trends, SEO de TikTok
+— Calendário editorial: planejamento semanal/mensal com objetivos por post
+— Hook nas 2 primeiras linhas — ou perde o scroll imediatamente
+— Formatos: carrossel educativo, antes/depois, bastidores, prova social, storytelling
+
+ANÁLISE DE MÉTRICAS META (Instagram e Facebook pessoal e empresarial):
+— Taxa de engajamento: likes + comentários + salvamentos / alcance × 100
+— Benchmark: Feed 1-3% bom · 3-6% muito bom · +6% viral
+— Alcance orgânico vs pago: proporção saudável e como melhorar
+— Impressões: frequência ideal por campanha (1.8-2.5x para reconhecimento)
+— CTR de stories: benchmark 1-3% saudável
+— Crescimento de seguidores: taxa semanal e projeção mensal
+— Horários de pico: análise por nicho e público-alvo
+— Análise de concorrência: o que está funcionando no seu setor
+— Diagnóstico de conta: quando recebe métricas, identifica o problema e prescreve solução
+— Análise de conteúdo: qual tipo de post performa melhor para aquele perfil
+
+QUANDO RECEBER MÉTRICAS OU PRINTS:
+1. Diagnóstico em 3 frases: o que está bem, o que está ruim, causa provável
+2. Plano de ação: 3 ações concretas com prazo
+3. Benchmark do nicho: como você se compara ao mercado
+4. Próximo teste: o que testar essa semana para melhorar
+
+ANTI-ALUCINAÇÃO: não invente dados de engajamento. Se receber métricas reais, analise-as. Se não receber, peça os dados antes de diagnosticar.
 Responda em português brasileiro.`},
 
 fred:{emoji:'✍️',nome:'FRED',role:'Copywriter · SEO Orgânico · Conteúdo de Longo Prazo',
@@ -700,6 +891,66 @@ let voiceIdInworld = 'Dennis';
 let inworldWebhookUrl = '';
 let modoSilencioso = false;
 
+// ── SEGURANÇA ──
+const SENHA_TEXTO = 'Chelsead10!';
+const SENHA_VOZ_DESBLOQUEAR = ['de volta ao show', 'de volta ao show'];
+const FRASE_ENCERRAR = ['por hoje é só jim', 'é isso vamo quere', 'é isso vamo querê'];
+const FRASE_HOLD = ['hold'];
+let sistemaTravaado = false;
+
+// ── CONECTORES ──
+let conectores = JSON.parse(localStorage.getItem('zanka_conectores') || '{}');
+
+// ── PROJETOS ──
+const PROJETOS_PADRAO = {
+  lumi: {
+    id: 'lumi', nome: 'Lumi', emoji: '💎',
+    descricao: 'SaaS PWA para gestão de revendedoras de semi-joias brasileiras',
+    mercados: 'Brasil',
+    produto: 'App de gestão — planos R$39,90 a R$397/mês · Supabase sa-east-1',
+    modelo: 'SaaS B2C com consultoras como canal de vendas',
+    status: 'ativo',
+    prioridade: 3,
+    roas_potencial: 'Muito alto — 4M+ revendedoras no Brasil, CAC baixo via consultoras',
+    ultimo_acesso: null,
+    agentes_principais: ['IRIS','LUNA','ANINHA','SABRINA','DIANA','GALDINO'],
+    kpis: { usuarios: 0, mrr: 0, churn: 0, consultoras: 0 },
+    notas: 'Supabase projeto: eraxjtfedswksiyigasf | Planos: Essencial R$39,90 · Profissional R$97 · Negócio R$197 · Inteligência R$397'
+  },
+  aurora: {
+    id: 'aurora', nome: 'Aurora Jewelry', emoji: '✨',
+    descricao: 'Catálogo autônomo de semi-joias com pedidos via Telegram',
+    mercados: 'Brasil',
+    produto: '152 produtos de semi-joias — catálogo online com pedidos automáticos',
+    modelo: 'E-commerce catálogo + Telegram bot para pedidos',
+    status: 'ativo',
+    prioridade: 2,
+    roas_potencial: 'Alto — operação autônoma, baixo custo, pedidos via Telegram 24h',
+    ultimo_acesso: null,
+    agentes_principais: ['SABRINA','LUNA','JONNY','ANINHA','LUDMILO'],
+    kpis: { pedidos: 0, catalogo: 152, receita: 0 },
+    notas: 'Site: aurorajewelsforyou.netlify.app | Supabase: eraxjtfedswksiyigasf | Telegram integrado para pedidos'
+  },
+  meidu: {
+    id: 'meidu', nome: 'Meidu Energy', emoji: '⚡',
+    descricao: 'NOVO INÍCIO — construindo do zero com ZANKA',
+    mercados: 'A definir com ZANKA',
+    produto: 'Baterias LiFePO4 · Inversores híbridos · Sistemas ESS',
+    modelo: 'A definir — iniciar diagnóstico com ZANKA',
+    status: 'embriao',
+    prioridade: 1,
+    roas_potencial: 'A avaliar — mercado B2B de energia com alto potencial',
+    ultimo_acesso: null,
+    agentes_principais: ['ZANKA','MIKIMBA','MARCUS','MBAKU','FRED','NIX'],
+    kpis: { leads: 0, distribuidores: 0, faturamento: 0 },
+    notas: 'PROJETO REINICIADO DO ZERO. ZANKA vai conduzir diagnóstico completo e construir nova estratégia.'
+  }
+};
+
+let projetos = JSON.parse(localStorage.getItem('zanka_projetos') || 'null') || {...PROJETOS_PADRAO};
+let projetoAtivo = localStorage.getItem('zanka_projeto_ativo') || null;
+let modoSelecaoProjeto = true; // true = mostrar seletor ao abrir
+
 Object.keys(AGENTES).forEach(k => historico[k] = []);
 
 // ═══════════════════════════════════════
@@ -762,7 +1013,7 @@ function atualizarApiIndicator() {
     dot.style.background = 'var(--teal)';
   }
   // Badge TTS
-  const vozLabel = inworldWebhookUrl ? '🎙️ Inworld via n8n' : '🔈 Google TTS';
+  const vozLabel = inworldWebhookUrl ? '🎙️ Inworld TTS-2' : '🔈 Web Speech';
   const vozColor = inworldWebhookUrl ? '#f59e0b' : '#34d399';
   let badge = document.getElementById('ttsBadge');
   if (!badge) {
@@ -823,7 +1074,15 @@ async function chamarAPI(agId, mensagem) {
   const usaClaude = ag.modelo === 'claude' && keyClaude;
 
   if (!historico[agId]) historico[agId] = [];
-  historico[agId].push({role:'user', content: mensagem});
+  // Adicionar mensagem com ou sem arquivo
+  let _parts = null;
+  if (arquivoAtual && agId === agenteId) {
+    _parts = prepararMensagemComArquivo(mensagem);
+    historico[agId].push({role:'user', content: mensagem, _parts});
+    cancelarUpload(); // limpar após enviar
+  } else {
+    historico[agId].push({role:'user', content: mensagem});
+  }
   if (historico[agId].length > 20) historico[agId] = historico[agId].slice(-20);
 
   const guardAntiAluc = '\n\n[REGRA CRÍTICA]: Nunca invente dados, métricas ou fatos não fornecidos. Se não tiver o dado, diga explicitamente. Sinalize estimativas como estimativas.';
@@ -833,7 +1092,23 @@ async function chamarAPI(agId, mensagem) {
     if (usaClaude) {
       resposta = await chamarClaude(ag.system + guardAntiAluc, historico[agId]);
     } else {
-      resposta = await chamarGemini(ag.system + guardAntiAluc, historico[agId]);
+      // Streaming — cria elemento de mensagem e vai preenchendo
+      const ws = document.getElementById('wlScreen');
+      if (ws) ws.style.display = 'none';
+      const msgEl = document.createElement('div');
+      msgEl.className = 'msg';
+      msgEl.innerHTML = `<div class="msg-av">${ag.emoji}</div><div><div class="msg-bub" id="streamBub_${agId}"></div><div class="msg-meta">${ag.nome} · agora</div></div>`;
+      const msgsEl = document.getElementById('msgs');
+      // Remover typing antes de adicionar streaming
+      document.getElementById('typing')?.remove();
+      msgsEl.appendChild(msgEl);
+      const bub = document.getElementById(`streamBub_${agId}`);
+      let streamText = '';
+      resposta = await chamarGemini(ag.system + guardAntiAluc, historico[agId], (chunk) => {
+        streamText += chunk;
+        bub.textContent = streamText;
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+      });
     }
     historico[agId].push({role:'assistant', content: resposta});
     return resposta;
@@ -861,23 +1136,60 @@ async function chamarClaude(system, msgs) {
   return d.content[0].text;
 }
 
-async function chamarGemini(system, msgs) {
+async function chamarGemini(system, msgs, onChunk) {
   const contents = msgs.map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
-    parts:[{text: m.content}]
+    parts: m._parts || [{text: m.content}]
   }));
   const body = {
     system_instruction:{parts:[{text: system}]},
     contents,
-    generationConfig:{maxOutputTokens:1200,temperature:0.7}
+    generationConfig:{maxOutputTokens:1400,temperature:0.7}
   };
+
+  // Streaming via streamGenerateContent
+  if (onChunk) {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse&key=${keyGemini}`,
+      {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}
+    );
+    if (!r.ok) {
+      const err = await r.json().catch(()=>({error:{message:r.statusText}}));
+      throw new Error(err.error?.message || r.statusText);
+    }
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let full = '';
+    let buffer = '';
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, {stream:true});
+      const lines = buffer.split('
+');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.startsWith('data:')) continue;
+        const json = line.slice(5).trim();
+        if (!json || json === '[DONE]') continue;
+        try {
+          const obj = JSON.parse(json);
+          const chunk = obj.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (chunk) { full += chunk; onChunk(chunk); }
+        } catch(e) {}
+      }
+    }
+    return full;
+  }
+
+  // Sem streaming — fallback normal
   const r = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${keyGemini}`,
     {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}
   );
   const d = await r.json();
   if (d.error) throw new Error(d.error.message);
-  return d.candidates[0].content.parts[0].text;
+  return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
 
 // ═══════════════════════════════════════
@@ -937,8 +1249,8 @@ async function horaDoShow() {
     `<div class="show-agent" id="show-${m}">${m}</div>`
   ).join('');
 
-  const resultados = [];
-  for (const membro of membros) {
+  // Execução paralela com Promise.all — 3x mais rápido
+  const promises = membros.map(async (membro) => {
     document.getElementById('show-'+membro).className = 'show-agent active';
     try {
       const id = idMap[membro];
@@ -947,12 +1259,14 @@ async function horaDoShow() {
         ag.system + '\n\n[HORA DO SHOW — entrega máxima, sem alucinação, baseado apenas no contexto real fornecido]',
         [{role:'user', content: tarefas[membro]}]
       );
-      resultados.push(`[${membro}]:\n${r}`);
+      document.getElementById('show-'+membro).className = 'show-agent done';
+      return `[${membro}]:\n${r}`;
     } catch(e) {
-      resultados.push(`[${membro}]: Erro ao chamar agente — ${e.message}`);
+      document.getElementById('show-'+membro).className = 'show-agent done';
+      return `[${membro}]: indisponível`;
     }
-    document.getElementById('show-'+membro).className = 'show-agent done';
-  }
+  });
+  const resultados = await Promise.all(promises);
 
   overlay.classList.remove('show');
 
@@ -976,7 +1290,23 @@ async function enviarTexto(txt) {
   if (!txt || processando) return;
   if (!keyGemini) { document.getElementById('setupOverlay').style.display='flex'; return; }
 
-  const intencao = agenteId === 'zanka' ? detectarIntencao(txt) : 'conversa';
+  // Verificar segurança
+  const intencaoSeg = detectarIntencao(txt);
+  if (intencaoSeg === 'seguranca') return;
+  if (sistemaTravaado) { holdSistema(true); return; }
+
+  // Verificar pedido de imagem
+  if (verificarPedidoImagem(txt)) {
+    addMsg(txt, true);
+    addMsg('🎨 Gerando imagem...', false);
+    const src = await gerarImagem(txt);
+    document.getElementById('msgs').lastElementChild?.remove();
+    if (src) { addImagem(src, txt); }
+    else { addMsg('❌ Não consegui gerar a imagem. Tente um prompt mais descritivo.', false); }
+    return;
+  }
+
+  const intencao = agenteId === 'zanka' ? intencaoSeg : 'conversa';
 
   if (intencao === 'show') {
     addMsg(txt, true);
@@ -984,7 +1314,12 @@ async function enviarTexto(txt) {
     return;
   }
 
-  addMsg(txt, true);
+  // Se tem arquivo, mostrar com arquivo
+  if (arquivoAtual) {
+    addMsgComArquivo(txt, arquivoAtual);
+  } else {
+    addMsg(txt, true);
+  }
   showTyping();
   processando = true;
   document.getElementById('sendBtn').disabled = true;
@@ -995,7 +1330,11 @@ async function enviarTexto(txt) {
   try {
     const r = await chamarAPI(agenteId, msgParaAPI);
     hideTyping();
-    addMsg(r, false);
+    if (!document.getElementById(`streamBub_${agenteId}`)) {
+      addMsg(r, false);
+    }
+    // Botão de download para respostas longas
+    if (r && r.length > 300) addBotaoDownload(r);
     if (vozAtiva && !modoSilencioso) await falarVoz(r);
     else setStatus('pronto');
   } catch(e) {
@@ -1252,39 +1591,9 @@ async function falarInworldN8N(texto) {
 }
 
 async function falarGoogleTTS(texto) {
-  if (!keyGemini) return false;
-  try {
-    const resp = await fetch(
-      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${keyGemini}`,
-      {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          input: { text: texto },
-          voice: { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'MALE' },
-          audioConfig: { audioEncoding: 'MP3', speakingRate: 1.0, pitch: -1.0, volumeGainDb: 3.0, effectsProfileId: ['headphone-class-device'] }
-        })
-      }
-    );
-    const data = await resp.json();
-    if (!data.audioContent) return false;
-    const audio = new Audio('data:audio/mp3;base64,' + data.audioContent);
-    document.getElementById('waveBars').classList.add('show');
-    return new Promise(res => {
-      audio.onended = () => {
-        document.getElementById('waveBars').classList.remove('show');
-        falando = false; setStatus('pronto');
-        if (vozAtiva) setTimeout(cicloEscuta, 500);
-        res(true);
-      };
-      audio.onerror = () => {
-        document.getElementById('waveBars').classList.remove('show');
-        falando = false; setStatus('pronto');
-        res(false);
-      };
-      audio.play().catch(() => res(false));
-    });
-  } catch(e) { return false; }
+  // Google Cloud TTS exige OAuth2 — não funciona com chave Gemini
+  // Usando Web Speech API com configuração masculina forçada
+  return false;
 }
 
 // ═══════════════════════════════════════
@@ -1294,12 +1603,31 @@ async function falarWebSpeech(texto) {
   return new Promise(res => {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(texto);
-    u.lang = 'pt-BR'; u.rate = 1.0; u.pitch = 0.9; u.volume = 1;
+    u.lang = 'pt-BR';
+    u.volume = 1;
+
     const vozes = window.speechSynthesis.getVoices();
-    const v = vozes.find(v => v.lang==='pt-BR' && !v.name.toLowerCase().includes('female'))
-             || vozes.find(v => v.lang==='pt-BR')
-             || vozes.find(v => v.lang.startsWith('pt'));
-    if (v) u.voice = v;
+
+    // Tentar voz masculina pt-BR — ordem de preferência
+    const v =
+      vozes.find(v => v.lang === 'pt-BR' && v.name.toLowerCase().includes('male')) ||
+      vozes.find(v => v.lang === 'pt-BR' && v.name.toLowerCase().includes('masculin')) ||
+      vozes.find(v => v.lang === 'pt-BR' && (v.name.includes('Ricardo') || v.name.includes('Daniel') || v.name.includes('Luciano') || v.name.includes('Antonio'))) ||
+      vozes.find(v => v.lang === 'pt-BR' && !v.name.toLowerCase().includes('female') && !v.name.toLowerCase().includes('feminina')) ||
+      vozes.find(v => v.lang === 'pt-BR') ||
+      vozes.find(v => v.lang.startsWith('pt'));
+
+    if (v) {
+      u.voice = v;
+      // Ajustar pitch baseado na voz encontrada
+      u.rate = 1.0;
+      u.pitch = v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('feminina') ? 0.1 : 0.85;
+    } else {
+      // Sem voz pt-BR — usar pitch baixo para simular masculino
+      u.rate = 1.0;
+      u.pitch = 0.1;
+    }
+
     u.onstart = () => document.getElementById('waveBars').classList.add('show');
     u.onend = u.onerror = () => {
       document.getElementById('waveBars').classList.remove('show');
@@ -1311,20 +1639,537 @@ async function falarWebSpeech(texto) {
   });
 }
 
+// Lista vozes disponíveis no sistema para debug
+function listarVozes() {
+  const vozes = window.speechSynthesis.getVoices();
+  const ptbr = vozes.filter(v => v.lang.startsWith('pt'));
+  console.log('Vozes pt:', ptbr.map(v => `${v.name} (${v.lang})`));
+  return ptbr;
+}
+
 function falarVozWebOnly(txt) {
   if (modoSilencioso) return;
   const limpo = prepararParaVoz(txt);
   if (!limpo) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(limpo);
-  u.lang = 'pt-BR'; u.rate = 1.0; u.pitch = 0.9; u.volume = 1;
+  u.lang = 'pt-BR'; u.rate = 1.0; u.pitch = 0.1; u.volume = 1;
   const vozes = window.speechSynthesis.getVoices();
-  const v = vozes.find(v=>v.lang==='pt-BR')||vozes.find(v=>v.lang.startsWith('pt'));
+  const v = vozes.find(v => v.lang==='pt-BR' && !v.name.toLowerCase().includes('female'))
+           || vozes.find(v => v.lang==='pt-BR')
+           || vozes.find(v => v.lang.startsWith('pt'));
   if (v) u.voice = v;
   window.speechSynthesis.speak(u);
 }
 
 window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
+
+// ════════════════════════════════════════
+// UPLOAD DE ARQUIVOS — FOTO / PDF / DOC
+// ════════════════════════════════════════
+let arquivoAtual = null; // { nome, tipo, base64, mimeType }
+
+function onFileSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const base64 = e.target.result.split(',')[1];
+    arquivoAtual = {
+      nome: file.name,
+      tipo: file.type,
+      base64,
+      mimeType: file.type,
+      tamanho: (file.size / 1024).toFixed(1) + 'KB'
+    };
+    // Mostrar preview
+    const prev = document.getElementById('uploadPreview');
+    const icon = file.type.startsWith('image/') ? '🖼️' : file.type === 'application/pdf' ? '📄' : '📎';
+    document.getElementById('uploadIcon').textContent = icon;
+    document.getElementById('uploadNome').textContent = file.name + ' · ' + arquivoAtual.tamanho;
+    prev.style.display = 'flex';
+    // Focar no input de texto
+    document.getElementById('inp').focus();
+  };
+  reader.readAsDataURL(file);
+  input.value = ''; // reset para permitir mesmo arquivo novamente
+}
+
+function cancelarUpload() {
+  arquivoAtual = null;
+  document.getElementById('uploadPreview').style.display = 'none';
+}
+
+// Adicionar arquivo na mensagem para Gemini Vision
+function prepararMensagemComArquivo(texto) {
+  if (!arquivoAtual) return [{text: texto}];
+  const parts = [];
+  if (arquivoAtual.tipo.startsWith('image/')) {
+    parts.push({
+      inlineData: { mimeType: arquivoAtual.mimeType, data: arquivoAtual.base64 }
+    });
+    if (texto) parts.push({text: texto || 'Analise esta imagem.'});
+    else parts.push({text: 'Analise esta imagem em detalhes.'});
+  } else if (arquivoAtual.tipo === 'application/pdf' || arquivoAtual.tipo.includes('text')) {
+    // Para PDF e texto, adicionar como texto (Gemini pode processar)
+    parts.push({text: `[Arquivo: ${arquivoAtual.nome}]
+${texto || 'Analise este arquivo.'}`});
+  } else {
+    parts.push({text: `[Arquivo anexado: ${arquivoAtual.nome} (${arquivoAtual.tamanho})]
+${texto || 'Analise este arquivo.'}`});
+  }
+  return parts;
+}
+
+// Mostrar arquivo enviado no chat
+function addMsgComArquivo(texto, arquivo) {
+  const ws = document.getElementById('wlScreen');
+  if (ws) ws.style.display = 'none';
+  const el = document.createElement('div');
+  el.className = 'msg user';
+  let conteudo = '';
+  if (arquivo.tipo.startsWith('image/')) {
+    conteudo = `<img src="data:${arquivo.mimeType};base64,${arquivo.base64}" style="max-width:220px;border-radius:8px;display:block;margin-bottom:6px;" alt="${arquivo.nome}">`;
+  } else {
+    conteudo = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:14px;">${arquivo.tipo==='application/pdf'?'📄':'📎'}</span><span style="font-size:11px;color:var(--text2);">${arquivo.nome}</span></div>`;
+  }
+  if (texto) conteudo += `<div style="font-size:12.5px;">${texto.replace(/</g,'&lt;')}</div>`;
+  el.innerHTML = `<div class="msg-av">👤</div><div><div class="msg-bub">${conteudo}</div><div class="msg-meta" style="text-align:right;">Você · agora</div></div>`;
+  document.getElementById('msgs').appendChild(el);
+  document.getElementById('msgs').scrollTop = 99999;
+}
+
+// ════════════════════════════════════════
+// DOWNLOAD DE ARQUIVOS GERADOS
+// ════════════════════════════════════════
+function baixarTexto(conteudo, nomeArquivo) {
+  const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nomeArquivo;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function baixarImagem(src, nome) {
+  const a = document.createElement('a');
+  a.href = src; a.download = nome || 'zanka-imagem.png';
+  a.click();
+}
+
+function addBotaoDownload(textoMsg) {
+  // Adiciona botão de download na última mensagem do agente
+  setTimeout(() => {
+    const msgs = document.querySelectorAll('.msg:not(.user) .msg-bub');
+    const ultima = msgs[msgs.length - 1];
+    if (!ultima) return;
+    const btn = document.createElement('button');
+    btn.textContent = '⬇ Baixar';
+    btn.style.cssText = 'margin-top:8px;padding:4px 10px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);border-radius:6px;color:#60a5fa;font-size:10px;cursor:pointer;font-family:inherit;';
+    btn.onclick = () => {
+      const ts = new Date().toISOString().slice(0,10);
+      baixarTexto(textoMsg, `zanka-resposta-${ts}.md`);
+    };
+    ultima.appendChild(btn);
+  }, 100);
+}
+
+// ════════════════════════════════════════
+// EXECUÇÃO PARALELA — HORA DO SHOW
+// ════════════════════════════════════════
+
+// ════════════════════════════════════════
+// SEGURANÇA — HOLD / LOCK / DESBLOQUEAR
+// ════════════════════════════════════════
+function holdSistema(silencioso = false) {
+  sistemaTravaado = true;
+  // Para tudo
+  vozAtiva = false; deveOuvir = false;
+  if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
+  window.speechSynthesis.cancel();
+  document.getElementById('lockOverlay').classList.add('show');
+  document.getElementById('lockInput').value = '';
+  document.getElementById('lockErr').textContent = '';
+  if (!silencioso) document.getElementById('btnHold').textContent = '🔓 Travado';
+  setTimeout(() => document.getElementById('lockInput').focus(), 300);
+}
+
+function tentarDesbloquear() {
+  const val = document.getElementById('lockInput').value.trim();
+  if (val === SENHA_TEXTO) {
+    desbloquear();
+  } else {
+    document.getElementById('lockErr').textContent = 'Senha incorreta.';
+    document.getElementById('lockInput').value = '';
+    document.getElementById('lockInput').focus();
+    setTimeout(() => document.getElementById('lockErr').textContent = '', 2000);
+  }
+}
+
+function desbloquear() {
+  sistemaTravaado = false;
+  document.getElementById('lockOverlay').classList.remove('show');
+  document.getElementById('btnHold').textContent = '🔒 Hold';
+  addMsg('🔓 Sistema desbloqueado. De volta ao show!', false);
+}
+
+// Detectar frases de segurança na intenção
+const _detectarOriginal = detectarIntencao;
+function detectarIntencao(txt) {
+  const t = txt.toLowerCase().replace(/[^\w\s]/g,'').trim();
+  // Frases de segurança por voz
+  for (const f of SENHA_VOZ_DESBLOQUEAR) {
+    if (t.includes(f.replace(/[^\w\s]/g,''))) {
+      if (sistemaTravaado) { desbloquear(); return 'seguranca'; }
+    }
+  }
+  for (const f of FRASE_HOLD) {
+    if (t.includes(f)) { holdSistema(); return 'seguranca'; }
+  }
+  for (const f of FRASE_ENCERRAR) {
+    if (t.includes(f.replace(/[^\w\s]/g,''))) {
+      encerrarSessao(); return 'seguranca';
+    }
+  }
+  return _detectarOriginal ? _detectarOriginal(txt) :
+    (['bom dia zanka','boa tarde zanka','boa noite zanka','fala tu zanka','zanka na escuta'].some(s=>t.includes(s)) ? 'saudacao' :
+     ['zanka a que pe estamos','zanka como esta a operacao','zanka status'].some(s=>t.includes(s)) ? 'status' :
+     ['zanka hora do show'].some(s=>t.includes(s)) ? 'show' : 'conversa');
+}
+
+function encerrarSessao() {
+  // Salvar contexto e deixar só JIM
+  const ctx = { historico, timestamp: new Date().toISOString() };
+  localStorage.setItem('zanka_sessao_anterior', JSON.stringify(ctx));
+  vozAtiva = false; deveOuvir = false;
+  if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
+  window.speechSynthesis.cancel();
+  addMsg('🌙 Por hoje é só JIM. Contexto salvo. Até amanhã — o time descansa, mas JIM monitora.', false);
+  // Desabilitar interface exceto JIM
+  document.querySelectorAll('.ag-btn').forEach(b => {
+    if (!b.id.includes('hector')) b.style.opacity = '0.3';
+  });
+  sel('hector');
+}
+
+// ════════════════════════════════════════
+// CONECTORES — SISTEMA DE EVOLUÇÃO
+// ════════════════════════════════════════
+const NIVEL_LABELS = ['⚪','⭐','⭐⭐','⭐⭐⭐','⭐⭐⭐⭐','🌟'];
+const NIVEL_NOMES = ['Cadastrado','Iniciante','Ativo','Avançado','Expert','Maestria'];
+
+// Conectores padrão do sistema
+const CONECTORES_PADRAO = {
+  gemini: { nome:'Gemini Flash', categoria:'IA', url:'generativelanguage.googleapis.com', nivel:3, usos:0, descricao:'14 agentes' },
+  cloudflare: { nome:'Cloudflare Pages', categoria:'Hosting', url:'pages.cloudflare.com', nivel:3, usos:0, descricao:'HTTPS do ZANKA' },
+  worker: { nome:'Cloudflare Worker', categoria:'Proxy', url:'workers.dev', nivel:2, usos:0, descricao:'TTS Inworld' },
+  github: { nome:'GitHub', categoria:'Dev', url:'github.com', nivel:2, usos:0, descricao:'Repositório' },
+  inworld: { nome:'Inworld TTS', categoria:'Voz', url:'api.inworld.ai', nivel:1, usos:0, descricao:'Voz pt-BR' },
+};
+
+function iniciarConectores() {
+  // Mesclar padrão com salvos
+  const salvos = JSON.parse(localStorage.getItem('zanka_conectores') || '{}');
+  conectores = { ...CONECTORES_PADRAO, ...salvos };
+  salvarConectores();
+}
+
+function salvarConectores() {
+  localStorage.setItem('zanka_conectores', JSON.stringify(conectores));
+}
+
+function usarConector(id) {
+  if (!conectores[id]) return;
+  conectores[id].usos = (conectores[id].usos || 0) + 1;
+  const usos = conectores[id].usos;
+  const nivelAnterior = conectores[id].nivel || 0;
+  // Evolução: 5 usos = nível 1, 20 = 2, 50 = 3, 100 = 4, 200 = 5
+  const nivelNovo = usos >= 200 ? 5 : usos >= 100 ? 4 : usos >= 50 ? 3 : usos >= 20 ? 2 : usos >= 5 ? 1 : nivelAnterior;
+  if (nivelNovo > nivelAnterior) {
+    conectores[id].nivel = nivelNovo;
+    addMsg(`⬆️ ${conectores[id].nome} evoluiu para ${NIVEL_LABELS[nivelNovo]} ${NIVEL_NOMES[nivelNovo]}!`, false);
+  }
+  salvarConectores();
+}
+
+function adicionarConector() {
+  const nome = document.getElementById('conNome').value.trim();
+  const url = document.getElementById('conUrl').value.trim();
+  const cat = document.getElementById('conCat').value.trim();
+  const key = document.getElementById('conKey').value.trim();
+  if (!nome) return;
+  const id = nome.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  conectores[id] = { nome, url, key, categoria: cat || 'Geral', nivel:0, usos:0, descricao:'Recém adicionado' };
+  salvarConectores();
+  renderConectores();
+  document.getElementById('conNome').value = '';
+  document.getElementById('conUrl').value = '';
+  document.getElementById('conCat').value = '';
+  document.getElementById('conKey').value = '';
+  addMsg(`🔌 Conector "${nome}" adicionado! Nível ⚪ — use-o para evoluir.`, false);
+}
+
+function removerConector(id) {
+  if (CONECTORES_PADRAO[id]) return; // não remove padrão
+  delete conectores[id];
+  salvarConectores();
+  renderConectores();
+}
+
+function renderConectores() {
+  const grid = document.getElementById('conGrid');
+  if (!grid) return;
+  grid.innerHTML = Object.entries(conectores).map(([id, c]) => {
+    const nivel = c.nivel || 0;
+    const isPadrao = !!CONECTORES_PADRAO[id];
+    return `<div class="con-item nivel-${nivel}" onclick="usarConector('${id}')">
+      <div class="con-nivel">${NIVEL_LABELS[nivel]} <span style="font-size:10px;color:var(--text3);">${NIVEL_NOMES[nivel]}</span></div>
+      <div class="con-name">${c.nome}</div>
+      <div class="con-status">${c.categoria} · ${c.usos||0} usos${c.descricao ? ' · ' + c.descricao : ''}</div>
+      ${!isPadrao ? `<div onclick="event.stopPropagation();removerConector('${id}')" style="position:absolute;top:6px;right:8px;font-size:10px;color:var(--text3);cursor:pointer;">✕</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function abrirConectores() {
+  renderConectores();
+  document.getElementById('conOverlay').classList.add('show');
+}
+function fecharConectores() {
+  document.getElementById('conOverlay').classList.remove('show');
+}
+
+// ════════════════════════════════════════
+// NANOBANANA — IMAGENS VIA GEMINI
+// ════════════════════════════════════════
+async function gerarImagem(prompt) {
+  if (!keyGemini) return null;
+  try {
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${keyGemini}`,
+      {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `Crie uma imagem: ${prompt}` }] }],
+          generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+        })
+      }
+    );
+    const data = await resp.json();
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    for (const part of parts) {
+      if (part.inlineData?.mimeType?.startsWith('image/')) {
+        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+      }
+    }
+    return null;
+  } catch(e) { console.warn('Imagem erro:', e); return null; }
+}
+
+function addImagem(src, prompt) {
+  const el = document.createElement('div');
+  el.className = 'msg';
+  el.innerHTML = `
+    <div class="msg-av">🎨</div>
+    <div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:8px;max-width:340px;">
+        <img src="${src}" style="width:100%;border-radius:8px;display:block;" alt="${prompt}">
+        <div style="font-size:10px;color:var(--text3);margin-top:6px;padding:0 4px;">${prompt}</div>
+      </div>
+    </div>`;
+  document.getElementById('msgs').appendChild(el);
+  document.getElementById('msgs').scrollTop = 99999;
+}
+
+// Detectar pedido de imagem na mensagem
+function verificarPedidoImagem(txt) {
+  const t = txt.toLowerCase();
+  const triggers = ['cria uma imagem', 'gera uma imagem', 'crie uma imagem', 'gere uma imagem',
+    'cria imagem', 'gera imagem', '/imagem', '/img', 'draw', 'ilustra', 'nanobanana'];
+  return triggers.some(tr => t.includes(tr));
+}
+
+// ════════════════════════════════════════
+// PROJETOS — SISTEMA MULTI-PROJETO
+// ════════════════════════════════════════
+
+function salvarProjetos() {
+  localStorage.setItem('zanka_projetos', JSON.stringify(projetos));
+}
+
+function abrirProjetos() {
+  renderProjetos();
+  analisarPortfolio();
+  document.getElementById('projOverlay').classList.add('show');
+}
+
+function fecharProjetos() {
+  document.getElementById('projOverlay').classList.remove('show');
+}
+
+function renderProjetos() {
+  const grid = document.getElementById('projGrid');
+  if (!grid) return;
+  grid.innerHTML = Object.values(projetos).map(p => {
+    const sel = projetoAtivo === p.id ? 'selecionado' : '';
+    const cls = p.status === 'embriao' ? 'embriao' : '';
+    const badgeCls = p.status === 'ativo' ? 'pb-ativo' : p.status === 'embriao' ? 'pb-embriao' : 'pb-pausado';
+    const badgeTxt = p.status === 'ativo' ? 'Ativo' : p.status === 'embriao' ? 'Embrião' : 'Pausado';
+    const dias = p.ultimo_acesso
+      ? Math.floor((Date.now() - new Date(p.ultimo_acesso)) / 86400000)
+      : null;
+    const diasTxt = dias === null ? 'Nunca acessado' : dias === 0 ? 'Hoje' : `${dias}d sem acesso`;
+    return `<div class="proj-item ${sel} ${cls}" onclick="selecionarProjeto('${p.id}')">
+      <div class="proj-emoji">${p.emoji}</div>
+      <div class="proj-nome">${p.nome}</div>
+      <div class="proj-desc">${p.descricao}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="proj-badge ${badgeCls}">${badgeTxt}</span>
+        <span style="font-size:9px;color:var(--text3);">${diasTxt}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selecionarProjeto(id) {
+  projetoAtivo = id;
+  document.querySelectorAll('.proj-item').forEach(el => el.classList.remove('selecionado'));
+  document.querySelectorAll('.proj-item').forEach(el => {
+    if (el.onclick?.toString().includes(`'${id}'`)) el.classList.add('selecionado');
+  });
+}
+
+async function confirmarProjeto() {
+  if (!projetoAtivo) {
+    document.getElementById('projSub').textContent = 'Selecione um projeto antes de continuar.';
+    return;
+  }
+  const p = projetos[projetoAtivo];
+  p.ultimo_acesso = new Date().toISOString();
+  localStorage.setItem('zanka_projeto_ativo', projetoAtivo);
+  salvarProjetos();
+  fecharProjetos();
+  atualizarBadgeProjeto();
+  // Briefing do ZANKA sobre o projeto
+  await briefingProjeto(p);
+}
+
+function atualizarBadgeProjeto() {
+  const badge = document.getElementById('projBadge');
+  const emoji = document.getElementById('projEmoji');
+  const nome = document.getElementById('projNomeAtivo');
+  if (projetoAtivo && projetos[projetoAtivo]) {
+    const p = projetos[projetoAtivo];
+    emoji.textContent = p.emoji;
+    nome.textContent = p.nome;
+    badge.style.background = 'rgba(124,58,237,.15)';
+  } else {
+    emoji.textContent = '🎯';
+    nome.textContent = 'Selecionar projeto';
+  }
+}
+
+async function briefingProjeto(p) {
+  const outros = Object.values(projetos).filter(x => x.id !== p.id);
+  const msg = `Projeto selecionado: ${p.nome} (${p.emoji})
+Descrição: ${p.descricao}
+Mercados: ${p.mercados}
+Produto: ${p.produto}
+Modelo: ${p.modelo}
+ROAS potencial: ${p.roas_potencial}
+Agentes principais: ${p.agentes_principais.join(', ')}
+
+Outros projetos no portfólio: ${outros.map(x => `${x.emoji} ${x.nome} (${x.status})`).join(', ')}
+
+Faça um briefing executivo de 3-4 parágrafos:
+1. Qual é a oportunidade mais imediata neste projeto hoje
+2. Quais agentes devem ser acionados e com qual missão
+3. Um alerta sobre os outros projetos — qual merece atenção urgente e por quê
+4. A pergunta do dia: o que devemos resolver AGORA para máximo ROAS`;
+
+  addMsg(`${p.emoji} Projeto: ${p.nome}`, true);
+  showTyping();
+  processando = true;
+  setStatus('processando');
+  try {
+    const r = await chamarAPI('zanka', msg);
+    hideTyping();
+    addMsg(r, false);
+    if (vozAtiva && !modoSilencioso) await falarVoz(r);
+    else setStatus('pronto');
+  } catch(e) {
+    hideTyping();
+    setStatus('pronto');
+  }
+  processando = false;
+}
+
+async function analisarPortfolio() {
+  const alerta = document.getElementById('projAlerta');
+  // Análise local — sem chamar API para não atrasar a abertura
+  const lista = Object.values(projetos);
+  const estagnados = lista.filter(p => {
+    if (!p.ultimo_acesso) return true;
+    const dias = Math.floor((Date.now() - new Date(p.ultimo_acesso)) / 86400000);
+    return dias > 3;
+  });
+  const promissores = lista.filter(p => p.roas_potencial?.toLowerCase().includes('alto') || p.roas_potencial?.toLowerCase().includes('muito'));
+  const embriao = lista.filter(p => p.status === 'embriao');
+
+  let texto = '<strong>⚡ Análise do portfólio:</strong> ';
+  if (estagnados.length) texto += `${estagnados.map(p=>p.emoji+' '+p.nome).join(', ')} sem acesso recente — risco de estagnação. `;
+  if (promissores.length) texto += `${promissores.map(p=>p.emoji+' '+p.nome).join(', ')} com alto potencial de ROAS. `;
+  if (embriao.length) texto += `${embriao.map(p=>p.emoji+' '+p.nome).join(', ')} em fase embrião — precisam de atenção para não perder o timing.`;
+  if (!estagnados.length && !embriao.length) texto += 'Portfólio saudável. Escolha o foco de hoje.';
+
+  alerta.innerHTML = texto;
+}
+
+function salvarNovoProjeto() {
+  const nome = document.getElementById('pNome').value.trim();
+  if (!nome) return;
+  const id = nome.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  projetos[id] = {
+    id, nome,
+    emoji: document.getElementById('pEmoji').value.trim() || '📁',
+    descricao: document.getElementById('pDesc').value.trim() || 'Novo projeto',
+    mercados: document.getElementById('pMercado').value.trim() || '',
+    produto: document.getElementById('pProduto').value.trim() || '',
+    modelo: document.getElementById('pModelo').value.trim() || '',
+    status: 'embriao',
+    prioridade: 1,
+    roas_potencial: 'A definir',
+    ultimo_acesso: null,
+    agentes_principais: ['ZANKA','MIKIMBA','MARCUS'],
+    kpis: {},
+    notas: ''
+  };
+  salvarProjetos();
+  renderProjetos();
+  document.getElementById('projForm').classList.remove('show');
+  ['pNome','pEmoji','pDesc','pMercado','pProduto','pModelo'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+// Injetar contexto do projeto ativo em cada chamada à API
+const _chamarAPIOriginal = chamarAPI;
+async function chamarAPI(agId, mensagem) {
+  let msgFinal = mensagem;
+  if (projetoAtivo && projetos[projetoAtivo]) {
+    const p = projetos[projetoAtivo];
+    const ctx = `[PROJETO ATIVO: ${p.emoji} ${p.nome} | ${p.descricao} | Mercados: ${p.mercados} | Produto: ${p.produto} | Modelo: ${p.modelo}]
+
+`;
+    // Só adiciona se não for uma mensagem de sistema longa
+    if (mensagem.length < 800) msgFinal = ctx + mensagem;
+  }
+  return _chamarAPIOriginal(agId, msgFinal);
+}
+
+// ── Inicialização ──
+// Inicialização
+iniciarConectores();
 
 // ═══════════════════════════════════════
 // CONTROLES DE VOZ E SILÊNCIO
