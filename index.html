@@ -265,41 +265,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="setup-field">
       <div class="setup-label">
-        Cloudflare Worker URL — Voz Inworld
+        ElevenLabs API Key
         <span class="lbadge lb-optional">Opcional — voz ultra-realista</span>
       </div>
-      <input class="setup-input" id="inworldWebhook" type="text"
-        placeholder="https://blue-salad-129c.cleberamjr.workers.dev"
-        oninput="onKeyInput(this,'inworldWebhook')">
-      <div class="setup-hint">URL do Cloudflare Worker que faz proxy para o Inworld. Sem isso, usa Google TTS.</div>
-    </div>
-
-    <div class="setup-field">
-      <div class="setup-label">
-        Inworld API Key
-        <span class="lbadge lb-optional">Necessária para voz Inworld</span>
-      </div>
-      <input class="setup-input" id="keyInworldInput" type="password"
-        placeholder="Cole sua chave Inworld..." oninput="onKeyInput(this,'keyInworld')">
-      <div class="setup-hint">Sua chave da API Inworld — inworld.ai. Fica salva no navegador.</div>
-    </div>
-
-    <div class="setup-field">
-      <div class="setup-label">
-        Inworld Voice ID
-        <span class="lbadge lb-optional">ID da voz masculina</span>
-      </div>
-      <input class="setup-input" id="voiceIdInworldInput" type="text"
-        placeholder="Ex: Dennis" oninput="onKeyInput(this,'voiceId')">
-      <div class="setup-hint">Nome da voz no Inworld. Deixe vazio para usar "Dennis" (masculino padrão).</div>
+      <input class="setup-input" id="keyElevenLabs" type="password"
+        placeholder="sk_..." oninput="onKeyInput(this,'keyElevenLabs')">
+      <div class="setup-hint">Voz masculina pt-BR premium. Sem ela, usa Google TTS (também funciona).</div>
     </div>
 
     <div class="setup-err" id="setupErr">Cole a chave Gemini para continuar.</div>
     <button class="setup-btn" onclick="ativar()">🚀 Ativar o Time</button>
 
     <div class="setup-phase-note">
-      <strong>Fase 1 (agora):</strong> Gemini obrigatória — 17 agentes online.<br>
-      <strong>Fase 2 (depois):</strong> cole a chave Claude — ZANKA, NEJI e HECTOR sobem de nível.
+      <strong>Fase 1 (agora):</strong> Gemini obrigatória — 17 agentes + voz Google TTS.<br>
+      <strong>Fase 2 (depois):</strong> cole ElevenLabs para voz premium. Claude para C-Level.
     </div>
   </div>
 </div>
@@ -887,9 +866,7 @@ let deveOuvir = true;
 let falando = false;
 let keyGemini = '';
 let keyClaude = '';
-let keyInworld = '';
-let voiceIdInworld = 'Dennis';
-let inworldWebhookUrl = '';
+let keyElevenLabs = '';
 let modoSilencioso = false;
 
 // ── SEGURANÇA ──
@@ -983,22 +960,10 @@ function ativar() {
     localStorage.setItem('zanka_claude', keyClaude);
   }
 
-  const whEl = document.getElementById('inworldWebhook');
-  if (whEl && whEl.value.trim()) {
-    inworldWebhookUrl = whEl.value.trim();
-    localStorage.setItem('zanka_inworld_webhook', inworldWebhookUrl);
-  }
-
-  const ikEl = document.getElementById('keyInworldInput');
-  if (ikEl && ikEl.value.trim()) {
-    keyInworld = ikEl.value.trim();
-    localStorage.setItem('zanka_inworld_key', keyInworld);
-  }
-
-  const vidEl = document.getElementById('voiceIdInworldInput');
-  if (vidEl && vidEl.value.trim()) {
-    voiceIdInworld = vidEl.value.trim();
-    localStorage.setItem('zanka_inworld_voice', voiceIdInworld);
+  const elEl = document.getElementById('keyElevenLabs');
+  if (elEl && elEl.value.trim()) {
+    keyElevenLabs = elEl.value.trim();
+    localStorage.setItem('zanka_elevenlabs', keyElevenLabs);
   }
 
   // Fechar setup
@@ -1011,12 +976,8 @@ function ativar() {
 function trocarKey() {
   document.getElementById('keyGemini').value = keyGemini;
   document.getElementById('keyClaude').value = keyClaude;
-  const whEl = document.getElementById('inworldWebhook');
-  if (whEl) whEl.value = inworldWebhookUrl;
-  const ikEl = document.getElementById('keyInworldInput');
-  if (ikEl) ikEl.value = keyInworld;
-  const vidEl = document.getElementById('voiceIdInworldInput');
-  if (vidEl) vidEl.value = voiceIdInworld;
+  const elEl = document.getElementById('keyElevenLabs');
+  if (elEl) elEl.value = keyElevenLabs;
   document.getElementById('setupOverlay').style.display = 'flex';
 }
 
@@ -1035,8 +996,8 @@ function atualizarApiIndicator() {
     dot.style.background = 'var(--teal)';
   }
   // Badge TTS
-  const vozLabel = inworldWebhookUrl ? '🎙️ Inworld TTS-2' : '🔈 Web Speech';
-  const vozColor = inworldWebhookUrl ? '#f59e0b' : '#34d399';
+  const vozLabel = keyElevenLabs ? '🎙️ ElevenLabs' : '🔈 Google TTS';
+  const vozColor = keyElevenLabs ? '#f59e0b' : '#34d399';
   let badge = document.getElementById('ttsBadge');
   if (!badge) {
     badge = document.createElement('div');
@@ -1086,13 +1047,7 @@ window.onload = () => {
   // Carregar todas as chaves salvas
   const g  = localStorage.getItem('zanka_gemini');
   const c  = localStorage.getItem('zanka_claude');
-  const wh = localStorage.getItem('zanka_inworld_webhook');
-  const ik = localStorage.getItem('zanka_inworld_key');
-  const vid = localStorage.getItem('zanka_inworld_voice');
 
-  if (wh)  inworldWebhookUrl = wh;
-  if (ik)  keyInworld        = ik;
-  if (vid) voiceIdInworld    = vid;
 
   if (g) {
     // Chave já salva — fechar setup e inicializar
@@ -1589,47 +1544,72 @@ async function falarVoz(txt) {
   setStatus('falando');
   if (reconhecimento) { try { reconhecimento.abort(); } catch(e){} }
   document.getElementById('micBar').classList.remove('show');
+
   const limpo = prepararParaVoz(txt);
   if (!limpo) { falando=false; setStatus('pronto'); if(vozAtiva) setTimeout(cicloEscuta,400); return; }
 
-  let ok = false;
   try {
-    // Inworld via Cloudflare Worker (melhor qualidade)
-    if (inworldWebhookUrl && keyInworld) {
-      ok = await falarInworldN8N(limpo);
+    // ElevenLabs se disponível
+    if (keyElevenLabs) {
+      const ok = await falarElevenLabs(limpo);
+      if (ok) return;
     }
-    // Google TTS (fallback principal)
-    if (!ok) ok = await falarGoogleTTS(limpo);
-    // Web Speech (último recurso)
+    // Google TTS como principal (usa chave Gemini)
+    const ok = await falarGoogleTTS(limpo);
     if (!ok) await falarWebSpeech(limpo);
   } catch(e) {
-    // Erro de voz — silencioso, não mostrar no chat
     falando = false;
     setStatus('pronto');
     if (vozAtiva) setTimeout(cicloEscuta, 500);
-    console.warn('TTS erro:', e.message);
   }
 }
 
-// ═══════════════════════════════════════
-// TTS — INWORLD TTS-2 (SUB-100MS · TOP-RANKED)
-// ═══════════════════════════════════════
-// ═══════════════════════════════════════
-// TTS — INWORLD VIA CLOUDFLARE WORKER
-// ═══════════════════════════════════════
-async function falarInworldN8N(texto) {
-  if (!inworldWebhookUrl) return false;
+async function falarElevenLabs(texto) {
   try {
-    const resp = await fetch(inworldWebhookUrl, {
+    const resp = await fetch('https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB/stream', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json', 'xi-api-key': keyElevenLabs },
       body: JSON.stringify({
         text: texto,
-        voiceId: voiceIdInworld || 'Dennis',
-        inworldKey: keyInworld
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: { stability: 0.5, similarity_boost: 0.8 }
       })
     });
     if (!resp.ok) return false;
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    document.getElementById('waveBars').classList.add('show');
+    return new Promise(res => {
+      audio.onended = () => {
+        document.getElementById('waveBars').classList.remove('show');
+        URL.revokeObjectURL(url);
+        falando = false; setStatus('pronto');
+        if (vozAtiva) setTimeout(cicloEscuta, 500);
+        res(true);
+      };
+      audio.onerror = () => { URL.revokeObjectURL(url); falando=false; setStatus('pronto'); res(false); };
+      audio.play().catch(() => res(false));
+    });
+  } catch(e) { return false; }
+}
+
+
+async function falarGoogleTTS(texto) {
+  if (!keyGemini) return false;
+  try {
+    const resp = await fetch(
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${keyGemini}`,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          input: { text: texto },
+          voice: { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
+          audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95, pitch: -2.0 }
+        })
+      }
+    );
     const data = await resp.json();
     if (!data.audioContent) return false;
     const audio = new Audio('data:audio/mp3;base64,' + data.audioContent);
@@ -1649,12 +1629,6 @@ async function falarInworldN8N(texto) {
       audio.play().catch(() => res(false));
     });
   } catch(e) { return false; }
-}
-
-async function falarGoogleTTS(texto) {
-  // Google Cloud TTS exige OAuth2 — não funciona com chave Gemini
-  // Usando Web Speech API com configuração masculina forçada
-  return false;
 }
 
 // ═══════════════════════════════════════
