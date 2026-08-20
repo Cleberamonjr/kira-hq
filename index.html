@@ -7,14 +7,15 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 :root{
-  --bg:#06060e;--s1:#0d0d18;--s2:#14141f;--s3:#1e1e2e;
-  --border:#252535;--border2:#353548;
-  --text:#f0f0fa;--text2:#8888a8;--text3:#44445a;
+  --bg:#05070d;--s1:#0a0e17;--s2:#0f1420;--s3:#111827;
+  --border:#1c2436;--border2:#2a3448;
+  --text:#f3f5fb;--text2:#8b93ab;--text3:#48526b;
   --gold:#f59e0b;--gold-bg:rgba(245,158,11,.08);--gold-border:rgba(245,158,11,.3);
-  --blue:#60a5fa;--blue-bg:rgba(96,165,250,.08);
+  --blue:#3b82f6;--blue-bg:rgba(59,130,246,.1);--blue-border:rgba(59,130,246,.35);
   --green:#34d399;--green-bg:rgba(52,211,153,.08);
   --red:#f87171;--red-bg:rgba(248,113,113,.08);
-  --purple:#c084fc;--orange:#fb923c;--teal:#2dd4bf;
+  --purple:#8b5cf6;--purple-bg:rgba(139,92,246,.1);--purple-border:rgba(139,92,246,.35);
+  --orange:#fb923c;--teal:#2dd4bf;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;overflow:hidden;}
@@ -23,7 +24,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 /* TOP BAR */
 .topbar{height:50px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;}
 .tb-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:-.3px;}
-.tb-icon{width:28px;height:28px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.tb-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--purple),var(--blue));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;}
 .tb-divider{width:1px;height:20px;background:var(--border);margin:0 4px;}
 .voice-status{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--text3);transition:all .2s;}
 .voice-status.ouvindo{background:var(--red-bg);border-color:rgba(248,113,113,.4);color:var(--red);}
@@ -55,7 +56,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .sb-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);padding:6px 12px 4px;}
 .ag-btn{display:flex;align-items:center;gap:7px;padding:7px 12px;cursor:pointer;font-size:11px;color:var(--text2);border:none;background:transparent;width:100%;text-align:left;font-family:inherit;border-left:2px solid transparent;transition:all .12s;}
 .ag-btn:hover{color:var(--text);background:rgba(255,255,255,.02);}
-.ag-btn.ativo{color:var(--gold);background:var(--gold-bg);border-left-color:var(--gold);font-weight:600;}
+.ag-btn.ativo{color:var(--blue);background:var(--blue-bg);border-left-color:var(--blue);font-weight:600;}
 .ag-emoji{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
 .ag-info-sb{flex:1;}
 .ag-name-sb{font-size:11px;font-weight:700;}
@@ -102,7 +103,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .chat-inp{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--text);font-family:inherit;resize:none;outline:none;max-height:100px;min-height:40px;line-height:1.5;transition:border-color .12s;}
 .chat-inp:focus{border-color:var(--purple);}
 .chat-inp::placeholder{color:var(--text3);}
-.send-btn{width:40px;height:40px;border-radius:10px;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
+.send-btn{width:40px;height:40px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
 .send-btn:hover{transform:scale(1.05);}
 .send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
@@ -121,7 +122,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 /* SETUP */
 .setup-overlay{position:fixed;inset:0;background:rgba(6,6,14,.97);display:flex;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(8px);}
 .setup-card{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:36px;max-width:460px;width:90%;}
-.setup-logo{width:52px;height:52px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px;}
+.setup-logo{width:52px;height:52px;background:linear-gradient(135deg,var(--purple),var(--blue));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px;}
 .setup-title{font-size:20px;font-weight:900;margin-bottom:6px;}
 .setup-subtitle{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;}
 .setup-field{margin-bottom:12px;}
@@ -134,7 +135,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .setup-input::placeholder{color:var(--text3);}
 .setup-input.has-value{border-color:var(--green);}
 .setup-hint{font-size:10px;color:var(--text3);margin-top:4px;}
-.setup-btn{width:100%;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .12s;margin-top:8px;}
+.setup-btn{width:100%;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .12s;margin-top:8px;}
 .setup-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(124,58,237,.3);}
 .setup-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .setup-err{font-size:11px;color:var(--red);margin-top:6px;display:none;}
@@ -169,7 +170,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .lock-input{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:14px;color:var(--text);font-family:inherit;outline:none;text-align:center;width:260px;transition:border-color .12s;}
 .lock-input:focus{border-color:var(--purple);}
 .lock-err{font-size:11px;color:var(--red);min-height:16px;transition:opacity .2s;}
-.lock-btn{padding:12px 32px;border:none;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+.lock-btn{padding:12px 32px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
 
 /* CONECTORES OVERLAY */
 .con-overlay{position:fixed;inset:0;background:rgba(6,6,14,.95);z-index:998;display:none;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;backdrop-filter:blur(8px);}
@@ -216,7 +217,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .proj-alerta strong{color:var(--gold);}
 .proj-btn-row{display:flex;gap:8px;}
 .proj-btn{flex:1;padding:12px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .12s;}
-.proj-btn-ok{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;}
+.proj-btn-ok{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;}
 .proj-btn-ok:hover{opacity:.9;}
 .proj-btn-add{background:var(--s2);border:1px solid var(--border);color:var(--text2);}
 .proj-btn-add:hover{border-color:var(--border2);color:var(--text);}
@@ -349,7 +350,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="sb-section">
       <div class="sb-label">Conteúdo & Copy</div>
-      <button class="ag-btn" onclick="sel('sabrina')" id="btn-sabrina"><span class="ag-emoji">💃</span><div class="ag-info-sb"><div class="ag-name-sb">SABRINA</div><div class="ag-role-sb">Posts diários</div></div><div class="ag-dot"></div></button>
+      <button class="ag-btn" onclick="sel('sabrina')" id="btn-sabrina"><span class="ag-emoji">💃</span><div class="ag-info-sb"><div class="ag-name-sb">SABRINA</div><div class="ag-role-sb">Conteúdo viral · Métricas</div></div><div class="ag-dot"></div></button>
       <button class="ag-btn" onclick="sel('fred')" id="btn-fred"><span class="ag-emoji">✍️</span><div class="ag-info-sb"><div class="ag-name-sb">FRED</div><div class="ag-role-sb">Copy · SEO</div></div><div class="ag-dot"></div></button>
       <button class="ag-btn" onclick="sel('ludmilo')" id="btn-ludmilo"><span class="ag-emoji">🎨</span><div class="ag-info-sb"><div class="ag-name-sb">LUDMILO</div><div class="ag-role-sb">Visual · UX · LP</div></div><div class="ag-dot"></div></button>
     </div>
@@ -627,27 +628,32 @@ ANTI-ALUCINAÇÃO: Nunca aprove algo sem base. Se tiver dúvida, sinalize. Preci
 
 Responda em português brasileiro. Seja direto e preciso como um COO experiente.`},
 
-sabrina:{emoji:'💃',nome:'SABRINA',role:'Conteúdo Visual · Métricas Meta · Instagram · Facebook · TikTok',
+sabrina:{emoji:'💃',nome:'SABRINA',role:'Conteúdo Viral · Métricas Meta · Instagram · Facebook · TikTok',
 modelo:'gemini',
-system:`Você é SABRINA, especialista em conteúdo visual para redes sociais E analista de métricas Meta.
+system:`Você é SABRINA, especialista em CONTEÚDO VIRAL para redes sociais E analista sênior de métricas Meta (Instagram e Facebook, perfil pessoal ou página/conta empresarial).
 
-CRIAÇÃO DE CONTEÚDO:
+CRIAÇÃO DE CONTEÚDO VIRAL:
 — Instagram: feed (carrosséis, estáticos, reels), stories, close friends, collab
 — Facebook: posts de engajamento, grupos, Reels, eventos, página empresarial
 — TikTok: scripts virais, hooks 0-3s, duetos, trends, SEO de TikTok
+— Anatomia do viral: gatilho emocional, formato de fácil compartilhamento, timing de trend, som/áudio em alta
 — Calendário editorial: planejamento semanal/mensal com objetivos por post
 — Hook nas 2 primeiras linhas — ou perde o scroll imediatamente
 — Formatos: carrossel educativo, antes/depois, bastidores, prova social, storytelling
 
-ANÁLISE DE MÉTRICAS META (Instagram e Facebook pessoal e empresarial):
+ANÁLISE DE MÉTRICAS META — sabe tudo sobre métricas, pessoal e empresarial:
 — Taxa de engajamento: likes + comentários + salvamentos / alcance × 100
 — Benchmark: Feed 1-3% bom · 3-6% muito bom · +6% viral
+— Salvamentos e compartilhamentos: os sinais mais fortes de qualidade pro algoritmo (pesam mais que likes)
+— Retenção de Reels: tempo médio assistido e % que assiste até o fim — decide se o Reels é empurrado ou não
 — Alcance orgânico vs pago: proporção saudável e como melhorar
+— Alcance por hashtag vs Explorar/Reels feed: de onde está vindo o tráfego real
 — Impressões: frequência ideal por campanha (1.8-2.5x para reconhecimento)
-— CTR de stories: benchmark 1-3% saudável
-— Crescimento de seguidores: taxa semanal e projeção mensal
+— CTR de stories e taxa de saída (exit rate) por story
+— Crescimento de seguidores: taxa semanal, projeção mensal, razão seguidores/seguindo
 — Horários de pico: análise por nicho e público-alvo
 — Análise de concorrência: o que está funcionando no seu setor
+— Perfil PESSOAL vs EMPRESARIAL: métricas e estratégias mudam — pessoal prioriza conexão/autenticidade, empresarial prioriza conversão/CAC e métricas de negócio (cliques no link, mensagens, leads)
 — Diagnóstico de conta: quando recebe métricas, identifica o problema e prescreve solução
 — Análise de conteúdo: qual tipo de post performa melhor para aquele perfil
 
@@ -1166,7 +1172,7 @@ async function chamarGemini(system, msgs, onChunk) {
   // Streaming via streamGenerateContent
   if (onChunk) {
     const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${keyGemini}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:streamGenerateContent?alt=sse&key=${keyGemini}`,
       {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}
     );
     if (!r.ok) {
@@ -1199,7 +1205,7 @@ async function chamarGemini(system, msgs, onChunk) {
 
   // Sem streaming — fallback normal
   const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keyGemini}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${keyGemini}`,
     {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}
   );
   const d = await r.json();
@@ -1744,8 +1750,14 @@ function prepararMensagemComArquivo(texto) {
     });
     if (texto) parts.push({text: texto || 'Analise esta imagem.'});
     else parts.push({text: 'Analise esta imagem em detalhes.'});
-  } else if (arquivoAtual.tipo === 'application/pdf' || arquivoAtual.tipo.includes('text')) {
-    // Para PDF e texto, adicionar como texto (Gemini pode processar)
+  } else if (arquivoAtual.tipo === 'application/pdf') {
+    // Gemini lê PDF nativamente via inlineData — envia o conteúdo real, não só o nome
+    parts.push({
+      inlineData: { mimeType: 'application/pdf', data: arquivoAtual.base64 }
+    });
+    parts.push({text: texto || 'Analise este documento em detalhes.'});
+  } else if (arquivoAtual.tipo.includes('text')) {
+    // Para arquivos de texto puro, incluir como texto (Gemini pode processar)
     parts.push({text: `[Arquivo: ${arquivoAtual.nome}]
 ${texto || 'Analise este arquivo.'}`});
   } else {
@@ -1979,7 +1991,7 @@ async function gerarImagem(prompt) {
   if (!keyGemini) return null;
   try {
     const resp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keyGemini}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${keyGemini}`,
       {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
