@@ -1070,7 +1070,7 @@ function sel(id) {
   document.getElementById('agAv').textContent = ag.emoji;
   document.getElementById('agName').textContent = ag.nome;
   document.getElementById('agRole').textContent = ag.role;
-  document.getElementById('inp').placeholder = `Fale ou escreva para ${ag.nome}...`;
+  document.getElementById('inp').placeholder = "Fale ou escreva para " + ag.nome + "...";
   const badge = document.getElementById('agModelBadge');
   const usaClaude = ag.modelo === 'claude' && keyClaude;
   badge.textContent = usaClaude ? 'Claude Sonnet' : 'Gemini Flash';
@@ -1118,7 +1118,7 @@ async function chamarAPI(agId, mensagem) {
       // Remover typing antes de adicionar streaming
       document.getElementById('typing')?.remove();
       msgsEl.appendChild(msgEl);
-      const bub = document.getElementById(`streamBub_${agId}`);
+      const bub = document.getElementById("streamBub_" + agId);
       let streamText = '';
       resposta = await chamarGemini(ag.system + guardAntiAluc, historico[agId], (chunk) => {
         streamText += chunk;
@@ -1181,8 +1181,7 @@ async function chamarGemini(system, msgs, onChunk) {
       const {done, value} = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, {stream:true});
-      const lines = buffer.split('
-');
+      const lines = buffer.split('\n');
       buffer = lines.pop() || '';
       for (const line of lines) {
         if (!line.startsWith('data:')) continue;
@@ -1211,7 +1210,7 @@ async function chamarGemini(system, msgs, onChunk) {
 // ═══════════════════════════════════════
 // INTENÇÃO — frases de ativação ZANKA
 // ═══════════════════════════════════════
-function detectarIntencao(txt) {
+function detectarIntencaoBase(txt) {
   const t = txt.toLowerCase().replace(/[^\w\s]/g,'');
   const saudacoes = ['bom dia zanka','boa tarde zanka','boa noite zanka','fala tu zanka','zanka na escuta','oi zanka','ola zanka','hey zanka','ei zanka'];
   const status = ['zanka a que pe estamos','zanka como esta a operacao','zanka como ta a operacao','zanka status','zanka como vai a operacao'];
@@ -1346,7 +1345,7 @@ async function enviarTexto(txt) {
   try {
     const r = await chamarAPI(agenteId, msgParaAPI);
     hideTyping();
-    if (!document.getElementById(`streamBub_${agenteId}`)) {
+    if (!document.getElementById("streamBub_" + agenteId)) {
       addMsg(r, false);
     }
     // Botão de download para respostas longas
@@ -1802,7 +1801,7 @@ function addBotaoDownload(textoMsg) {
     btn.style.cssText = 'margin-top:8px;padding:4px 10px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);border-radius:6px;color:#60a5fa;font-size:10px;cursor:pointer;font-family:inherit;';
     btn.onclick = () => {
       const ts = new Date().toISOString().slice(0,10);
-      baixarTexto(textoMsg, `zanka-resposta-${ts}.md`);
+      baixarTexto(textoMsg, "zanka-resposta-" + ts + ".md");
     };
     ultima.appendChild(btn);
   }, 100);
@@ -1848,7 +1847,7 @@ function desbloquear() {
 }
 
 // Detectar frases de segurança na intenção
-const _detectarOriginal = detectarIntencao;
+const _detectarOriginal = detectarIntencaoBase;
 function detectarIntencao(txt) {
   const t = txt.toLowerCase().replace(/[^\w\s]/g,'').trim();
   // Frases de segurança por voz
@@ -2106,23 +2105,23 @@ function atualizarBadgeProjeto() {
 
 async function briefingProjeto(p) {
   const outros = Object.values(projetos).filter(x => x.id !== p.id);
-  const msg = `Projeto selecionado: ${p.nome} (${p.emoji})
-Descrição: ${p.descricao}
-Mercados: ${p.mercados}
-Produto: ${p.produto}
-Modelo: ${p.modelo}
-ROAS potencial: ${p.roas_potencial}
-Agentes principais: ${p.agentes_principais.join(', ')}
+  const outrosStr = outros.map(x => x.emoji + ' ' + x.nome + ' (' + x.status + ')').join(', ');
+  const agentesStr = p.agentes_principais ? p.agentes_principais.join(', ') : '';
+  const msg = 'Projeto selecionado: ' + p.nome + ' (' + p.emoji + ')\n' +
+    'Descricao: ' + p.descricao + '\n' +
+    'Mercados: ' + p.mercados + '\n' +
+    'Produto: ' + p.produto + '\n' +
+    'Modelo: ' + p.modelo + '\n' +
+    'ROAS potencial: ' + p.roas_potencial + '\n' +
+    'Agentes principais: ' + agentesStr + '\n\n' +
+    'Outros projetos no portfolio: ' + outrosStr + '\n\n' +
+    'Faca um briefing executivo de 3-4 paragrafos:\n' +
+    '1. Qual e a oportunidade mais imediata neste projeto hoje\n' +
+    '2. Quais agentes devem ser acionados e com qual missao\n' +
+    '3. Um alerta sobre os outros projetos - qual merece atencao urgente e por que\n' +
+    '4. A pergunta do dia: o que devemos resolver AGORA para maximo ROAS';
 
-Outros projetos no portfólio: ${outros.map(x => `${x.emoji} ${x.nome} (${x.status})`).join(', ')}
-
-Faça um briefing executivo de 3-4 parágrafos:
-1. Qual é a oportunidade mais imediata neste projeto hoje
-2. Quais agentes devem ser acionados e com qual missão
-3. Um alerta sobre os outros projetos — qual merece atenção urgente e por quê
-4. A pergunta do dia: o que devemos resolver AGORA para máximo ROAS`;
-
-  addMsg(`${p.emoji} Projeto: ${p.nome}`, true);
+  addMsg(p.emoji + " Projeto: " + p.nome, true);
   showTyping();
   processando = true;
   setStatus('processando');
@@ -2151,10 +2150,10 @@ async function analisarPortfolio() {
   const promissores = lista.filter(p => p.roas_potencial?.toLowerCase().includes('alto') || p.roas_potencial?.toLowerCase().includes('muito'));
   const embriao = lista.filter(p => p.status === 'embriao');
 
-  let texto = '<strong>⚡ Análise do portfólio:</strong> ';
-  if (estagnados.length) texto += `${estagnados.map(p=>p.emoji+' '+p.nome).join(', ')} sem acesso recente — risco de estagnação. `;
-  if (promissores.length) texto += `${promissores.map(p=>p.emoji+' '+p.nome).join(', ')} com alto potencial de ROAS. `;
-  if (embriao.length) texto += `${embriao.map(p=>p.emoji+' '+p.nome).join(', ')} em fase embrião — precisam de atenção para não perder o timing.`;
+  let texto = '<strong>&#9889; Análise do portfólio:</strong> ';
+  if (estagnados.length) texto += estagnados.map(p=>p.emoji+' '+p.nome).join(', ') + ' sem acesso recente - risco de estagnação. ';
+  if (promissores.length) texto += promissores.map(p=>p.emoji+' '+p.nome).join(', ') + ' com alto potencial de ROAS. ';
+  if (embriao.length) texto += embriao.map(p=>p.emoji+' '+p.nome).join(', ') + ' em fase embrião - precisam de atenção para não perder o timing.';
   if (!estagnados.length && !embriao.length) texto += 'Portfólio saudável. Escolha o foco de hoje.';
 
   alerta.innerHTML = texto;
@@ -2195,9 +2194,7 @@ function projetoCtx(mensagem) {
   if (!projetoAtivo || !projetos[projetoAtivo]) return mensagem;
   if (mensagem.length >= 800) return mensagem;
   const p = projetos[projetoAtivo];
-  return `[PROJETO: ${p.emoji} ${p.nome} | ${p.descricao}]
-
-${mensagem}`;
+  return '[PROJETO: ' + p.emoji + ' ' + p.nome + ' | ' + p.descricao + ']\n\n' + mensagem;
 }
 
 // ═══════════════════════════════════════
