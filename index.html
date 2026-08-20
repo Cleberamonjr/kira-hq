@@ -316,6 +316,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <div class="tb-brand">
     <div class="tb-icon">🧠</div>
     ZANKA HQ
+    <span style="font-size:9px;font-weight:500;color:var(--text3);margin-left:6px;letter-spacing:.5px;">v1.3.0</span>
   </div>
   <div class="proj-ativo-badge" id="projBadge" onclick="abrirProjetos()">
     <span id="projEmoji">🎯</span>
@@ -963,27 +964,54 @@ function onKeyInput(el, id) {
 
 function ativar() {
   const g = document.getElementById('keyGemini').value.trim();
-  const c = document.getElementById('keyClaude').value.trim();
-  if (!g || g.length < 10) {
-    document.getElementById('setupErr').style.display = 'block';
+  const c = document.getElementById('keyClaude') ? document.getElementById('keyClaude').value.trim() : '';
+
+  // Validação simples — só precisa ter algum conteúdo
+  if (!g) {
+    const err = document.getElementById('setupErr');
+    if (err) { err.textContent = 'Cole a chave Gemini para continuar.'; err.style.display = 'block'; }
     return;
   }
+
+  // Salvar tudo
   keyGemini = g;
-  keyClaude = c;
+  keyClaude = c || '';
   localStorage.setItem('zanka_gemini', g);
   if (c) localStorage.setItem('zanka_claude', c);
-  const wh = document.getElementById('inworldWebhook').value.trim();
-  if (wh) { inworldWebhookUrl = wh; localStorage.setItem('zanka_inworld_webhook', wh); }
-  const ik = document.getElementById('keyInworldInput').value.trim();
-  if (ik) { keyInworld = ik; localStorage.setItem('zanka_inworld_key', ik); }
-  const vid = document.getElementById('voiceIdInworldInput').value.trim();
-  if (vid) { voiceIdInworld = vid; localStorage.setItem('zanka_inworld_voice', vid); }
-  document.getElementById('setupOverlay').style.display = 'none';
-  atualizarApiIndicator();
+
+  // Campos opcionais — verificar se existem antes de ler
+  const whEl = document.getElementById('inworldWebhook');
+  if (whEl && whEl.value.trim()) {
+    inworldWebhookUrl = whEl.value.trim();
+    localStorage.setItem('zanka_inworld_webhook', inworldWebhookUrl);
+  }
+  const ikEl = document.getElementById('keyInworldInput');
+  if (ikEl && ikEl.value.trim()) {
+    keyInworld = ikEl.value.trim();
+    localStorage.setItem('zanka_inworld_key', keyInworld);
+  }
+  const vidEl = document.getElementById('voiceIdInworldInput');
+  if (vidEl && vidEl.value.trim()) {
+    voiceIdInworld = vidEl.value.trim();
+    localStorage.setItem('zanka_inworld_voice', voiceIdInworld);
+  }
+
+  // Fechar overlay
+  const overlay = document.getElementById('setupOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  // Inicializar
+  try { atualizarApiIndicator(); } catch(e) {}
+  try { atualizarBadgeProjeto(); } catch(e) {}
+  try { iniciarConectores(); } catch(e) {}
+
   setTimeout(() => {
-    iniciarVoz();
-    setTimeout(() => falarVoz('ZANKA online. Time de dezessete agentes pronto. Pode falar.'), 800);
-  }, 400);
+    try { abrirProjetos(); } catch(e) {
+      setTimeout(() => {
+        try { iniciarVoz(); } catch(e2) {}
+      }, 500);
+    }
+  }, 600);
 }
 
 function trocarKey() {
