@@ -77,6 +77,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .ag-model-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid;}
 .badge-gemini{background:rgba(52,211,153,.1);color:var(--teal);border-color:rgba(52,211,153,.3);}
 .badge-claude{background:rgba(124,58,237,.1);color:#a78bfa;border-color:rgba(124,58,237,.3);}
+.badge-openai{background:var(--green-bg);color:var(--green);border-color:rgba(52,211,153,.3);}
+.badge-glm{background:rgba(251,146,60,.1);color:var(--orange);border-color:rgba(251,146,60,.3);}
+.badge-deepseek{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border);}
 
 /* MESSAGES */
 .messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
@@ -233,31 +236,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .proj-inp{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--text);font-family:inherit;outline:none;}
 .proj-inp:focus{border-color:var(--purple);}
 .stars{color:var(--gold);font-size:12px;letter-spacing:1px;}
-
-/* ── v1.4 — SIDEBAR RETRÁTIL ── */
-.sidebar{transition:width .18s ease, opacity .15s ease;}
-.sidebar.collapsed{width:0 !important;opacity:0;border-right:none;pointer-events:none;overflow:hidden;}
-.tb-icon-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;}
-.tb-icon-btn:hover{color:var(--text);border-color:var(--border2);background:rgba(255,255,255,.03);}
-
-/* ── v1.4 — MENU DROPDOWN (esconde controles do cabeçalho) ── */
-.menu-wrap{position:relative;}
-.menu-dropdown{position:absolute;top:38px;right:0;background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:6px;display:none;flex-direction:column;gap:2px;z-index:600;min-width:220px;box-shadow:0 14px 44px rgba(0,0,0,.55);}
-.menu-dropdown.show{display:flex;}
-.menu-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;border:none;background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;text-align:left;width:100%;transition:all .12s;}
-.menu-item:hover{background:rgba(255,255,255,.05);color:var(--text);}
-.menu-sep{height:1px;background:var(--border);margin:5px 6px;}
-.menu-info{padding:5px 12px 3px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);}
-
-/* ── v1.4 — STATUS DE AGENTE (trabalhando) ── */
-.ag-btn.working{background:var(--gold-bg);border-left-color:var(--gold);}
-.ag-btn.working .ag-emoji{animation:pulse 1s infinite;}
-.ag-btn.working .ag-dot{background:var(--gold);animation:pulse 1s infinite;}
-
-/* ── v1.4 — LOCK SCREEN LIMPO + IMAGEM DE FUNDO ── */
-.lock-overlay{background-size:cover;background-position:center;background-repeat:no-repeat;}
-.lock-inner{display:flex;flex-direction:column;align-items:center;gap:18px;background:rgba(10,14,23,.74);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:22px;padding:44px 40px;box-shadow:0 24px 70px rgba(0,0,0,.55);min-width:320px;}
-.lock-inner .lock-icon{font-size:44px;}
 </style>
 </head>
 <body>
@@ -271,42 +249,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="setup-field">
       <div class="setup-label">
-        GLM API Key (Zhipu)
-        <span class="lbadge lb-optional">1ª prioridade</span>
+        Gemini API Key (Google)
+        <span class="lbadge lb-required">Obrigatória</span>
       </div>
-      <input class="setup-input" id="keyGLM" type="password"
-        placeholder="xxxxxxxx.xxxxxxxx" oninput="onKeyInput(this,'keyGLM')">
-      <div class="setup-hint">bigmodel.cn — usada primeiro quando disponível (GLM-4.6). Endpoint doméstico, funciona na China sem VPN.</div>
+      <input class="setup-input" id="keyGemini" type="password"
+        placeholder="AIzaSy..." oninput="onKeyInput(this,'keyGemini')">
+      <div class="setup-hint">Grátis em aistudio.google.com — 14 agentes operacionais</div>
     </div>
 
     <div class="setup-field">
       <div class="setup-label">
         OpenAI API Key
-        <span class="lbadge lb-optional">2ª — melhor escala</span>
+        <span class="lbadge lb-optional">Opcional — 1ª prioridade estratégica</span>
       </div>
       <input class="setup-input" id="keyOpenAI" type="password"
         placeholder="sk-..." oninput="onKeyInput(this,'keyOpenAI')">
-      <div class="setup-hint">platform.openai.com — entra se a GLM não estiver disponível (GPT-4o)</div>
-    </div>
-
-    <div class="setup-field">
-      <div class="setup-label">
-        Gemini API Key (Google)
-        <span class="lbadge lb-optional">Custo-benefício — recomendada</span>
-      </div>
-      <input class="setup-input" id="keyGemini" type="password"
-        placeholder="AIzaSy..." oninput="onKeyInput(this,'keyGemini')">
-      <div class="setup-hint">Grátis em aistudio.google.com — a API mais usada por custo-benefício</div>
-    </div>
-
-    <div class="setup-field">
-      <div class="setup-label">
-        DeepSeek API Key
-        <span class="lbadge lb-required">Âncora — sempre no ar</span>
-      </div>
-      <input class="setup-input" id="keyDeepSeek" type="password"
-        placeholder="sk-..." oninput="onKeyInput(this,'keyDeepSeek')">
-      <div class="setup-hint">platform.deepseek.com — garante que o sistema nunca fica fora do ar</div>
+      <div class="setup-hint">ZANKA usa pra pensamento estratégico e planejamento, se disponível</div>
     </div>
 
     <div class="setup-field">
@@ -316,7 +274,27 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </div>
       <input class="setup-input" id="keyClaude" type="password"
         placeholder="sk-ant-..." oninput="onKeyInput(this,'keyClaude')">
-      <div class="setup-hint">Quando tiver: ZANKA, NEJI e HECTOR migram para Claude Sonnet</div>
+      <div class="setup-hint">NEJI e HECTOR migram para Claude Sonnet. ZANKA usa como 2ª opção estratégica.</div>
+    </div>
+
+    <div class="setup-field">
+      <div class="setup-label">
+        GLM API Key (Z.ai)
+        <span class="lbadge lb-optional">Opcional — 3ª prioridade estratégica</span>
+      </div>
+      <input class="setup-input" id="keyGLM" type="password"
+        placeholder="Chave da z.ai..." oninput="onKeyInput(this,'keyGLM')">
+      <div class="setup-hint">Gerar em z.ai — ótimo em planejamento e código</div>
+    </div>
+
+    <div class="setup-field">
+      <div class="setup-label">
+        DeepSeek API Key
+        <span class="lbadge lb-optional">Opcional — 4ª prioridade estratégica</span>
+      </div>
+      <input class="setup-input" id="keyDeepSeek" type="password"
+        placeholder="sk-..." oninput="onKeyInput(this,'keyDeepSeek')">
+      <div class="setup-hint">Gerar em platform.deepseek.com</div>
     </div>
 
     <div class="setup-field">
@@ -329,12 +307,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       <div class="setup-hint">Voz masculina pt-BR premium. Sem ela, usa Google TTS (também funciona).</div>
     </div>
 
-    <div class="setup-err" id="setupErr">Cole ao menos uma chave de IA para continuar.</div>
+    <div class="setup-err" id="setupErr">Cole a chave Gemini para continuar.</div>
     <button class="setup-btn" onclick="ativar()">🚀 Ativar o Time</button>
 
     <div class="setup-phase-note">
-      <strong>Cadeia de resiliência:</strong> GLM → OpenAI → Gemini → DeepSeek.<br>
-      Basta <strong>uma</strong> chave para ativar. Com várias, o sistema faz failover automático e nunca fica fora do ar. Claude entra como preferência dos agentes C-Level; ElevenLabs é voz premium opcional.
+      <strong>Fase 1 (agora):</strong> Gemini obrigatória — 17 agentes + voz Google TTS.<br>
+      <strong>Fase 2 (depois):</strong> cole ElevenLabs para voz premium. Claude para C-Level.
     </div>
   </div>
 </div>
@@ -348,57 +326,41 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <button class="tb-icon-btn" onclick="toggleSidebar()" title="Mostrar / ocultar o time">☰</button>
   <div class="tb-brand">
     <div class="tb-icon">🧠</div>
     ZANKA HQ
-    <span style="font-size:9px;font-weight:500;color:var(--text3);margin-left:6px;letter-spacing:.5px;">v1.4.0</span>
+    <span style="font-size:9px;font-weight:500;color:var(--text3);margin-left:6px;letter-spacing:.5px;">v1.3.0</span>
   </div>
   <div class="proj-ativo-badge" id="projBadge" onclick="abrirProjetos()">
     <span id="projEmoji">🎯</span>
     <span id="projNomeAtivo">Selecionar projeto</span>
   </div>
   <div class="tb-divider"></div>
-  <!-- Indicador do modelo ativo — fica visível e muda sozinho conforme o provider responde -->
-  <div class="tb-api-indicator" id="apiIndicator" title="Modelo ativo (muda automaticamente na cadeia de failover)">
-    <div class="api-dot" style="background:#4d6bfe"></div>
-    <span id="apiLabel" style="font-size:11px;font-weight:600;color:var(--text2);">DeepSeek</span>
-  </div>
-  <!-- Status de voz compacto (necessário pro motor de voz) -->
-  <div class="voice-status pronto" id="voiceStatus" style="padding:3px 10px;">
+  <div class="voice-status pronto" id="voiceStatus">
     <div class="vs-dot" id="vsDot"></div>
-    <span id="vsLabel" style="font-size:10px;">Pronto</span>
+    <span id="vsLabel">Pronto para ouvir</span>
     <div class="wave-bars" id="waveBars">
       <div class="wb"></div><div class="wb"></div><div class="wb"></div>
       <div class="wb"></div><div class="wb"></div><div class="wb"></div>
     </div>
   </div>
+  <div class="tb-api-indicator" id="apiIndicator">
+    <div class="api-dot" style="background:#2dd4bf"></div>
+    <span id="apiLabel" style="font-size:10px;color:var(--text3);">Gemini</span>
+  </div>
   <div class="tb-right">
-    <button class="tb-btn" onclick="atualizarVersao()" title="Buscar a nova versão publicada no GitHub — a conversa é preservada">🔄 Atualizar</button>
-    <div class="menu-wrap">
-      <button class="tb-btn" id="btnMenu" onclick="toggleMenu(event)" title="Controles">⚙ Menu</button>
-      <div class="menu-dropdown" id="menuDropdown">
-        <div class="menu-info">Voz</div>
-        <button class="menu-item" id="btnVoz" onclick="ativarMicrofone()">🎤 Clique para falar</button>
-        <button class="menu-item" id="btnSilencio" onclick="toggleSilencio()">🔇 Modo silêncio</button>
-        <div class="menu-info" id="ttsInfo">🔈 Voz: Google TTS</div>
-        <div class="menu-sep"></div>
-        <div class="menu-info">Sistema</div>
-        <button class="menu-item" onclick="trocarKey()">🔑 Chaves de API</button>
-        <button class="menu-item" onclick="abrirConectores()">🔌 Conectores</button>
-        <button class="menu-item" onclick="limpar()">🗑 Limpar conversa</button>
-        <div class="menu-sep"></div>
-        <button class="menu-item" id="btnHold" onclick="holdSistema()">🔒 Travar sistema (Hold)</button>
-        <button class="menu-item" onclick="escolherImagemBloqueio()">🖼 Imagem da tela de bloqueio</button>
-      </div>
-    </div>
+    <button class="tb-btn" id="btnVoz" onclick="ativarMicrofone()" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.4);font-weight:700;">🎤 Clique para falar</button>
+    <button class="tb-btn" id="btnSilencio" onclick="toggleSilencio()" title="Modo silencioso — desativa toda voz">🔇 Silêncio</button>
+    <button class="tb-btn" onclick="limpar()">🗑 Limpar</button>
+    <button class="tb-btn" onclick="trocarKey()">🔑 Keys</button>
+    <button class="tb-btn" id="btnHold" onclick="holdSistema()" title="Travar sistema">🔒 Hold</button>
+    <button class="tb-btn" onclick="abrirConectores()" title="Gerenciar conectores">🔌 Conectores</button>
   </div>
 </div>
-<input type="file" id="lockBgInput" accept="image/*" style="display:none" onchange="onLockBgSelected(this)">
 
 <!-- LAYOUT -->
 <div class="layout">
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar">
 
     <div class="sb-section">
       <div class="sb-label">C-Level</div>
@@ -567,13 +529,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <!-- LOCK OVERLAY -->
 <div class="lock-overlay" id="lockOverlay">
-  <div class="lock-inner">
-    <div class="lock-icon">🔒</div>
-    <input class="lock-input" id="lockInput" type="password" placeholder="Palavra-chave..."
-      onkeydown="if(event.key==='Enter')tentarDesbloquear()">
-    <div class="lock-err" id="lockErr"></div>
-    <button class="lock-btn" onclick="tentarDesbloquear()">Entrar</button>
-  </div>
+  <div class="lock-icon">🔒</div>
+  <div class="lock-title">Sistema travado</div>
+  <div class="lock-sub">Digite a senha ou fale "De volta ao show" para retomar a operação.</div>
+  <input class="lock-input" id="lockInput" type="password" placeholder="Digite a senha..."
+    onkeydown="if(event.key==='Enter')tentarDesbloquear()">
+  <div class="lock-err" id="lockErr"></div>
+  <button class="lock-btn" onclick="tentarDesbloquear()">Desbloquear</button>
 </div>
 
 <!-- CONECTORES OVERLAY -->
@@ -615,7 +577,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 const AGENTES = {
 
 zanka:{emoji:'🧠',nome:'ZANKA',role:'CEO · ZANKA OS · Orquestradora · Estrategista',
-modelo:'claude', // usa Claude se disponível, senão Gemini
+modelo:'cascade', // pensamento estratégico: OpenAI → Claude → GLM → DeepSeek → Gemini (usa o 1º com chave disponível)
 system:`Você é ZANKA.
 Você é a CEO e orquestradora do time. Seu nome existe porque você é a arquitetura central que transforma o conhecimento do dono do negócio junto ao seu em inteligência operacional real.
 
@@ -936,21 +898,18 @@ Responda em português brasileiro.`}
 // ═══════════════════════════════════════
 let agenteId = 'zanka';
 let historico = {};
-let agenteStatus = {};      // 'online' | 'working' por agente
-let sidebarColapsada = false;
-let menuAberto = false;
 let vozAtiva = true;
 let processando = false;
 let reconhecimento = null;
 let deveOuvir = true;
 let falando = false;
 let keyGemini = '';
+let keyOpenAI = '';
+let keyGLM = '';
+let keyDeepSeek = '';
+let streamRenderizado = false; // rastreia se a última resposta já foi renderizada via streaming
 let keyClaude = '';
 let keyElevenLabs = '';
-let keyOpenAI = '';
-let keyDeepSeek = '';
-let keyGLM = '';
-let providerAtivo = '';
 let modoSilencioso = false;
 
 // ── SEGURANÇA ──
@@ -1015,131 +974,6 @@ let modoSelecaoProjeto = true; // true = mostrar seletor ao abrir
 
 Object.keys(AGENTES).forEach(k => historico[k] = []);
 
-// ═══════════════════════════════════════════════════════════════
-// v1.4 — PERSISTÊNCIA DA CONVERSA (sobrevive a reload / atualização)
-// ═══════════════════════════════════════════════════════════════
-function salvarHistorico() {
-  try {
-    // Persiste só o essencial: role, content e o texto de exibição limpo.
-    // Anexos (_parts, base64) são descartados para não estourar o localStorage.
-    const slim = {};
-    for (const k of Object.keys(historico)) {
-      const arr = historico[k] || [];
-      if (!arr.length) continue;
-      slim[k] = arr.slice(-20).map(m => ({ role: m.role, content: m.content, _display: m._display }));
-    }
-    localStorage.setItem('zanka_historico', JSON.stringify(slim));
-  } catch (e) { console.warn('salvarHistorico:', e.message); }
-}
-
-function carregarHistorico() {
-  try {
-    const raw = localStorage.getItem('zanka_historico');
-    if (!raw) return;
-    const slim = JSON.parse(raw);
-    for (const k of Object.keys(slim)) historico[k] = slim[k];
-  } catch (e) { console.warn('carregarHistorico:', e.message); }
-}
-
-// Reconstrói as bolhas do agente na tela a partir do histórico salvo
-function renderHistorico(agId) {
-  const msgs = document.getElementById('msgs');
-  if (!msgs) return;
-  const hist = historico[agId] || [];
-  if (hist.length === 0) return; // mantém a tela de boas-vindas
-  const ag = AGENTES[agId];
-  msgs.innerHTML = '';
-  for (const m of hist) {
-    const isUser = m.role === 'user';
-    const texto = isUser ? (m._display || m.content || '') : (m.content || '');
-    const el = document.createElement('div');
-    el.className = `msg${isUser ? ' user' : ''}`;
-    el.innerHTML = `<div class="msg-av">${isUser ? '👤' : ag.emoji}</div><div><div class="msg-bub">${String(texto).replace(/</g,'&lt;')}</div><div class="msg-meta">${isUser ? 'Você' : ag.nome}</div></div>`;
-    msgs.appendChild(el);
-  }
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// v1.4 — STATUS DE AGENTE (Painel de Agentes vivo — próximo passo)
-// ═══════════════════════════════════════════════════════════════
-function setAgenteStatus(agId, status) {
-  agenteStatus[agId] = status;
-  const btn = document.getElementById('btn-' + agId);
-  if (btn) btn.classList.toggle('working', status === 'working');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// v1.4 — SIDEBAR RETRÁTIL + MENU
-// ═══════════════════════════════════════════════════════════════
-function toggleSidebar() {
-  sidebarColapsada = !sidebarColapsada;
-  document.getElementById('sidebar').classList.toggle('collapsed', sidebarColapsada);
-  localStorage.setItem('zanka_sidebar', sidebarColapsada ? '1' : '0');
-}
-function aplicarEstadoSidebar() {
-  sidebarColapsada = localStorage.getItem('zanka_sidebar') === '1';
-  document.getElementById('sidebar').classList.toggle('collapsed', sidebarColapsada);
-}
-function toggleMenu(ev) {
-  if (ev) ev.stopPropagation();
-  menuAberto = !menuAberto;
-  document.getElementById('menuDropdown').classList.toggle('show', menuAberto);
-}
-function fecharMenu() {
-  menuAberto = false;
-  const d = document.getElementById('menuDropdown');
-  if (d) d.classList.remove('show');
-}
-// Fecha o menu ao clicar fora
-document.addEventListener('click', (e) => {
-  const wrap = document.querySelector('.menu-wrap');
-  if (menuAberto && wrap && !wrap.contains(e.target)) fecharMenu();
-});
-
-// ═══════════════════════════════════════════════════════════════
-// v1.4 — ATUALIZAR VERSÃO (pega nova versão do GitHub sem perder a conversa)
-// ═══════════════════════════════════════════════════════════════
-function atualizarVersao() {
-  salvarHistorico(); // garante que a conversa está salva antes de recarregar
-  // cache-bust para forçar o GitHub Pages a servir o index mais novo
-  location.href = location.pathname + '?v=' + Date.now();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// v1.4 — IMAGEM DE FUNDO DA TELA DE BLOQUEIO
-// ═══════════════════════════════════════════════════════════════
-function escolherImagemBloqueio() {
-  fecharMenu();
-  document.getElementById('lockBgInput').click();
-}
-function onLockBgSelected(input) {
-  const file = input.files && input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      localStorage.setItem('zanka_lock_bg', reader.result);
-      aplicarImagemBloqueio();
-      addMsg('🖼 Imagem da tela de bloqueio atualizada.', false);
-    } catch (e) {
-      addMsg('⚠ Imagem grande demais para salvar. Tente uma menor (< 2MB).', false);
-    }
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
-}
-function aplicarImagemBloqueio() {
-  const bg = localStorage.getItem('zanka_lock_bg');
-  const ov = document.getElementById('lockOverlay');
-  if (!ov) return;
-  if (bg) {
-    ov.style.backgroundImage = `linear-gradient(rgba(6,7,13,.55),rgba(6,7,13,.78)), url(${bg})`;
-  } else {
-    ov.style.backgroundImage = '';
-  }
-}
-
 // ═══════════════════════════════════════
 // SETUP
 // ═══════════════════════════════════════
@@ -1149,29 +983,42 @@ function onKeyInput(el, id) {
 }
 
 function ativar() {
-  const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-  const glm = val('keyGLM');
-  const oai = val('keyOpenAI');
-  const gem = val('keyGemini');
-  const dsk = val('keyDeepSeek');
+  // Ler chave obrigatória
+  const gEl = document.getElementById('keyGemini');
+  const g = gEl ? gEl.value.trim() : '';
 
-  // Precisa de PELO MENOS uma API de IA (qualquer uma da cadeia)
-  if (!glm && !oai && !gem && !dsk) {
+  if (!g) {
     const err = document.getElementById('setupErr');
-    if (err) { err.textContent = 'Cole ao menos uma chave de IA (GLM, OpenAI, Gemini ou DeepSeek).'; err.style.display = 'block'; }
+    if (err) { err.textContent = 'Cole a chave Gemini para continuar.'; err.style.display = 'block'; }
     return;
   }
 
-  // Salvar chaves de IA que foram preenchidas
-  if (glm) { keyGLM      = glm; localStorage.setItem('zanka_glm',      glm); }
-  if (oai) { keyOpenAI   = oai; localStorage.setItem('zanka_openai',   oai); }
-  if (gem) { keyGemini   = gem; localStorage.setItem('zanka_gemini',   gem); }
-  if (dsk) { keyDeepSeek = dsk; localStorage.setItem('zanka_deepseek', dsk); }
+  // Salvar chaves
+  keyGemini = g;
+  localStorage.setItem('zanka_gemini', g);
 
   const cEl = document.getElementById('keyClaude');
   if (cEl && cEl.value.trim()) {
     keyClaude = cEl.value.trim();
     localStorage.setItem('zanka_claude', keyClaude);
+  }
+
+  const oEl = document.getElementById('keyOpenAI');
+  if (oEl && oEl.value.trim()) {
+    keyOpenAI = oEl.value.trim();
+    localStorage.setItem('zanka_openai', keyOpenAI);
+  }
+
+  const glmEl = document.getElementById('keyGLM');
+  if (glmEl && glmEl.value.trim()) {
+    keyGLM = glmEl.value.trim();
+    localStorage.setItem('zanka_glm', keyGLM);
+  }
+
+  const dsEl = document.getElementById('keyDeepSeek');
+  if (dsEl && dsEl.value.trim()) {
+    keyDeepSeek = dsEl.value.trim();
+    localStorage.setItem('zanka_deepseek', keyDeepSeek);
   }
 
   const elEl = document.getElementById('keyElevenLabs');
@@ -1188,14 +1035,16 @@ function ativar() {
 }
 
 function trocarKey() {
-  fecharMenu();
-  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
-  set('keyGLM', keyGLM);
-  set('keyOpenAI', keyOpenAI);
-  set('keyGemini', keyGemini);
-  set('keyDeepSeek', keyDeepSeek);
-  set('keyClaude', keyClaude);
-  set('keyElevenLabs', keyElevenLabs);
+  document.getElementById('keyGemini').value = keyGemini;
+  document.getElementById('keyClaude').value = keyClaude;
+  const oEl = document.getElementById('keyOpenAI');
+  if (oEl) oEl.value = keyOpenAI;
+  const glmEl = document.getElementById('keyGLM');
+  if (glmEl) glmEl.value = keyGLM;
+  const dsEl = document.getElementById('keyDeepSeek');
+  if (dsEl) dsEl.value = keyDeepSeek;
+  const elEl = document.getElementById('keyElevenLabs');
+  if (elEl) elEl.value = keyElevenLabs;
   document.getElementById('setupOverlay').style.display = 'flex';
 }
 
@@ -1203,40 +1052,42 @@ function trocarKey() {
 function atualizarApiIndicator() {
   const lbl = document.getElementById('apiLabel');
   const dot = document.querySelector('.api-dot');
-  // Cadeia de resiliência configurada (na ordem de prioridade)
-  const chain = PROVIDER_ORDER.filter(p => keyDe(p));
-  if (chain.length === 0) {
-    lbl.textContent = 'Sem API';
-    lbl.style.color = 'var(--red)';
-    dot.style.background = 'var(--red)';
+  // Modelo de linguagem
+  if (keyClaude) {
+    lbl.textContent = 'Gemini + Claude';
+    lbl.style.color = '#a78bfa';
+    dot.style.background = '#a78bfa';
   } else {
-    const nomes = chain.map(p => PROVIDERS[p].label.split(' ')[0]);
-    if (keyClaude) nomes.push('+Claude');
-    lbl.textContent = nomes.join(' → ');
-    lbl.style.color = 'var(--text2)';
-    dot.style.background = PROVIDERS[chain[0]].cor;
+    lbl.textContent = 'Gemini Flash';
+    lbl.style.color = 'var(--teal)';
+    dot.style.background = 'var(--teal)';
   }
-  lbl.title = 'Cadeia de failover automático. Se a 1ª falhar, cai para a próxima.';
-  // Info de voz/TTS agora vive dentro do menu (⚙), não no cabeçalho
-  const vozLabel = keyElevenLabs ? '🎙️ Voz: ElevenLabs' : '🔈 Voz: Google TTS';
-  const ttsInfo = document.getElementById('ttsInfo');
-  if (ttsInfo) ttsInfo.textContent = vozLabel;
-  // Remove qualquer badge antigo que tenha ficado no cabeçalho de versões anteriores
-  const oldBadge = document.getElementById('ttsBadge');
-  if (oldBadge) oldBadge.remove();
+  // Badge TTS
+  const vozLabel = keyElevenLabs ? '🎙️ ElevenLabs' : '🔈 Google TTS';
+  const vozColor = keyElevenLabs ? '#f59e0b' : '#34d399';
+  let badge = document.getElementById('ttsBadge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'ttsBadge';
+    badge.className = 'tb-api-indicator';
+    badge.style.cssText = 'margin-left:6px;';
+    document.getElementById('apiIndicator').after(badge);
+  }
+  badge.innerHTML = `<span style="font-size:10px;font-weight:600;color:${vozColor}">${vozLabel}</span>`;
 }
 
 // ── INICIALIZAÇÃO CENTRAL ──────────────────────────────────────────────────
 // Chamada por ativar() e window.onload — ponto único de entrada do sistema
 function inicializarSistema() {
+  // 0. Restaurar histórico de conversas e agente ativo (sobrevive a updates do arquivo)
+  try { historico = JSON.parse(localStorage.getItem('zanka_historico') || '{}'); } catch(e) { historico = {}; }
+  const agSalvo = localStorage.getItem('zanka_agente_atual');
+  if (agSalvo && AGENTES[agSalvo]) sel(agSalvo); else restaurarMensagens(agenteId);
+
   // 1. Atualizar indicadores visuais
   try { atualizarApiIndicator(); } catch(e) { console.warn('apiIndicator:', e); }
   try { atualizarBadgeProjeto(); } catch(e) { console.warn('badgeProjeto:', e); }
   try { iniciarConectores(); } catch(e) { console.warn('conectores:', e); }
-  // 1b. Restaurar estado de UI e conversa salva
-  try { aplicarEstadoSidebar(); } catch(e) { console.warn('sidebar:', e); }
-  try { aplicarImagemBloqueio(); } catch(e) { console.warn('lockbg:', e); }
-  try { carregarHistorico(); renderHistorico(agenteId); } catch(e) { console.warn('historico:', e); }
 
   // 2. Verificar se já tem projeto selecionado
   const projSalvo = localStorage.getItem('zanka_projeto_ativo');
@@ -1266,31 +1117,44 @@ function inicializarSistema() {
 
 window.onload = () => {
   // Carregar todas as chaves salvas
-  const glm = localStorage.getItem('zanka_glm');
   const g  = localStorage.getItem('zanka_gemini');
   const c  = localStorage.getItem('zanka_claude');
   const o  = localStorage.getItem('zanka_openai');
+  const glm = localStorage.getItem('zanka_glm');
   const ds = localStorage.getItem('zanka_deepseek');
   const el = localStorage.getItem('zanka_elevenlabs');
 
-  keyGLM      = glm || '';
-  keyGemini   = g  || '';
-  keyClaude   = c  || '';
-  keyOpenAI   = o  || '';
-  keyDeepSeek = ds || '';
-  keyElevenLabs = el || '';
-
-  // Basta UMA chave de IA (qualquer provider da cadeia) para iniciar
-  if (glm || o || g || ds) {
+  if (g) {
+    // Chave já salva — fechar setup e inicializar
+    keyGemini = g;
+    keyClaude = c || '';
+    keyOpenAI = o || '';
+    keyGLM = glm || '';
+    keyDeepSeek = ds || '';
+    keyElevenLabs = el || '';
     document.getElementById('setupOverlay').style.display = 'none';
     inicializarSistema();
   }
-  // Se não tem nenhuma chave de IA salva, o setupOverlay permanece visível (default no HTML)
+  // Se não tem chave salva, o setupOverlay permanece visível (default no HTML)
 };
 
 // ═══════════════════════════════════════
 // SELEÇÃO DE AGENTE
 // ═══════════════════════════════════════
+function salvarHistorico() {
+  try { localStorage.setItem('zanka_historico', JSON.stringify(historico)); } catch(e) { console.warn('salvarHistorico:', e); }
+}
+
+function restaurarMensagens(agId) {
+  const msgsEl = document.getElementById('msgs');
+  msgsEl.innerHTML = '';
+  const conversa = historico[agId] || [];
+  if (conversa.length === 0) return; // sem histórico — mantém tela de boas-vindas
+  const ws = document.getElementById('wlScreen');
+  if (ws) ws.style.display = 'none';
+  conversa.forEach(m => addMsg(m.content, m.role === 'user'));
+}
+
 function sel(id) {
   document.querySelectorAll('.ag-btn').forEach(b => b.classList.remove('ativo'));
   document.getElementById('btn-'+id)?.classList.add('ativo');
@@ -1300,208 +1164,29 @@ function sel(id) {
   document.getElementById('agName').textContent = ag.nome;
   document.getElementById('agRole').textContent = ag.role;
   document.getElementById('inp').placeholder = "Fale ou escreva para " + ag.nome + "...";
+  localStorage.setItem('zanka_agente_atual', id);
+  restaurarMensagens(id);
   const badge = document.getElementById('agModelBadge');
-  const cadeia = montarCadeia(ag, []);
-  const top = cadeia[0];
-  if (top && PROVIDERS[top]) {
-    badge.textContent = PROVIDERS[top].label;
-    badge.className = 'ag-model-badge';
-    badge.style.color = PROVIDERS[top].cor;
-    badge.style.borderColor = PROVIDERS[top].cor;
-    badge.style.background = 'transparent';
+  if (ag.modelo === 'cascade') {
+    const cadeia = [['OpenAI',keyOpenAI,'badge-openai'],['Claude Sonnet',keyClaude,'badge-claude'],['GLM',keyGLM,'badge-glm'],['DeepSeek',keyDeepSeek,'badge-deepseek'],['Gemini Flash',keyGemini,'badge-gemini']];
+    const ativo = cadeia.find(c => c[1]) || cadeia[cadeia.length-1];
+    badge.textContent = ativo[0];
+    badge.className = 'ag-model-badge ' + ativo[2];
   } else {
-    badge.textContent = 'Sem API';
-    badge.className = 'ag-model-badge badge-gemini';
+    const usaClaude = ag.modelo === 'claude' && keyClaude;
+    badge.textContent = usaClaude ? 'Claude Sonnet' : 'Gemini Flash';
+    badge.className = 'ag-model-badge ' + (usaClaude ? 'badge-claude' : 'badge-gemini');
   }
   const ws = document.getElementById('wlScreen');
   if (ws) ws.style.display = 'none';
-  renderHistorico(id);
 }
 
 // ═══════════════════════════════════════
 // API — ROTEAMENTO AUTOMÁTICO
 // ═══════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════
-// CAMADA MULTI-PROVIDER — resiliência com failover automático
-// ═══════════════════════════════════════════════════════════════
-// ORDEM DE PRIORIDADE (troque a ordem nesta linha para mudar tudo):
-//   GLM (Zhipu) → OpenAI (melhor escala) → Gemini (custo-benefício) → DeepSeek (âncora sempre-ativa)
-//   Para priorizar CUSTO: ['gemini','deepseek','glm','openai']
-const PROVIDER_ORDER = ['glm', 'openai', 'gemini', 'deepseek'];
-
-// Config dos providers compatíveis com o formato OpenAI (OpenAI, DeepSeek e GLM partilham a mesma API)
-const OPENAI_COMPAT = {
-  glm:      { base: 'https://open.bigmodel.cn/api/paas/v4/chat/completions', model: 'glm-4.6',    key: () => keyGLM },
-  openai:   { base: 'https://api.openai.com/v1/chat/completions',            model: 'gpt-4o',     key: () => keyOpenAI },
-  deepseek: { base: 'https://api.deepseek.com/chat/completions',             model: 'deepseek-chat', key: () => keyDeepSeek },
-};
-// Modelo GLM alternativo: 'glm-5' (mais novo) ou 'glm-4-flash' (gratuito). Troque acima em model.
-
-// Registro central — label, cor e função de chamada de cada provider
-const PROVIDERS = {
-  glm:      { label: 'GLM (Zhipu)',   cor: '#3b82f6', call: (s, m, oc) => chamarOpenAICompat('glm', s, m, oc) },
-  openai:   { label: 'OpenAI GPT-4o', cor: '#10a37f', call: (s, m, oc) => chamarOpenAICompat('openai', s, m, oc) },
-  gemini:   { label: 'Gemini Flash',  cor: '#2dd4bf', call: (s, m, oc) => chamarGemini(s, m, oc) },
-  deepseek: { label: 'DeepSeek',      cor: '#4d6bfe', call: (s, m, oc) => chamarOpenAICompat('deepseek', s, m, oc) },
-  claude:   { label: 'Claude Sonnet', cor: '#a78bfa', call: (s, m, oc) => chamarClaudeStream(s, m, oc) },
-};
-
-// Telemetria leve (para o futuro System Monitor) — custo zero de render
-const providerStats = { glm:{ok:0,fail:0}, openai:{ok:0,fail:0}, gemini:{ok:0,fail:0}, deepseek:{ok:0,fail:0}, claude:{ok:0,fail:0} };
-function marcarProvider(p, ok) { if (!providerStats[p]) providerStats[p]={ok:0,fail:0}; providerStats[p][ok?'ok':'fail']++; }
-
-// Chave configurada de um provider
-function keyDe(prov) {
-  return { glm: keyGLM, openai: keyOpenAI, gemini: keyGemini, deepseek: keyDeepSeek, claude: keyClaude }[prov] || '';
-}
-
-// Tipo de anexo na última mensagem: 'image' | 'file' | null
-function tipoAnexo(msgs) {
-  const last = msgs[msgs.length - 1];
-  if (!last || !last._parts || !Array.isArray(last._parts)) return null;
-  const temImg = last._parts.some(p => p.inlineData && p.inlineData.mimeType && p.inlineData.mimeType.startsWith('image/'));
-  return temImg ? 'image' : 'file';
-}
-
-// Monta a cadeia de providers para ESTE agente/chamada, na ordem de tentativa
-function montarCadeia(ag, msgs) {
-  const anexo = tipoAnexo(msgs);
-  if (anexo === 'image') {
-    // IMAGENS → OpenAI primeiro, Gemini como reserva (ambos têm visão). GLM fica só no texto.
-    const visao = ['openai', 'gemini'].filter(p => keyDe(p));
-    if (visao.length) return visao;
-    // Sem provider de visão configurado → cai para a cadeia normal (responde ao menos o texto)
-  } else if (anexo === 'file') {
-    // PDFs e outros arquivos → hoje só o Gemini lê nativamente
-    if (keyGemini) return ['gemini'];
-  }
-  // TEXTO → cadeia global (GLM primeiro)
-  const cadeia = [];
-  // Preferência do agente por Claude (raciocínio C-Level) entra na frente quando há chave
-  if (ag.modelo === 'claude' && keyClaude) cadeia.push('claude');
-  // Ordem global de resiliência definida pelo dono, pulando os que não têm chave
-  for (const p of PROVIDER_ORDER) if (!cadeia.includes(p) && keyDe(p)) cadeia.push(p);
-  return cadeia;
-}
-
-// ORQUESTRADOR — tenta cada provider em ordem; cai para o próximo em qualquer falha.
-// sink = { write(chunk), reset() } para streaming na bolha (opcional).
-async function chamarLLM(ag, system, msgs, sink) {
-  const cadeia = montarCadeia(ag, msgs);
-  if (cadeia.length === 0) throw new Error('Nenhuma API de IA configurada. Adicione GLM, OpenAI, Gemini ou DeepSeek.');
-
-  let ultimoErro;
-  for (let i = 0; i < cadeia.length; i++) {
-    const prov = cadeia[i];
-    try {
-      if (sink) sink.reset(); // limpa qualquer stream parcial de uma tentativa anterior
-      const onChunk = sink ? (c) => sink.write(c) : null;
-      const txt = await PROVIDERS[prov].call(system, msgs, onChunk);
-      if (!txt || !txt.trim()) throw new Error('Resposta vazia');
-      providerAtivo = prov;
-      marcarProvider(prov, true);
-      atualizarProviderVivo(prov, i > 0);
-      return txt;
-    } catch (e) {
-      ultimoErro = e;
-      marcarProvider(prov, false);
-      console.warn(`[ZANKA] Provider "${prov}" falhou → tentando próximo. Motivo:`, e.message);
-    }
-  }
-  throw new Error('Todas as APIs de IA falharam. Última: ' + (ultimoErro ? ultimoErro.message : 'desconhecido'));
-}
-
-// Atualiza a topbar mostrando qual provider respondeu de fato
-function atualizarProviderVivo(prov, caiuFallback) {
-  const dot = document.querySelector('.api-dot');
-  const lbl = document.getElementById('apiLabel');
-  if (!dot || !lbl || !PROVIDERS[prov]) return;
-  dot.style.background = PROVIDERS[prov].cor;
-  lbl.textContent = (caiuFallback ? '⚠ ' : '') + PROVIDERS[prov].label;
-  lbl.style.color = PROVIDERS[prov].cor;
-  lbl.title = caiuFallback
-    ? 'Failover: um provider anterior falhou e a cadeia caiu para este.'
-    : 'Provider ativo (topo da cadeia).';
-}
-
-// Adaptador OpenAI-compatível (serve OpenAI E DeepSeek — mesma API, base/model/chave diferentes)
-// Converte uma mensagem do histórico para o formato OpenAI.
-// Se tiver imagem anexada (_parts formato Gemini), monta o formato de visão do OpenAI.
-function msgParaOpenAI(m) {
-  const role = m.role === 'assistant' ? 'assistant' : 'user';
-  if (m._parts && Array.isArray(m._parts)) {
-    const content = [];
-    for (const p of m._parts) {
-      if (p.text) content.push({ type: 'text', text: p.text });
-      else if (p.inlineData && p.inlineData.mimeType && p.inlineData.mimeType.startsWith('image/')) {
-        content.push({ type: 'image_url', image_url: { url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}` } });
-      }
-      // PDFs/arquivos não-imagem não vão pro OpenAI (visão via chat só aceita imagem)
-    }
-    if (content.length) return { role, content };
-  }
-  return { role, content: m.content };
-}
-
-async function chamarOpenAICompat(prov, system, msgs, onChunk) {
-  const cfg = OPENAI_COMPAT[prov];
-  const messages = [{ role: 'system', content: system }].concat(msgs.map(msgParaOpenAI));
-  const body = { model: cfg.model, messages, temperature: 0.7, max_tokens: 1400, stream: !!onChunk };
-
-  const r = await fetch(cfg.base, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key() },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) {
-    const err = await r.json().catch(() => ({ error: { message: r.statusText } }));
-    throw new Error(err.error?.message || ('HTTP ' + r.status));
-  }
-
-  // Sem streaming
-  if (!onChunk) {
-    const d = await r.json();
-    return d.choices?.[0]?.message?.content || '';
-  }
-
-  // Streaming SSE (formato OpenAI: choices[0].delta.content)
-  const reader = r.body.getReader();
-  const decoder = new TextDecoder();
-  let full = '';
-  let buffer = '';
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
-    for (const line of lines) {
-      const t = line.trim();
-      if (!t.startsWith('data:')) continue;
-      const json = t.slice(5).trim();
-      if (!json || json === '[DONE]') continue;
-      try {
-        const obj = JSON.parse(json);
-        const chunk = obj.choices?.[0]?.delta?.content || '';
-        if (chunk) { full += chunk; onChunk(chunk); }
-      } catch (e) {}
-    }
-  }
-  return full;
-}
-
-// Wrapper de streaming para o Claude (a API atual é não-streaming; emitimos o texto de uma vez)
-async function chamarClaudeStream(system, msgs, onChunk) {
-  const txt = await chamarClaude(system, msgs);
-  if (onChunk && txt) onChunk(txt);
-  return txt;
-}
-
 async function chamarAPI(agId, mensagem) {
   const ag = AGENTES[agId];
-
-  // Guarda o texto limpo (antes da injeção de contexto) para exibir na bolha do usuário
-  const mensagemOriginal = mensagem;
+  const usaClaude = ag.modelo === 'claude' && keyClaude;
 
   // Injetar contexto do projeto ativo (sem recursão)
   mensagem = projetoCtx(mensagem);
@@ -1511,51 +1196,57 @@ async function chamarAPI(agId, mensagem) {
   let _parts = null;
   if (arquivoAtual && agId === agenteId) {
     _parts = prepararMensagemComArquivo(mensagem);
-    historico[agId].push({role:'user', content: mensagem, _parts, _display: mensagemOriginal});
+    historico[agId].push({role:'user', content: mensagem, _parts});
     cancelarUpload(); // limpar após enviar
   } else {
-    historico[agId].push({role:'user', content: mensagem, _display: mensagemOriginal});
+    historico[agId].push({role:'user', content: mensagem});
   }
   if (historico[agId].length > 20) historico[agId] = historico[agId].slice(-20);
 
   const guardAntiAluc = '\n\n[REGRA CRÍTICA]: Nunca invente dados, métricas ou fatos não fornecidos. Se não tiver o dado, diga explicitamente. Sinalize estimativas como estimativas.';
-  const system = ag.system + guardAntiAluc;
 
-  // Bolha de streaming unificada — vale para QUALQUER provider da cadeia
-  const ws = document.getElementById('wlScreen');
-  if (ws) ws.style.display = 'none';
-  document.getElementById('typing')?.remove();
-  const msgsEl = document.getElementById('msgs');
-  const msgEl = document.createElement('div');
-  msgEl.className = 'msg';
-  msgEl.innerHTML = `<div class="msg-av">${ag.emoji}</div><div><div class="msg-bub" id="streamBub_${agId}"></div><div class="msg-meta" id="streamMeta_${agId}">${ag.nome} · agora</div></div>`;
-  msgsEl.appendChild(msgEl);
-  const bub = document.getElementById('streamBub_' + agId);
-  let acc = '';
-  const sink = {
-    write: (c) => { acc += c; bub.textContent = acc; msgsEl.scrollTop = msgsEl.scrollHeight; },
-    reset: () => { acc = ''; bub.textContent = ''; }
-  };
-
-  setAgenteStatus(agId, 'working');
   try {
-    const resposta = await chamarLLM(ag, system, historico[agId], sink);
-    // Rede de segurança: garante que o texto COMPLETO aparece na bolha (mesmo se o stream falhou)
-    if (bub) bub.textContent = resposta;
-    historico[agId].push({role:'assistant', content: resposta});
-    salvarHistorico(); // persiste a conversa a cada troca
-    // Carimbar qual provider respondeu na meta da mensagem
-    const meta = document.getElementById('streamMeta_' + agId);
-    if (meta && providerAtivo && PROVIDERS[providerAtivo]) {
-      meta.textContent = `${ag.nome} · ${PROVIDERS[providerAtivo].label} · agora`;
+    let resposta;
+    streamRenderizado = false;
+    if (ag.modelo === 'cascade') {
+      resposta = await chamarCascata(ag.system + guardAntiAluc, historico[agId]);
+    } else if (usaClaude) {
+      resposta = await chamarClaude(ag.system + guardAntiAluc, historico[agId]);
+    } else {
+      // Streaming — cria elemento de mensagem e vai preenchendo
+      const ws = document.getElementById('wlScreen');
+      if (ws) ws.style.display = 'none';
+      const msgEl = document.createElement('div');
+      msgEl.className = 'msg';
+      const streamId = 'streamBub_' + agId + '_' + Date.now();
+      msgEl.innerHTML = `<div class="msg-av">${ag.emoji}</div><div><div class="msg-bub" id="${streamId}"></div><div class="msg-meta">${ag.nome} · agora</div></div>`;
+      const msgsEl = document.getElementById('msgs');
+      // Remover typing antes de adicionar streaming
+      document.getElementById('typing')?.remove();
+      msgsEl.appendChild(msgEl);
+      const bub = msgEl.querySelector('.msg-bub'); // referência direta — nunca pega bolha antiga
+      streamRenderizado = true;
+      let streamText = '';
+      resposta = await chamarGemini(ag.system + guardAntiAluc, historico[agId], (chunk) => {
+        streamText += chunk;
+        bub.textContent = streamText;
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+      });
     }
+    historico[agId].push({role:'assistant', content: resposta});
+    salvarHistorico();
     return resposta;
   } catch(e) {
-    // Se nada foi transmitido, remove a bolha vazia para o caller exibir o erro
-    if (!acc) msgEl.remove();
+    // Fallback: se Claude falhou, tenta Gemini
+    if (usaClaude) {
+      try {
+        const r = await chamarGemini(ag.system + guardAntiAluc, historico[agId]);
+        historico[agId].push({role:'assistant', content: r});
+        salvarHistorico();
+        return r + '\n\n_(Nota: rodando em Gemini — chave Claude indisponível)_';
+      } catch(e2) { throw e2; }
+    }
     throw e;
-  } finally {
-    setAgenteStatus(agId, 'online');
   }
 }
 
@@ -1568,6 +1259,59 @@ async function chamarClaude(system, msgs) {
   const d = await r.json();
   if (d.error) throw new Error(d.error.message);
   return d.content[0].text;
+}
+
+// Helper genérico para APIs no formato OpenAI-compatível (OpenAI, GLM, DeepSeek)
+async function chamarOpenAICompativel(url, apiKey, modelo, system, msgs) {
+  const messages = [
+    {role:'system', content: system},
+    ...msgs.map(m => ({role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content}))
+  ];
+  const r = await fetch(url, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+    body: JSON.stringify({model:modelo, messages, max_tokens:1400})
+  });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message || JSON.stringify(d.error));
+  if (!d.choices || !d.choices[0]) throw new Error('Resposta inesperada da API');
+  return d.choices[0].message.content;
+}
+
+async function chamarOpenAI(system, msgs) {
+  return chamarOpenAICompativel('https://api.openai.com/v1/chat/completions', keyOpenAI, 'gpt-5.5', system, msgs);
+}
+
+async function chamarGLM(system, msgs) {
+  return chamarOpenAICompativel('https://api.z.ai/api/paas/v4/chat/completions', keyGLM, 'glm-4.6', system, msgs);
+}
+
+async function chamarDeepSeek(system, msgs) {
+  return chamarOpenAICompativel('https://api.deepseek.com/chat/completions', keyDeepSeek, 'deepseek-chat', system, msgs);
+}
+
+// Cascata de prioridade para pensamento estratégico: tenta cada provedor na ordem, pula o que não tem chave
+async function chamarCascata(system, msgs) {
+  const cadeia = [
+    {nome:'OpenAI',  key: keyOpenAI,   fn: chamarOpenAI},
+    {nome:'Claude',  key: keyClaude,   fn: (s,m) => chamarClaude(s,m)},
+    {nome:'GLM',     key: keyGLM,      fn: chamarGLM},
+    {nome:'DeepSeek',key: keyDeepSeek, fn: chamarDeepSeek},
+    {nome:'Gemini',  key: keyGemini,   fn: (s,m) => chamarGemini(s,m)}
+  ];
+  let ultimoErro = null;
+  for (let i = 0; i < cadeia.length; i++) {
+    const provedor = cadeia[i];
+    if (!provedor.key) continue; // sem chave configurada, pula
+    try {
+      const resposta = await provedor.fn(system, msgs);
+      return i === 0 ? resposta : resposta + `\n\n_(Nota: rodando em ${provedor.nome} — provedor(es) anterior(es) indisponível(is))_`;
+    } catch(e) {
+      ultimoErro = e;
+      console.warn('Cascata: ' + provedor.nome + ' falhou —', e.message);
+    }
+  }
+  throw ultimoErro || new Error('Nenhuma chave de API configurada para pensamento estratégico (OpenAI/Claude/GLM/DeepSeek/Gemini)');
 }
 
 async function chamarGemini(system, msgs, onChunk) {
@@ -1763,9 +1507,11 @@ async function enviarTexto(txt) {
   try {
     const r = await chamarAPI(agenteId, msgParaAPI);
     hideTyping();
-    if (!document.getElementById("streamBub_" + agenteId)) {
+    if (!streamRenderizado) {
       addMsg(r, false);
     }
+    // Botão de download para respostas longas
+    if (r && r.length > 300) addBotaoDownload(r);
     if (vozAtiva && !modoSilencioso) await falarVoz(r);
     else setStatus('pronto');
   } catch(e) {
@@ -1789,7 +1535,7 @@ async function enviarParaZANKA(msg) {
   try {
     const r = await chamarAPI('zanka', msg);
     hideTyping();
-    if (!document.getElementById('streamBub_zanka')) addMsg(r, false);
+    if (!streamRenderizado) addMsg(r, false);
     if (vozAtiva && !modoSilencioso) await falarVoz(r);
     else setStatus('pronto');
   } catch(e) {
@@ -2237,7 +1983,6 @@ function addBotaoDownload(textoMsg) {
 // SEGURANÇA — HOLD / LOCK / DESBLOQUEAR
 // ════════════════════════════════════════
 function holdSistema(silencioso = false) {
-  fecharMenu();
   sistemaTravaado = true;
   // Para tudo
   vozAtiva = false; deveOuvir = false;
@@ -2265,8 +2010,7 @@ function tentarDesbloquear() {
 function desbloquear() {
   sistemaTravaado = false;
   document.getElementById('lockOverlay').classList.remove('show');
-  const bh = document.getElementById('btnHold');
-  if (bh) bh.textContent = '🔒 Travar sistema (Hold)';
+  document.getElementById('btnHold').textContent = '🔒 Hold';
   addMsg('🔓 Sistema desbloqueado. De volta ao show!', false);
 }
 
@@ -2317,10 +2061,7 @@ const NIVEL_NOMES = ['Cadastrado','Iniciante','Ativo','Avançado','Expert','Maes
 
 // Conectores padrão do sistema
 const CONECTORES_PADRAO = {
-  glm: { nome:'GLM (Zhipu)', categoria:'IA', url:'open.bigmodel.cn', nivel:3, usos:0, descricao:'1ª prioridade — GLM-4.6' },
-  openai: { nome:'OpenAI GPT-4o', categoria:'IA', url:'api.openai.com', nivel:3, usos:0, descricao:'2ª — melhor escala' },
-  gemini: { nome:'Gemini Flash', categoria:'IA', url:'generativelanguage.googleapis.com', nivel:3, usos:0, descricao:'Custo-benefício — mais usada' },
-  deepseek: { nome:'DeepSeek', categoria:'IA', url:'api.deepseek.com', nivel:3, usos:0, descricao:'Âncora — sempre no ar' },
+  gemini: { nome:'Gemini Flash', categoria:'IA', url:'generativelanguage.googleapis.com', nivel:3, usos:0, descricao:'14 agentes' },
   cloudflare: { nome:'Cloudflare Pages', categoria:'Hosting', url:'pages.cloudflare.com', nivel:3, usos:0, descricao:'HTTPS do ZANKA' },
   worker: { nome:'Cloudflare Worker', categoria:'Proxy', url:'workers.dev', nivel:2, usos:0, descricao:'TTS Inworld' },
   github: { nome:'GitHub', categoria:'Dev', url:'github.com', nivel:2, usos:0, descricao:'Repositório' },
@@ -2392,7 +2133,6 @@ function renderConectores() {
 }
 
 function abrirConectores() {
-  fecharMenu();
   renderConectores();
   document.getElementById('conOverlay').classList.add('show');
 }
@@ -2556,7 +2296,7 @@ async function briefingProjeto(p) {
   try {
     const r = await chamarAPI('zanka', msg);
     hideTyping();
-    if (!document.getElementById('streamBub_zanka')) addMsg(r, false);
+    if (!streamRenderizado) addMsg(r, false);
     if (vozAtiva && !modoSilencioso) await falarVoz(r);
     else setStatus('pronto');
   } catch(e) {
@@ -2695,10 +2435,8 @@ function toggleSilencio() {
 
 // Limpar conversa
 function limpar() {
-  fecharMenu();
   historico[agenteId] = [];
   document.getElementById('msgs').innerHTML = '';
-  salvarHistorico();
 }
 
 // Status bar
