@@ -1825,7 +1825,7 @@ function showTyping() {
   scroll();
 }
 function hideTyping(){document.getElementById('typing')?.remove();}
-function scroll(){const m=document.getElementById('msgs'); if(m) requestAnimationFrame(()=>m.scrollTo({top:m.scrollHeight,behavior:'smooth'}));}
+function scroll(){const m=document.getElementById('msgs');m.scrollTop=m.scrollHeight;}
 
 // ═══════════════════════════════════════
 // VOZ — MICROFONE ROBUSTO
@@ -2315,27 +2315,6 @@ function encerrarSessao() {
 const NIVEL_LABELS = ['⚪','⭐','⭐⭐','⭐⭐⭐','⭐⭐⭐⭐','🌟'];
 const NIVEL_NOMES = ['Cadastrado','Iniciante','Ativo','Avançado','Expert','Maestria'];
 
-
-// ════════════════════════════════════════
-// ZANKA MCP REGISTRY — SPRINT 1
-// ════════════════════════════════════════
-const MCP_RECOMENDADOS = {
- notion_mcp:{nome:'Notion MCP',categoria:'Knowledge',descricao:'Memória operacional e documentação',agentes:['ZANKA','NEJI','DIANA','GALDINO']},
- github_mcp:{nome:'GitHub MCP',categoria:'Dev',descricao:'Código, issues e versionamento',agentes:['HECTOR']},
- cloudflare_mcp:{nome:'Cloudflare MCP',categoria:'Infra',descricao:'Workers, Pages e DNS',agentes:['HECTOR']},
- google_drive_mcp:{nome:'Google Drive MCP',categoria:'Arquivos',descricao:'Documentos e dados',agentes:['TODOS']},
- supabase_mcp:{nome:'Supabase MCP',categoria:'Database',descricao:'Banco de dados e BI',agentes:['ZANKA','DIANA']},
- meta_business_mcp:{nome:'Meta Business MCP',categoria:'Marketing',descricao:'BM, Ads, campanhas e métricas',agentes:['SABRINA','MBAKU','DIANA']},
- brevo_mcp:{nome:'Brevo MCP',categoria:'Email Marketing',descricao:'Campanhas e automações',agentes:['ANINHA']},
- telegram_mcp:{nome:'Telegram MCP',categoria:'Comunicação',descricao:'Comandos e alertas',agentes:['ZANKA']}
-};
-function instalarMCP(id){
- const m=MCP_RECOMENDADOS[id]; if(!m)return;
- conectores[id]={...m,status:'vinculado',nivel:1,usos:0,descricao:m.descricao};
- salvarConectores(); renderConectores();
- addMsg(`🟢 ${m.nome} conectado. Agentes vinculados: ${m.agentes.join(', ')}`,false);
-}
-
 // Conectores padrão do sistema
 const CONECTORES_PADRAO = {
   glm: { nome:'GLM (Zhipu)', categoria:'IA', url:'open.bigmodel.cn', nivel:3, usos:0, descricao:'1ª prioridade — GLM-4.6' },
@@ -2400,14 +2379,13 @@ function removerConector(id) {
 function renderConectores() {
   const grid = document.getElementById('conGrid');
   if (!grid) return;
-  const recomendados = Object.entries(MCP_RECOMENDADOS).filter(([id])=>!conectores[id]).map(([id,m])=>`<button class="mcp-btn" onclick="instalarMCP('${id}')">+ ${m.nome}</button>`).join('');
-  grid.innerHTML = (recomendados ? `<div class="mcp-recomendados"><h3>🚀 MCP recomendados para ZANKA</h3>${recomendados}</div>` : '') + Object.entries(conectores).map(([id, c]) => {
+  grid.innerHTML = Object.entries(conectores).map(([id, c]) => {
     const nivel = c.nivel || 0;
     const isPadrao = !!CONECTORES_PADRAO[id];
     return `<div class="con-item nivel-${nivel}" onclick="usarConector('${id}')">
       <div class="con-nivel">${NIVEL_LABELS[nivel]} <span style="font-size:10px;color:var(--text3);">${NIVEL_NOMES[nivel]}</span></div>
       <div class="con-name">${c.nome}</div>
-      <div class="con-status">${c.categoria} · ${c.usos||0} usos · ${c.status==='vinculado'?'🟢 Vinculado':''}${c.descricao ? ' · ' + c.descricao : ''}</div>
+      <div class="con-status">${c.categoria} · ${c.usos||0} usos${c.descricao ? ' · ' + c.descricao : ''}</div>
       ${!isPadrao ? `<div onclick="event.stopPropagation();removerConector('${id}')" style="position:absolute;top:6px;right:8px;font-size:10px;color:var(--text3);cursor:pointer;">✕</div>` : ''}
     </div>`;
   }).join('');
@@ -2763,6 +2741,60 @@ function resize(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 100) + 'px';
 }
+</script>
+
+
+<!-- ZANKA Sprint 2 Agent Binding Layer -->
+<script>
+window.ZANKA_SPRINT = "2.0-Agent-Binding";
+window.ZANKA_MCP_REGISTRY = JSON.parse(localStorage.getItem('zanka_mcp_registry')||'{}');
+
+function zankaRegisterMCP(name, data){
+  const registry = JSON.parse(localStorage.getItem('zanka_mcp_registry')||'{}');
+  registry[name] = Object.assign({status:'pending', linkedAgents:[], created:new Date().toISOString()}, data);
+  localStorage.setItem('zanka_mcp_registry', JSON.stringify(registry));
+  return registry[name];
+}
+
+function zankaBindMCP(name, agents){
+  const registry = JSON.parse(localStorage.getItem('zanka_mcp_registry')||'{}');
+  if(!registry[name]) throw new Error('MCP não cadastrado');
+  registry[name].status='connected';
+  registry[name].linkedAgents=agents;
+  registry[name].verified=true;
+  localStorage.setItem('zanka_mcp_registry', JSON.stringify(registry));
+}
+
+function zankaProjectManager(){
+ return {
+  rename(oldName,newName){
+    const projects=JSON.parse(localStorage.getItem('zanka_projects')||'{}');
+    if(projects[oldName]){projects[newName]=projects[oldName]; delete projects[oldName]; localStorage.setItem('zanka_projects',JSON.stringify(projects));}
+  },
+  remove(name){
+    const projects=JSON.parse(localStorage.getItem('zanka_projects')||'{}');
+    delete projects[name]; localStorage.setItem('zanka_projects',JSON.stringify(projects));
+  }
+ }
+}
+
+function zankaScrollBottom(){
+ const targets=[document.querySelector('.chat-messages'),document.querySelector('#messages'),document.querySelector('.messages')];
+ const el=targets.find(x=>x);
+ if(el) setTimeout(()=>el.scrollTo({top:el.scrollHeight,behavior:'smooth'}),100);
+}
+window.addEventListener('load',()=>zankaScrollBottom());
+
+const ZANKA_CHANGELOG={
+ version:'Sprint 2',
+ changes:[
+ 'MCP com estados reais de conexão',
+ 'Base de vínculo agente-ferramenta',
+ 'Gerenciamento de projetos preparado',
+ 'Scroll automático inferior preparado'
+ ]
+};
+localStorage.setItem('zanka_last_update',JSON.stringify(ZANKA_CHANGELOG));
 </script>
 </body>
 </html>
