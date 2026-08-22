@@ -3175,5 +3175,208 @@ localStorage.setItem('zanka_last_update',JSON.stringify(ZANKA_CHANGELOG));
   try{localStorage.setItem('zanka_sprint3_version',S3_VERSION);localStorage.setItem('zanka_sprint3_changelog',JSON.stringify(window.ZANKA_CHANGELOG_S3));}catch(e){}
 })();
 </script>
+
+<style id="zanka-s4-style">
+/* SPRINT 4 — stable bottom-anchored conversation */
+.messages{overflow-anchor:none;scroll-behavior:auto!important;}
+.messages .msg{flex:0 0 auto;min-height:0;overflow-anchor:none;}
+.messages .msg-bub{white-space:pre-wrap;overflow-wrap:anywhere;}
+.z4-panel{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:12px;}
+.z4-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.z4-btn{border:1px solid var(--border);background:var(--s3);color:var(--text);border-radius:8px;padding:8px 11px;font-size:11px;font-weight:700;cursor:pointer}
+.z4-btn.primary{background:linear-gradient(135deg,var(--purple),var(--blue));border-color:transparent;color:#fff}
+.z4-status{font-size:10px;color:var(--text3);line-height:1.5}
+.z4-badge{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);border-radius:999px;padding:3px 7px;font-size:9px;color:var(--text2)}
+.z4-modal{position:fixed;inset:0;background:rgba(6,6,14,.78);backdrop-filter:blur(10px);z-index:10020;display:none;align-items:center;justify-content:center;padding:20px}
+.z4-modal.show{display:flex}.z4-card{width:min(720px,96vw);max-height:88vh;overflow:auto;background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:0 20px 70px rgba(0,0,0,.45)}
+.z4-card h3{margin:0 0 6px;font-size:17px}.z4-card p{font-size:11px;color:var(--text2);line-height:1.6}
+.z4-item{padding:12px 0;border-top:1px solid var(--border)}
+.z4-input{width:100%;box-sizing:border-box;background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 10px;font-size:11px;margin-top:6px}
+</style>
+
+<script>
+/* =============================================================
+   ZANKA SPRINT 4 — AUTONOMY, WEB READING, OAUTH CONNECTOR UX
+   Version 4.0.0
+   ============================================================= */
+(function(){
+'use strict';
+const S4='4.0.0';
+const MORNING_KEY='zanka_morning_brief_v4';
+const SCHED_KEY='zanka_morning_schedule_v4';
+const OAUTH_KEY='zanka_oauth_state_v4';
+
+function safe(k,d){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d));}catch(e){return d;}}
+function put(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+function esc4(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function bottom(force=true){
+  const m=document.getElementById('msgs'); if(!m)return;
+  const apply=()=>{m.scrollTop=m.scrollHeight; if(force) m.scrollTo({top:m.scrollHeight,left:0,behavior:'auto'});};
+  requestAnimationFrame(()=>requestAnimationFrame(apply));
+  setTimeout(apply,60); setTimeout(apply,180);
+}
+window.zankaScrollBottom4=bottom;
+
+/* ---------- Fix opposite-direction streaming ---------- */
+if(!window.__ZANKA_S4_SCROLL_PATCH){
+  const originalScroll=window.scroll;
+  window.scroll=function(){bottom(true);};
+  const oldAdd=window.addMsg;
+  if(typeof oldAdd==='function') window.addMsg=function(txt,isUser){const r=oldAdd.apply(this,arguments);bottom(true);return r;};
+  const oldTyping=window.showTyping;
+  if(typeof oldTyping==='function') window.showTyping=function(){const r=oldTyping.apply(this,arguments);bottom(true);return r;};
+  /* MutationObserver catches the exact moment the streaming bubble is created/expanded. */
+  const msgs=document.getElementById('msgs');
+  if(msgs){
+    const mo=new MutationObserver(()=>bottom(true));
+    mo.observe(msgs,{childList:true,subtree:true,characterData:true});
+  }
+  window.addEventListener('resize',()=>bottom(false));
+  window.__ZANKA_S4_SCROLL_PATCH=true;
+}
+
+/* ---------- Web reader: direct fetch + configurable server proxy ---------- */
+const WEB_CFG_KEY='zanka_web_reader_v4';
+window.ZANKA_WEB_READER={
+  version:S4,
+  getConfig:()=>safe(WEB_CFG_KEY,{proxyUrl:'',timeoutMs:12000}),
+  setConfig:(cfg)=>put(WEB_CFG_KEY,{...safe(WEB_CFG_KEY,{}),...cfg}),
+  normalizeUrl:(u)=>{let x=String(u||'').trim();if(!/^https?:\/\//i.test(x))x='https://'+x;return x;},
+  async read(url){
+    const target=this.normalizeUrl(url), cfg=this.getConfig();
+    if(cfg.proxyUrl){
+      const sep=cfg.proxyUrl.includes('?')?'&':'?';
+      const r=await fetch(cfg.proxyUrl+sep+'url='+encodeURIComponent(target),{signal:AbortSignal.timeout?.(cfg.timeoutMs||12000)});
+      if(!r.ok)throw new Error('Web Reader HTTP '+r.status);
+      const d=await r.json();
+      return {url:target,title:d.title||target,text:String(d.text||d.content||''),source:'proxy'};
+    }
+    const r=await fetch(target,{mode:'cors',signal:AbortSignal.timeout?.(cfg.timeoutMs||12000)});
+    if(!r.ok)throw new Error('O site recusou a leitura direta (HTTP '+r.status+'). Configure o Web Reader proxy.');
+    const html=await r.text();
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    doc.querySelectorAll('script,style,noscript,svg').forEach(x=>x.remove());
+    const title=doc.querySelector('title')?.textContent?.trim()||target;
+    const text=(doc.body?.innerText||doc.documentElement?.textContent||'').replace(/\\s+/g,' ').trim().slice(0,50000);
+    return {url:target,title,text,source:'direct'};
+  },
+  async ingest(url){const d=await this.read(url); if(window.zankaIngestKnowledge) window.zankaIngestKnowledge(d.text,{title:d.title,source:d.url}); return d;}
+};
+window.lerLinkZanka=async function(url){
+  try{const d=await window.ZANKA_WEB_READER.ingest(url); addMsg('🔗 Li o conteúdo de: '+d.title+'\\n\\n'+d.text.slice(0,8000),false); return d;}
+  catch(e){addMsg('⚠️ Não consegui ler esse site diretamente. '+e.message+'\\n\\nVocê pode configurar o Web Reader em Conectores.',false);throw e;}
+};
+
+/* ---------- Official connector launchers / OAuth handoff ---------- */
+const CONNECTOR4={
+  supabase:{name:'Supabase MCP',url:'https://mcp.supabase.com/mcp',site:'https://supabase.com/dashboard',auth:'browser-oauth',agents:['zanka','diana','hector','neji']},
+  supermetrics:{name:'Supermetrics MCP',url:'https://mcp.supermetrics.com',site:'https://mcp.supermetrics.com',auth:'oauth',agents:['zanka','diana','mbaku','sabrina']},
+  googleworkspace:{name:'Google Workspace',url:'',site:'https://console.cloud.google.com/',auth:'oauth',agents:['zanka','diana','galdino','aninha','hector']},
+  brevo:{name:'Brevo',url:'',site:'https://app.brevo.com/',auth:'oauth',agents:['aninha','luna','sabrina']},
+  telegram:{name:'Telegram',url:'',site:'https://my.telegram.org/',auth:'bot-or-oauth',agents:['zanka','luna','aninha']},
+  notion:{name:'Notion',url:'',site:'https://www.notion.so/my-integrations',auth:'oauth',agents:['zanka','neji','diana','galdino']},
+  github:{name:'GitHub',url:'',site:'https://github.com/settings/developers',auth:'oauth',agents:['hector','zanka']},
+  cloudflare:{name:'Cloudflare',url:'',site:'https://dash.cloudflare.com/',auth:'oauth',agents:['hector','zanka']}
+};
+window.ZANKA_CONNECTOR_CATALOG4=CONNECTOR4;
+window.zankaOpenConnector=async function(id){
+  const c=CONNECTOR4[id]; if(!c)return;
+  const reg=safe('zanka_mcp_registry',{});
+  reg[id]={...(reg[id]||{}),id,nome:c.name,status:'pending',verified:false,authState:'browser-login-started',officialSite:c.site,mcpEndpoint:c.url,linkedAgents:[],updated:new Date().toISOString()};
+  put('zanka_mcp_registry',reg);
+  window.open(c.site,'_blank','noopener,noreferrer');
+  renderConnector4();
+  addMsg('🔐 '+c.name+'\\n\\nAbri o ambiente oficial para autenticação. Faça login e autorize o ZANKA. Depois retorne ao ZANKA e use “Verificar conexão”.\\n\\nO sistema não marcará o conector como conectado sem uma verificação real.',false);
+};
+window.zankaVerifyOfficialConnector=async function(id){
+  const c=CONNECTOR4[id],reg=safe('zanka_mcp_registry',{}),x=reg[id];
+  if(!x)throw new Error('Primeiro inicie a conexão.');
+  if(id==='supabase'){
+    /* Browser-only verification cannot safely impersonate an MCP client. Probe the official endpoint and require an authenticated bridge response. */
+    const bridge=safe('zanka_mcp_bridge_v4',{endpoint:''});
+    if(!bridge.endpoint) throw new Error('Supabase: configure o MCP Bridge/endpoint autenticado. O login no site sozinho não fornece ao HTML uma sessão MCP segura.');
+  }
+  const bridge=safe('zanka_mcp_bridge_v4',{endpoint:''});
+  if(!bridge.endpoint) throw new Error('Verificação real requer o MCP Bridge do ZANKA. Isso evita marcar conexão fictícia.');
+  const r=await fetch(bridge.endpoint.replace(/\/$/,'')+'/health?connector='+encodeURIComponent(id),{credentials:'include'});
+  if(!r.ok)throw new Error('Bridge retornou HTTP '+r.status);
+  const d=await r.json(); if(d.connected!==true)throw new Error('Bridge não confirmou autenticação.');
+  x.status='connected';x.verified=true;x.authState='verified';x.updated=new Date().toISOString();reg[id]=x;put('zanka_mcp_registry',reg);renderConnector4();return x;
+};
+
+function renderConnector4(){
+  const grid=document.getElementById('conGrid'); if(!grid)return;
+  const reg=safe('zanka_mcp_registry',{});
+  const ids=Object.keys(CONNECTOR4);
+  const cards=ids.map(id=>{const c=CONNECTOR4[id],x=reg[id];const status=x?.status||'available';const label=status==='linked'?'🟢 Vinculado':status==='connected'&&x?.verified?'🟢 Conectado':status==='pending'?'🟡 Aguardando login':'⚪ Disponível';
+    return `<div class="con-item" style="position:relative"><div class="con-name">${esc4(c.name)}</div><div class="con-status">MCP / OAuth · ${esc4(c.auth)}</div><div class="con-state ${status==='linked'||(status==='connected'&&x?.verified)?'connected':'pending'}">${label}</div><div class="z4-row"><button class="z4-btn primary" onclick="zankaOpenConnector('${id}')">${status==='pending'?'Abrir login':'Conectar'}</button>${x?.status==='pending'?`<button class="z4-btn" onclick="zankaVerifyOfficialConnector('${id}').catch(e=>alert(e.message))">Verificar conexão</button>`:''}<button class="z4-btn" onclick="window.open('${c.site}','_blank','noopener,noreferrer')">Site oficial</button></div>${x?.linkedAgents?.length?`<div class="z4-status">Agentes: ${esc4(x.linkedAgents.join(', '))}</div>`:''}</div>`;
+  }).join('');
+  grid.innerHTML=`<div class="z4-panel"><strong>Conexão assistida</strong><div class="z4-status">O ZANKA abre o ambiente oficial, preserva o estado e só confirma o vínculo após verificação real. Login não é considerado conexão por si só.</div></div>${cards}`;
+}
+window.renderConectores=renderConnector4;
+
+/* ---------- Morning Briefing ---------- */
+function schedule(){return safe(SCHED_KEY,{enabled:true,time:'08:00',remoteEndpoint:''});}
+function morning(){return safe(MORNING_KEY,{lastRun:null,summary:null});}
+window.ZANKA_MORNING={
+  configure:function(cfg){put(SCHED_KEY,{...schedule(),...cfg});return schedule();},
+  getSchedule:schedule,
+  getLast:morning,
+  async run(reason='manual'){
+    const s=schedule();
+    const project=window.projetoAtivo||localStorage.getItem('zanka_projeto_ativo')||'global';
+    const memory=window.ZANKA_MEMORY?.retrieve?.('prioridades riscos oportunidades métricas tarefas',12)||[];
+    const payload={project,agent:'zanka',reason,time:new Date().toISOString(),memory,request:'Produza um resumo executivo matinal: fatos, métricas disponíveis, mudanças desde o último resumo, prioridades, riscos, oportunidades e ações recomendadas. Nunca invente dados.'};
+    if(s.remoteEndpoint){
+      const r=await fetch(s.remoteEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw new Error('Morning Briefing HTTP '+r.status);const d=await r.json();put(MORNING_KEY,{lastRun:new Date().toISOString(),summary:d.summary||d.text||d});return d;
+    }
+    /* Local fallback: creates a briefing when the app is opened. True background execution while the browser is closed requires the remote endpoint/cron. */
+    const prompt=payload.request+'\\nProjeto: '+project+'\\nMemórias relevantes: '+JSON.stringify(memory);
+    const text=typeof window.chamarAPI==='function'?await window.chamarAPI('zanka',prompt):'Abra o ZANKA para executar o briefing.';
+    put(MORNING_KEY,{lastRun:new Date().toISOString(),summary:text});return {summary:text,local:true};
+  },
+  shouldRun:function(){const s=schedule(),last=morning().lastRun;if(!s.enabled)return false;const now=new Date();const [h,m]=s.time.split(':').map(Number);const target=new Date(now);target.setHours(h,m,0,0);return now>=target && (!last || new Date(last).toDateString()!==now.toDateString());}
+};
+window.runMorningBriefing=async function(){try{const d=await window.ZANKA_MORNING.run('manual');addMsg('🌅 RESUMO MATINAL\\n\\n'+String(d.summary||d.text||d),false);bottom(true);}catch(e){addMsg('⚠️ Resumo matinal: '+e.message,false);}};
+window.openMorningSettings=function(){
+  let m=document.getElementById('z4Morning');if(!m){m=document.createElement('div');m.id='z4Morning';m.className='z4-modal';document.body.appendChild(m);}
+  const s=schedule(),last=morning();m.innerHTML=`<div class="z4-card"><h3>🌅 Resumo matinal</h3><p>O ZANKA prepara um briefing executivo por projeto. Nesta versão, execução realmente fora do navegador depende de um endpoint remoto/cron; sem isso, o briefing é disparado automaticamente na primeira abertura do dia.</p><div class="z4-item"><label class="z4-status">Horário</label><input id="z4MorningTime" class="z4-input" type="time" value="${esc4(s.time)}"></div><div class="z4-item"><label class="z4-status">Endpoint remoto (opcional — Supabase Edge Function/cron)</label><input id="z4MorningEndpoint" class="z4-input" placeholder="https://seu-projeto.supabase.co/functions/v1/zanka-morning" value="${esc4(s.remoteEndpoint||'')}"></div><div class="z4-row"><button class="z4-btn primary" onclick="ZANKA_MORNING.configure({time:document.getElementById('z4MorningTime').value,remoteEndpoint:document.getElementById('z4MorningEndpoint').value,enabled:true});document.getElementById('z4Morning').classList.remove('show');alert('Configuração salva.');">Salvar</button><button class="z4-btn" onclick="runMorningBriefing();document.getElementById('z4Morning').classList.remove('show')">Executar agora</button><button class="z4-btn" onclick="document.getElementById('z4Morning').classList.remove('show')">Fechar</button></div><div class="z4-status" style="margin-top:12px">Último resumo: ${esc4(last.lastRun||'nunca')}</div></div>`;m.classList.add('show');
+};
+
+/* ---------- Natural-language URL intent ---------- */
+if(!window.__ZANKA_S4_URL_INTENT){
+ const oldEnviar=window.enviarTexto;
+ if(typeof oldEnviar==='function') window.enviarTexto=async function(txt){
+   const m=String(txt||'').match(/(?:ler|leia|analise|analisar|resuma|resumir)\s+(?:este\s+)?(?:site|link|url)?\s*[:\-]?\s*(https?:\/\/\S+)/i);
+   if(m){try{const d=await window.ZANKA_WEB_READER.ingest(m[1]);const q='Analise o conteúdo abaixo com base no objetivo do usuário. URL: '+d.url+'\\nTítulo: '+d.title+'\\nConteúdo:\\n'+d.text.slice(0,30000);return oldEnviar.call(this,q);}catch(e){return oldEnviar.apply(this,arguments);}}
+   return oldEnviar.apply(this,arguments);
+ };
+ window.__ZANKA_S4_URL_INTENT=true;
+}
+
+/* ---------- Automatic daily trigger on opening ---------- */
+setTimeout(()=>{try{if(window.ZANKA_MORNING.shouldRun()){window.ZANKA_MORNING.run('daily-open').then(d=>{put(MORNING_KEY,{lastRun:new Date().toISOString(),summary:d.summary||d.text||d});});}}catch(e){console.warn('[ZANKA S4 morning]',e);}},1200);
+
+/* ---------- Changelog ---------- */
+window.ZANKA_CHANGELOG_S4={version:S4,sprint:'4 — Autonomy + Web + Assisted OAuth',changes:[
+ 'Scroll ancorado no final com MutationObserver durante streaming para evitar movimento contrário.',
+ 'Leitor de links/sites com fetch direto e proxy configurável para sites que bloqueiam CORS.',
+ 'Catálogo de conexões assistidas com abertura dos sites oficiais.',
+ 'Fluxo de verificação real: login não marca MCP como conectado; exige MCP Bridge autenticado.',
+ 'Supabase MCP com endpoint oficial e caminho de autenticação assistida.',
+ 'Supermetrics MCP com OAuth assistido e site oficial.',
+ 'Google Workspace preparado para OAuth/Google Cloud Console.',
+ 'Resumo matinal por projeto com execução local na abertura e suporte a endpoint remoto para execução fora do navegador.',
+ 'Memória/RAG do Sprint 3 preservados.'
+],practical:'O ZANKA passa a ter base para monitoramento matinal, leitura de links e conexão assistida. Execução enquanto o navegador está fechado exige um job remoto/cron; o HTML sozinho não pode executar JavaScript quando não está rodando.'};
+try{localStorage.setItem('zanka_sprint4_version',S4);localStorage.setItem('zanka_sprint4_changelog',JSON.stringify(window.ZANKA_CHANGELOG_S4));}catch(e){}
+
+/* Add non-invasive menu entry. */
+try{const menu=document.querySelector('.menu-item[onclick="abrirConectores()"]')?.parentElement;if(menu&&!document.getElementById('z4MorningMenu')){const b=document.createElement('button');b.id='z4MorningMenu';b.className='menu-item';b.textContent='🌅 Resumo matinal';b.onclick=openMorningSettings;menu.insertBefore(b,menu.querySelector('.menu-sep'));}}catch(e){}
+
+setTimeout(()=>{renderConnector4();bottom(true);},250);
+})();
+</script>
+
 </body>
 </html>
