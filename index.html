@@ -24,7 +24,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 /* TOP BAR */
 .topbar{height:50px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;}
 .tb-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:-.3px;}
-.tb-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--purple),var(--blue));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.tb-icon{display:none;}
 .tb-divider{width:1px;height:20px;background:var(--border);margin:0 4px;}
 .voice-status{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--text3);transition:all .2s;}
 .voice-status.ouvindo{background:var(--red-bg);border-color:rgba(248,113,113,.4);color:var(--red);}
@@ -122,7 +122,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 /* SETUP */
 .setup-overlay{position:fixed;inset:0;background:rgba(6,6,14,.97);display:flex;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(8px);}
 .setup-card{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:36px;max-width:460px;width:90%;}
-.setup-logo{width:52px;height:52px;background:linear-gradient(135deg,var(--purple),var(--blue));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px;}
+.setup-logo{display:none;}
 .setup-title{font-size:20px;font-weight:900;margin-bottom:6px;}
 .setup-subtitle{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;}
 .setup-field{margin-bottom:12px;}
@@ -256,8 +256,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 /* ── v1.4 — LOCK SCREEN LIMPO + IMAGEM DE FUNDO ── */
 .lock-overlay{background-size:cover;background-position:center;background-repeat:no-repeat;}
-.lock-inner{display:flex;flex-direction:column;align-items:center;gap:18px;background:rgba(10,14,23,.74);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:22px;padding:44px 40px;box-shadow:0 24px 70px rgba(0,0,0,.55);min-width:320px;}
-.lock-inner .lock-icon{font-size:44px;}
+.lock-inner{display:flex;flex-direction:column;align-items:center;gap:10px;background:rgba(10,14,23,.74);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;box-shadow:0 16px 40px rgba(0,0,0,.4);min-width:250px;}
+.lock-inner .lock-icon{font-size:20px;opacity:.55;}
+
+/* Sprint 2.1 — project controls */
+.proj-actions{display:flex;gap:5px;margin-top:9px;}
+.proj-mini{border:1px solid var(--border);background:var(--s3);color:var(--text2);border-radius:6px;padding:5px 7px;font-size:9px;cursor:pointer;font-family:inherit;}
+.proj-mini:hover{color:var(--text);border-color:var(--border2);}
+.con-state{display:inline-flex;align-items:center;gap:5px;font-size:9px;margin-top:5px;}
+.con-state.pending{color:var(--gold)} .con-state.connected{color:var(--green)} .con-state.error{color:var(--red)}
+.mcp-market{margin-bottom:14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.mcp-market-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:9px;}
+.mcp-rec{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);gap:8px;}
+.mcp-rec:last-child{border-bottom:0;}
+.mcp-rec-info{min-width:0}.mcp-rec-name{font-size:11px;font-weight:700}.mcp-rec-desc{font-size:9px;color:var(--text3);margin-top:2px;}
+.mcp-install{border:1px solid var(--purple-border);background:var(--purple-bg);color:#a78bfa;border-radius:6px;padding:5px 8px;font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap;}
+
 </style>
 </head>
 <body>
@@ -265,7 +279,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 <!-- SETUP -->
 <div class="setup-overlay" id="setupOverlay">
   <div class="setup-card">
-    <div class="setup-logo">🧠</div>
+    
     <div class="setup-title">ZANKA HQ</div>
     <div class="setup-subtitle">Knowledge Integration & Response Automation<br>Time de 17 agentes. Configure as APIs para ativar.</div>
 
@@ -350,9 +364,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 <div class="topbar">
   <button class="tb-icon-btn" onclick="toggleSidebar()" title="Mostrar / ocultar o time">☰</button>
   <div class="tb-brand">
-    <div class="tb-icon">🧠</div>
+    
     ZANKA HQ
-    <span style="font-size:9px;font-weight:500;color:var(--text3);margin-left:6px;letter-spacing:.5px;">v1.4.0</span>
+    <span style="font-size:9px;font-weight:500;color:var(--text3);margin-left:6px;letter-spacing:.5px;">v2.1.0</span>
   </div>
   <div class="proj-ativo-badge" id="projBadge" onclick="abrirProjetos()">
     <span id="projEmoji">🎯</span>
@@ -403,7 +417,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     <div class="sb-section">
       <div class="sb-label">C-Level</div>
       <button class="ag-btn ativo" onclick="sel('zanka')" id="btn-zanka">
-        <span class="ag-emoji">🧠</span>
+        <span class="ag-emoji"></span>
         <div class="ag-info-sb"><div class="ag-name-sb">ZANKA</div><div class="ag-role-sb">Orquestradora</div></div>
         <span class="clevel-tag tag-ceo">CEO</span>
       </button>
@@ -453,7 +467,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
   <div class="chat-main">
     <div class="ag-header">
-      <div class="ag-av" id="agAv">🧠</div>
+      <div class="ag-av" id="agAv"></div>
       <div class="ag-header-info">
         <div class="ag-header-name" id="agName">ZANKA</div>
         <div class="ag-header-role" id="agRole">ZANKA · CEO · CFO · Jurídica · Orquestradora</div>
@@ -463,7 +477,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
     <div class="messages" id="msgs">
       <div class="welcome" id="wlScreen">
-        <div style="font-size:48px;">🧠</div>
+        
         <div class="wl-title">ZANKA online.</div>
         <div class="wl-sub">Pode falar — estou ouvindo. Microfone ativo automaticamente. Ou use as sugestões abaixo para começar.</div>
         <div class="wl-voice" style="background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);">
@@ -934,13 +948,13 @@ Responda em português brasileiro.`}
 // ═══════════════════════════════════════
 // ESTADO
 // ═══════════════════════════════════════
-let agenteId = 'zanka';
-let historico = {};
+var agenteId = 'zanka';
+var historico = {};
 let agenteStatus = {};      // 'online' | 'working' por agente
 let sidebarColapsada = false;
 let menuAberto = false;
 let vozAtiva = true;
-let processando = false;
+var processando = false;
 let reconhecimento = null;
 let deveOuvir = true;
 let falando = false;
@@ -1009,8 +1023,8 @@ const PROJETOS_PADRAO = {
   }
 };
 
-let projetos = JSON.parse(localStorage.getItem('zanka_projetos') || 'null') || {...PROJETOS_PADRAO};
-let projetoAtivo = localStorage.getItem('zanka_projeto_ativo') || null;
+var projetos = JSON.parse(localStorage.getItem('zanka_projetos') || 'null') || {...PROJETOS_PADRAO};
+var projetoAtivo = localStorage.getItem('zanka_projeto_ativo') || null;
 let modoSelecaoProjeto = true; // true = mostrar seletor ao abrir
 
 Object.keys(AGENTES).forEach(k => historico[k] = []);
@@ -2483,11 +2497,16 @@ function renderProjetos() {
     const diasTxt = dias === null ? 'Nunca acessado' : dias === 0 ? 'Hoje' : `${dias}d sem acesso`;
     return `<div class="proj-item ${sel} ${cls}" onclick="selecionarProjeto('${p.id}')">
       <div class="proj-emoji">${p.emoji}</div>
-      <div class="proj-nome">${p.nome}</div>
-      <div class="proj-desc">${p.descricao}</div>
+      <div class="proj-nome">${escapeHtml(p.nome)}</div>
+      <div class="proj-desc">${escapeHtml(p.descricao)}</div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span class="proj-badge ${badgeCls}">${badgeTxt}</span>
         <span style="font-size:9px;color:var(--text3);">${diasTxt}</span>
+      </div>
+      <div class="proj-actions" onclick="event.stopPropagation()">
+        <button class="proj-mini" onclick="renomearProjeto('${p.id}')">Renomear</button>
+        <button class="proj-mini" onclick="duplicarProjeto('${p.id}')">Duplicar</button>
+        <button class="proj-mini" onclick="excluirProjeto('${p.id}')">Excluir</button>
       </div>
     </div>`;
   }).join('');
@@ -2795,6 +2814,240 @@ const ZANKA_CHANGELOG={
  ]
 };
 localStorage.setItem('zanka_last_update',JSON.stringify(ZANKA_CHANGELOG));
+</script>
+
+<!-- ZANKA Sprint 2.1 — validated stability / project isolation / real MCP state -->
+<script>
+(function(){
+  'use strict';
+  const VERSION='2.1.0-stability';
+  window.ZANKA_SPRINT=VERSION;
+  const esc = window.escapeHtml || function(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));};
+  window.escapeHtml=esc;
+
+  /* ---------- Project-scoped memory ---------- */
+  function loadProjectHistory(){
+    try{return JSON.parse(localStorage.getItem('zanka_historico_projetos')||'{}')||{};}catch(e){return {};}
+  }
+  function currentProjectKey(){ return window.projetoAtivo || localStorage.getItem('zanka_projeto_ativo') || 'sem-projeto'; }
+  function saveProjectHistory(){
+    try{
+      const all=loadProjectHistory(), pid=currentProjectKey();
+      all[pid]={};
+      for(const k of Object.keys(window.historico||{})){
+        const arr=(window.historico[k]||[]).slice(-40).map(m=>({role:m.role,content:m.content,_display:m._display}));
+        if(arr.length) all[pid][k]=arr;
+      }
+      localStorage.setItem('zanka_historico_projetos',JSON.stringify(all));
+      /* legacy backup retained for rollback */
+      if(window.salvarHistoricoLegacy) window.salvarHistoricoLegacy();
+    }catch(e){console.warn('project history save',e);}
+  }
+  function loadCurrentProjectHistory(){
+    const all=loadProjectHistory(), pid=currentProjectKey(), data=all[pid]||{};
+    window.historico=window.historico||{};
+    Object.keys(window.AGENTES||{}).forEach(k=>window.historico[k]=Array.isArray(data[k])?data[k]:[]);
+    try{localStorage.setItem('zanka_historico',JSON.stringify(data));}catch(e){}
+  }
+
+  /* Preserve original history saver and replace it with project-aware saver. */
+  if(!window.salvarHistoricoLegacy && typeof window.salvarHistorico==='function') window.salvarHistoricoLegacy=window.salvarHistorico;
+  window.salvarHistorico=function(){ saveProjectHistory(); };
+
+  /* Migration: old global history belongs to current project only. */
+  (function migrate(){
+    const all=loadProjectHistory();
+    if(Object.keys(all).length===0){
+      try{
+        const old=JSON.parse(localStorage.getItem('zanka_historico')||'{}');
+        if(Object.keys(old).length) all[currentProjectKey()]=old;
+        localStorage.setItem('zanka_historico_projetos',JSON.stringify(all));
+      }catch(e){}
+    }
+  })();
+
+  /* ---------- Reliable rendering: never replace the user's text with an empty bubble ---------- */
+  function scrollBottom(force){
+    const el=document.getElementById('msgs'); if(!el) return;
+    requestAnimationFrame(()=>{
+      el.scrollTop=el.scrollHeight;
+      if(force) setTimeout(()=>{el.scrollTop=el.scrollHeight;},40);
+    });
+  }
+  window.scroll=scrollBottom;
+  window.zankaScrollBottom=()=>scrollBottom(true);
+
+  /* ---------- Agent selection: project context stays, agent history is project-scoped ---------- */
+  const originalSel=window.sel;
+  window.sel=function(id){
+    if(typeof originalSel==='function') originalSel(id);
+    loadCurrentProjectHistory();
+    if(typeof window.renderHistorico==='function') window.renderHistorico(id);
+    scrollBottom(true);
+  };
+
+  /* ---------- Safe message sender: user bubble is rendered once and never cleared ---------- */
+  const originalEnviarTexto=window.enviarTexto;
+  window.enviarTexto=async function(txt){
+    if(!txt || window.processando) return;
+    /* Keep typed text in the UI until the user bubble is committed. */
+    const inp=document.getElementById('inp');
+    if(inp && inp.value.trim()===txt.trim()) { inp.value=''; if(typeof window.resize==='function') window.resize(inp); }
+    return originalEnviarTexto.call(this,txt).finally(()=>{
+      scrollBottom(true);
+    });
+  };
+
+  /* ---------- Override API wrapper to guarantee non-empty assistant content ---------- */
+  if(typeof window.chamarAPI==='function'){
+    const originalAPI=window.chamarAPI;
+    window.chamarAPI=async function(agId,msg){
+      const result=await originalAPI.apply(this,arguments);
+      if(result==null || String(result).trim()==='') throw new Error('A IA retornou uma resposta vazia. A mensagem foi preservada e a tentativa pode ser repetida.');
+      saveProjectHistory();
+      scrollBottom(true);
+      return result;
+    };
+  }
+
+  /* ---------- Project manager ---------- */
+  window.renomearProjeto=function(id){
+    if(!window.projetos || !window.projetos[id]) return;
+    const p=window.projetos[id], novo=prompt('Novo nome do projeto:',p.nome);
+    if(!novo || !novo.trim() || novo.trim()===p.nome) return;
+    p.nome=novo.trim();
+    window.salvarProjetos(); window.renderProjetos(); window.atualizarBadgeProjeto();
+  };
+  window.duplicarProjeto=function(id){
+    const p=window.projetos?.[id]; if(!p) return;
+    const novoNome=prompt('Nome do projeto duplicado:',p.nome+' — cópia');
+    if(!novoNome||!novoNome.trim()) return;
+    let nid=novoNome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    if(!nid) nid='projeto-'+Date.now();
+    let base=nid,n=2; while(window.projetos[nid]) nid=base+'-'+n++;
+    window.projetos[nid]=JSON.parse(JSON.stringify({...p,id:nid,nome:novoNome.trim(),ultimo_acesso:null}));
+    window.salvarProjetos(); window.renderProjetos();
+  };
+  window.excluirProjeto=function(id){
+    if(!window.projetos?.[id]) return;
+    if(Object.keys(window.projetos).length<=1){alert('Mantenha pelo menos um projeto.');return;}
+    const p=window.projetos[id];
+    if(!confirm('Excluir o projeto "'+p.nome+'"? O histórico e a memória exclusivos deste projeto também serão removidos.')) return;
+    delete window.projetos[id];
+    const all=loadProjectHistory(); delete all[id]; localStorage.setItem('zanka_historico_projetos',JSON.stringify(all));
+    if(window.projetoAtivo===id){ window.projetoAtivo=Object.keys(window.projetos)[0]; localStorage.setItem('zanka_projeto_ativo',window.projetoAtivo); loadCurrentProjectHistory(); if(typeof window.sel==='function') window.sel(window.agenteId||'zanka'); }
+    window.salvarProjetos(); window.renderProjetos(); window.atualizarBadgeProjeto();
+  };
+
+  window.confirmarProjeto=async function(){
+    const id=window.projetoAtivo;
+    if(!id || !window.projetos?.[id]){ document.getElementById('projSub').textContent='Selecione um projeto antes de continuar.'; return; }
+    window.projetoAtivo=id;
+    window.projetos[id].ultimo_acesso=new Date().toISOString();
+    localStorage.setItem('zanka_projeto_ativo',id);
+    window.salvarProjetos();
+    if(typeof window.fecharProjetos==='function') window.fecharProjetos();
+    if(typeof window.atualizarBadgeProjeto==='function') window.atualizarBadgeProjeto();
+    loadCurrentProjectHistory();
+    const msgs=document.getElementById('msgs');
+    if(msgs) msgs.innerHTML='';
+    if(typeof window.renderHistorico==='function') window.renderHistorico(window.agenteId||'zanka');
+    scrollBottom(true);
+  };
+
+  /* Project briefing is explicit, never forced on project switch. */
+  window.briefingProjeto=async function(p){
+    const txt='Projeto ativo: '+p.nome+'\nDescrição: '+p.descricao+'\nMercados: '+p.mercados+'\nProduto: '+p.produto+'\nModelo: '+p.modelo+'\n\nFaça um briefing executivo somente se o usuário solicitou.';
+    if(typeof window.enviarTexto==='function') return window.enviarTexto(txt);
+  };
+
+  /* ---------- MCP registry: only verified connections can become connected/linked ---------- */
+  const MCP_CATALOG={
+    notion:{nome:'Notion MCP',cat:'Knowledge',desc:'Documentação, SOPs e memória operacional'},
+    supabase:{nome:'Supabase MCP',cat:'Database',desc:'PostgreSQL, dados operacionais e análises'},
+    meta:{nome:'Meta Business MCP',cat:'Marketing',desc:'BM, campanhas, anúncios e métricas'},
+    brevo:{nome:'Brevo MCP',cat:'Email',desc:'Email marketing e automações'},
+    telegram:{nome:'Telegram MCP',cat:'Communication',desc:'Bots, alertas e operação'},
+    github:{nome:'GitHub MCP',cat:'Dev',desc:'Repositórios, issues e código'},
+    cloudflare:{nome:'Cloudflare MCP',cat:'Infra',desc:'Pages, Workers e infraestrutura'}
+  };
+  function mcpStore(){try{return JSON.parse(localStorage.getItem('zanka_mcp_registry')||'{}')||{};}catch(e){return {};}}
+  function mcpSave(r){localStorage.setItem('zanka_mcp_registry',JSON.stringify(r));window.ZANKA_MCP_REGISTRY=r;}
+  window.zankaRegisterMCP=function(id,data){
+    const r=mcpStore(); r[id]={...(r[id]||{}),...data,status:data.status||'pending',verified:false,linkedAgents:[],updated:new Date().toISOString()}; mcpSave(r); return r[id];
+  };
+  window.zankaVerifyMCP=async function(id,verifyFn){
+    const r=mcpStore(); if(!r[id]) throw new Error('MCP não cadastrado.');
+    r[id].status='testing'; mcpSave(r); renderMCPUI();
+    try{
+      const ok=typeof verifyFn==='function' ? await verifyFn(r[id]) : false;
+      if(!ok) throw new Error('A conexão não foi confirmada.');
+      r[id].status='connected'; r[id].verified=true; r[id].updated=new Date().toISOString(); mcpSave(r); renderMCPUI(); return true;
+    }catch(e){r[id].status='error';r[id].verified=false;r[id].error=e.message;mcpSave(r);renderMCPUI();return false;}
+  };
+  window.zankaBindMCP=function(id,agents){
+    const r=mcpStore(); if(!r[id] || r[id].status!=='connected' || !r[id].verified) throw new Error('MCP não pode ser vinculado: conexão real ainda não foi validada.');
+    r[id].linkedAgents=[...new Set(agents)].filter(a=>window.AGENTES?.[a]); r[id].status='linked'; mcpSave(r); renderMCPUI(); return r[id];
+  };
+  window.installMCP=function(id){
+    const c=MCP_CATALOG[id]; if(!c)return;
+    const r=mcpStore(); if(r[id]?.status==='linked'||r[id]?.status==='connected') return;
+    r[id]={...(r[id]||{}),id,nome:c.nome,categoria:c.cat,descricao:c.desc,status:'pending',verified:false,linkedAgents:[],created:r[id]?.created||new Date().toISOString()};
+    mcpSave(r); renderMCPUI();
+    alert(c.nome+' foi cadastrado como PENDENTE. Ele só será considerado conectado/vinculado após autenticação e teste real.');
+  };
+  function renderMCPUI(){
+    const grid=document.getElementById('conGrid'); if(!grid)return;
+    const r=mcpStore();
+    const installed=new Set(Object.keys(r));
+    const rec=Object.entries(MCP_CATALOG).filter(([id])=>!installed.has(id)).map(([id,c])=>`<div class="mcp-rec"><div class="mcp-rec-info"><div class="mcp-rec-name">${esc(c.nome)}</div><div class="mcp-rec-desc">${esc(c.desc)}</div></div><button class="mcp-install" onclick="installMCP('${id}')">Adicionar</button></div>`).join('');
+    const market=rec?`<div class="mcp-market"><div class="mcp-market-title">MCP recomendados</div>${rec}</div>`:'';
+    const cards=Object.entries(r).map(([id,c])=>{
+      const status=c.status||'pending', label=status==='linked'?'🟢 Vinculado':status==='connected'?'🟢 Conectado':status==='testing'?'🟡 Testando':status==='error'?'🔴 Erro de conexão':'🟡 Pendente';
+      const agents=(c.linkedAgents||[]).join(', ')||'Nenhum agente vinculado';
+      return `<div class="con-item"><div class="con-name">${esc(c.nome||id)}</div><div class="con-status">${esc(c.categoria||'MCP')} · ${esc(c.descricao||'')}</div><div class="con-state ${status==='error'?'error':status==='linked'||status==='connected'?'connected':'pending'}">${label}</div><div style="font-size:9px;color:var(--text3);margin-top:4px">Agentes: ${esc(agents)}</div>${status==='linked'?'<div style="font-size:9px;color:var(--green);margin-top:3px">Ferramentas liberadas conforme permissão.</div>':''}<div onclick="event.stopPropagation();deleteMCP('${id}')" style="position:absolute;top:6px;right:8px;font-size:10px;color:var(--text3);cursor:pointer">✕</div></div>`;
+    }).join('');
+    grid.innerHTML=market+cards;
+  }
+  window.renderConectores=renderMCPUI;
+  window.deleteMCP=function(id){const r=mcpStore();if(!confirm('Remover este MCP e seus vínculos locais?'))return;delete r[id];mcpSave(r);renderMCPUI();};
+
+  /* ---------- Read permissions are explicit; write is approval-only by default ---------- */
+  window.ZANKA_AGENT_CAPABILITIES={
+    zanka:{read:'all-connected',write:'approval'},diana:{read:['supabase','meta','shopify','analytics'],write:'approval'},
+    sabrina:{read:['meta','instagram'],write:'approval'},mbaku:{read:['meta','google-ads'],write:'approval'},
+    hector:{read:['github','cloudflare','supabase'],write:'approval'},galdino:{read:['hubspot','pipedrive','supabase'],write:'approval'},
+    luna:{read:['crm','brevo','telegram'],write:'approval'},marcus:{read:['crm','brevo'],write:'approval'},
+    aninha:{read:['brevo'],write:'approval'},neji:{read:'all-connected',write:'approval'}
+  };
+
+  window.limpar=function(){
+    if(typeof window.fecharMenu==='function') window.fecharMenu();
+    if(window.historico) window.historico[window.agenteId||'zanka']=[];
+    saveProjectHistory();
+    const msgs=document.getElementById('msgs'); if(msgs) msgs.innerHTML='';
+    const ws=document.getElementById('wlScreen'); if(ws) ws.style.display='flex';
+    scrollBottom(true);
+  };
+
+  /* ---------- Changelog ---------- */
+  window.ZANKA_CHANGELOG_FINAL={version:VERSION,sprints:['0 — Agent Intelligence','1 — MCP Registry','1.5 — Project UX','2 — Agent Binding','2.1 — Stability'],changes:[
+    'Mensagem do usuário permanece visível; resposta não substitui nem limpa o balão.',
+    'Scroll forçado ao final após envio, streaming, resposta e troca de agente/projeto.',
+    'Histórico isolado por projeto e agente; migração do histórico legado para o projeto atual.',
+    'Troca de projeto não dispara briefing nem apaga a conversa do projeto anterior.',
+    'Projetos podem ser renomeados, duplicados e excluídos com confirmação.',
+    'MCP só pode ser Conectado/Vinculado após verificação real; cadastro sozinho fica Pendente.',
+    'Matriz inicial de capacidades agente × ferramenta; escrita exige aprovação.',
+    'Interface sem cérebro no branding e cadeado reduzido.'
+  ]};
+  localStorage.setItem('zanka_last_update',JSON.stringify(window.ZANKA_CHANGELOG_FINAL));
+
+  /* initialize current project history after all overrides are installed */
+  loadCurrentProjectHistory();
+  renderMCPUI();
+  setTimeout(()=>scrollBottom(true),100);
+})();
 </script>
 </body>
 </html>
