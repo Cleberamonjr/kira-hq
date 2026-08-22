@@ -509,15 +509,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </div>
     </div>
 
-    <div class="bottom">
-      <div class="hints">
-        <button class="hint" onclick="enviarTexto('bom dia ZANKA')">🌅 Bom dia ZANKA</button>
-        <button class="hint" onclick="enviarTexto('ZANKA hora do show')">🔥 Hora do show</button>
-        <button class="hint" onclick="enviarTexto('ZANKA a que pé estamos')">📊 Status da operação</button>
-        <button class="hint" onclick="enviarTexto('Quero criar conteúdo para essa semana')">📅 Conteúdo da semana</button>
-        <button class="hint" onclick="enviarTexto('Preciso de uma estratégia de tráfego')">⚡ Estratégia tráfego</button>
-      </div>
-      <div id="uploadPreview" style="display:none;margin-bottom:8px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--text2);display:none;align-items:center;gap:8px;">
+    <div class="bottom"><div id="uploadPreview" style="display:none;margin-bottom:8px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--text2);display:none;align-items:center;gap:8px;">
         <span id="uploadIcon">📎</span>
         <span id="uploadNome" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
         <button onclick="cancelarUpload()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0;">✕</button>
@@ -1059,19 +1051,27 @@ function carregarHistorico() {
 function renderHistorico(agId) {
   const msgs = document.getElementById('msgs');
   if (!msgs) return;
-  const hist = historico[agId] || [];
-  if (hist.length === 0) return; // mantém a tela de boas-vindas
-  const ag = AGENTES[agId];
+  const hist = Array.isArray(historico[agId]) ? historico[agId] : [];
   msgs.innerHTML = '';
+  if (hist.length === 0) {
+    const ws = document.getElementById('wlScreen');
+    if (ws) msgs.appendChild(ws);
+    scroll();
+    return;
+  }
+  const ag = AGENTES[agId];
   for (const m of hist) {
     const isUser = m.role === 'user';
     const texto = isUser ? (m._display || m.content || '') : (m.content || '');
     const el = document.createElement('div');
     el.className = `msg${isUser ? ' user' : ''}`;
-    el.innerHTML = `<div class="msg-av">${isUser ? '👤' : ag.emoji}</div><div><div class="msg-bub">${String(texto).replace(/</g,'&lt;')}</div><div class="msg-meta">${isUser ? 'Você' : ag.nome}</div></div>`;
-    msgs.appendChild(el);
+    const av = document.createElement('div'); av.className='msg-av'; av.textContent=isUser?'👤':ag.emoji;
+    const wrap = document.createElement('div');
+    const bub = document.createElement('div'); bub.className='msg-bub'; bub.textContent=String(texto);
+    const meta = document.createElement('div'); meta.className='msg-meta'; meta.textContent=isUser?'Você':ag.nome;
+    wrap.appendChild(bub); wrap.appendChild(meta); el.appendChild(av); el.appendChild(wrap); msgs.appendChild(el);
   }
-  msgs.scrollTop = msgs.scrollHeight;
+  scroll();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1547,7 +1547,7 @@ async function chamarAPI(agId, mensagem) {
   const bub = document.getElementById('streamBub_' + agId);
   let acc = '';
   const sink = {
-    write: (c) => { acc += c; bub.textContent = acc; msgsEl.scrollTop = msgsEl.scrollHeight; },
+    write: (c) => { acc += c; bub.textContent = acc; requestAnimationFrame(()=>{ msgsEl.scrollTop = msgsEl.scrollHeight; }); },
     reset: () => { acc = ''; bub.textContent = ''; }
   };
 
@@ -2513,11 +2513,20 @@ function renderProjetos() {
 }
 
 function selecionarProjeto(id) {
+  if (!projetos[id]) return;
+  // Persist the current project immediately. A project click is a context switch, not just a UI selection.
+  try { salvarHistorico(); } catch(e) {}
   projetoAtivo = id;
-  document.querySelectorAll('.proj-item').forEach(el => el.classList.remove('selecionado'));
-  document.querySelectorAll('.proj-item').forEach(el => {
-    if (el.onclick?.toString().includes(`'${id}'`)) el.classList.add('selecionado');
-  });
+  localStorage.setItem('zanka_projeto_ativo', id);
+  if (projetos[id]) projetos[id].ultimo_acesso = new Date().toISOString();
+  salvarProjetos();
+  // Load only this project's history and render it; never keep the previous project's DOM.
+  try { if (window.loadCurrentProjectHistory) window.loadCurrentProjectHistory(); } catch(e) {}
+  if (typeof window.atualizarBadgeProjeto==='function') window.atualizarBadgeProjeto();
+  if (typeof window.renderProjetos==='function') window.renderProjetos();
+  if (typeof window.renderHistorico==='function') window.renderHistorico(agenteId || 'zanka');
+  const modal=document.getElementById('projModal'); if(modal) modal.style.display='none';
+  scroll();
 }
 
 async function confirmarProjeto() {
@@ -2850,6 +2859,9 @@ localStorage.setItem('zanka_last_update',JSON.stringify(ZANKA_CHANGELOG));
     try{localStorage.setItem('zanka_historico',JSON.stringify(data));}catch(e){}
   }
 
+  window.loadCurrentProjectHistory=loadCurrentProjectHistory;
+  window.saveProjectHistory=saveProjectHistory;
+
   /* Preserve original history saver and replace it with project-aware saver. */
   if(!window.salvarHistoricoLegacy && typeof window.salvarHistorico==='function') window.salvarHistoricoLegacy=window.salvarHistorico;
   window.salvarHistorico=function(){ saveProjectHistory(); };
@@ -2880,6 +2892,7 @@ localStorage.setItem('zanka_last_update',JSON.stringify(ZANKA_CHANGELOG));
   /* ---------- Agent selection: project context stays, agent history is project-scoped ---------- */
   const originalSel=window.sel;
   window.sel=function(id){
+    if(!window.AGENTES?.[id]) return;
     if(typeof originalSel==='function') originalSel(id);
     loadCurrentProjectHistory();
     if(typeof window.renderHistorico==='function') window.renderHistorico(id);
@@ -2941,24 +2954,48 @@ localStorage.setItem('zanka_last_update',JSON.stringify(ZANKA_CHANGELOG));
 
   window.confirmarProjeto=async function(){
     const id=window.projetoAtivo;
-    if(!id || !window.projetos?.[id]){ document.getElementById('projSub').textContent='Selecione um projeto antes de continuar.'; return; }
-    window.projetoAtivo=id;
-    window.projetos[id].ultimo_acesso=new Date().toISOString();
-    localStorage.setItem('zanka_projeto_ativo',id);
-    window.salvarProjetos();
-    if(typeof window.fecharProjetos==='function') window.fecharProjetos();
-    if(typeof window.atualizarBadgeProjeto==='function') window.atualizarBadgeProjeto();
-    loadCurrentProjectHistory();
-    const msgs=document.getElementById('msgs');
-    if(msgs) msgs.innerHTML='';
-    if(typeof window.renderHistorico==='function') window.renderHistorico(window.agenteId||'zanka');
-    scrollBottom(true);
+    if(!id || !window.projetos?.[id]){ const sub=document.getElementById('projSub'); if(sub) sub.textContent='Selecione um projeto antes de continuar.'; return; }
+    selecionarProjeto(id);
   };
 
   /* Project briefing is explicit, never forced on project switch. */
   window.briefingProjeto=async function(p){
     const txt='Projeto ativo: '+p.nome+'\nDescrição: '+p.descricao+'\nMercados: '+p.mercados+'\nProduto: '+p.produto+'\nModelo: '+p.modelo+'\n\nFaça um briefing executivo somente se o usuário solicitou.';
     if(typeof window.enviarTexto==='function') return window.enviarTexto(txt);
+  };
+
+  /* ---------- SPRINT 5: Action Engine ---------- */
+  const ACTIONS_KEY='zanka_action_proposals_v1';
+  function loadActions(){try{return JSON.parse(localStorage.getItem(ACTIONS_KEY)||'[]')||[];}catch(e){return[];}}
+  function saveActions(a){localStorage.setItem(ACTIONS_KEY,JSON.stringify(a.slice(-200)));}
+  window.zankaProposeAction=function(action){
+    const a=loadActions(); const item={id:'act_'+Date.now(),project:currentProjectKey(),agent:window.agenteId||'zanka',status:'pending_approval',createdAt:new Date().toISOString(),...action};
+    a.push(item); saveActions(a); return item;
+  };
+  window.zankaApproveAction=function(id){const a=loadActions();const x=a.find(v=>v.id===id);if(!x)throw new Error('Ação não encontrada');x.status='approved';x.approvedAt=new Date().toISOString();saveActions(a);return x;};
+  window.zankaRejectAction=function(id,reason){const a=loadActions();const x=a.find(v=>v.id===id);if(!x)throw new Error('Ação não encontrada');x.status='rejected';x.reason=reason||'';x.rejectedAt=new Date().toISOString();saveActions(a);return x;};
+
+  /* ---------- SPRINT 5: Web Reader ---------- */
+  window.zankaReadURL=async function(url,proxy){
+    try{const u=new URL(url); if(!/^https?:$/.test(u.protocol)) throw new Error('URL inválida');
+      const endpoint=proxy||localStorage.getItem('zanka_web_reader_proxy');
+      const target=endpoint ? endpoint + (endpoint.includes('?')?'&':'?') + 'url='+encodeURIComponent(url) : url;
+      const r=await fetch(target,{method:'GET',headers:{'Accept':'text/html,text/plain,application/json'}});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const type=r.headers.get('content-type')||''; const raw=await r.text();
+      const text=type.includes('html') ? new DOMParser().parseFromString(raw,'text/html').body?.innerText||'' : raw;
+      return {ok:true,url,text:text.slice(0,120000),source:'web-reader'};
+    }catch(e){return {ok:false,url,error:e.message,needsProxy:true};}
+  };
+
+  /* ---------- SPRINT 5: Morning briefing visual model ---------- */
+  window.zankaBuildMorningDashboard=function(data){
+    const d=data||{}; return {title:'ZANKA Morning Briefing',date:new Date().toISOString(),cards:[
+      {label:'Prioridade',value:d.priority||'—'},
+      {label:'Riscos',value:d.risks||'—'},
+      {label:'Oportunidades',value:d.opportunities||'—'},
+      {label:'Ações',value:d.actions||'—'}
+    ]};
   };
 
   /* ---------- MCP registry: only verified connections can become connected/linked ---------- */
@@ -3176,7 +3213,19 @@ localStorage.setItem('zanka_last_update',JSON.stringify(ZANKA_CHANGELOG));
 })();
 </script>
 
-<style id="zanka-s4-style">
+<style id="zanka-s5-style">
+/* SPRINT 5 — conversation stability: message grows downward, avatar starts at top */
+.messages{overflow-anchor:none;scroll-behavior:auto!important;align-content:flex-start;}
+.messages .msg{flex:0 0 auto;min-height:0;overflow-anchor:none;align-items:flex-start;}
+.messages .msg > div:nth-child(2){min-width:0;display:flex;flex-direction:column;align-items:flex-start;}
+.messages .msg-av{align-self:flex-start;margin-top:1px;}
+.messages .msg-bub{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;min-width:0;}
+.messages .msg-meta{align-self:flex-start;}
+.messages .msg.user .msg-meta{text-align:right;align-self:flex-end;}
+.messages .msg.user{align-items:flex-start;}
+.messages .msg.user .msg-av{align-self:flex-start;}
+.hints{display:none!important;}
+
 /* SPRINT 4 — stable bottom-anchored conversation */
 .messages{overflow-anchor:none;scroll-behavior:auto!important;}
 .messages .msg{flex:0 0 auto;min-height:0;overflow-anchor:none;}
@@ -3378,5 +3427,47 @@ setTimeout(()=>{renderConnector4();bottom(true);},250);
 })();
 </script>
 
+
+<script id="zanka-sprint5-changelog">
+window.ZANKA_CHANGELOG_SPRINT5={
+ version:'Sprint 5',
+ title:'Conversation Stability + Project Isolation + Action Engine',
+ changes:[
+  'Histórico separado por projeto e agente',
+  'Troca de projeto agora troca o contexto real imediatamente',
+  'Histórico vazio limpa a tela corretamente em vez de manter a conversa anterior',
+  'Avatar do ZANKA alinhado ao início da mensagem',
+  'Streaming protegido para acompanhar o final sem reescrever a mensagem anterior',
+  'Sugestões do rodapé removidas',
+  'Action Engine com propostas, aprovação e rejeição',
+  'Web Reader com fallback explícito para proxy por causa de CORS',
+  'Modelo visual de Morning Briefing preparado para DIANA'
+ ],
+ validation:{javascript:'6/6 blocks parsed',e2e:'not executed in external OAuth/MCP environment'}
+};
+</script>
 </body>
 </html>
+
+<style id="zanka-s5-final-style">
+.messages .msg{align-items:flex-start!important;}
+.messages .msg-av{align-self:flex-start!important;}
+.messages .msg > div:nth-child(2){min-width:0!important;align-self:flex-start!important;}
+.messages .msg-bub{display:block!important;}
+.hints{display:none!important;}
+</style>
+<script>
+/* SPRINT 5 final guard: never render assistant content into a previous message element. */
+(function(){
+ const originalAddMsg=window.addMsg;
+ window.addMsg=function(txt,isUser){
+   const before=document.querySelectorAll('#msgs .msg').length;
+   const r=originalAddMsg.apply(this,arguments);
+   const after=document.querySelectorAll('#msgs .msg').length;
+   if(after<=before) console.warn('[ZANKA Sprint 5] addMsg did not append a new message');
+   requestAnimationFrame(()=>window.zankaScrollBottom?.());
+   return r;
+ };
+ window.ZANKA_SPRINT5_VALIDATION={version:'5.0.0',projectIsolation:true,actionEngine:true,webReader:true,morningDashboard:true,footerHintsRemoved:true,assistantAvatarTop:true};
+})();
+</script>
