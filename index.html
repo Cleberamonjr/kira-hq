@@ -3049,5 +3049,131 @@ localStorage.setItem('zanka_last_update',JSON.stringify(ZANKA_CHANGELOG));
   setTimeout(()=>scrollBottom(true),100);
 })();
 </script>
+
+<script>
+/* =============================================================
+   ZANKA SPRINT 3 — MEMORY + LOCAL RAG + PROJECT KNOWLEDGE
+   Version: 3.0.0
+   Design rule: no external connector is considered connected unless
+   the existing MCP verification layer has confirmed it.
+   ============================================================= */
+(function(){
+  'use strict';
+  const S3_VERSION='3.0.0';
+  const MEM_KEY='zanka_memory_v3';
+  const DOC_KEY='zanka_knowledge_v3';
+  const MAX_MEM=300;
+  const MAX_DOC=500;
+
+  function safeRead(key, fallback){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));}catch(e){return fallback;}}
+  function safeWrite(key,val){try{localStorage.setItem(key,JSON.stringify(val));return true;}catch(e){console.warn('[ZANKA S3] storage:',e.message);return false;}}
+  function activeProject(){return window.projetoAtivo || localStorage.getItem('zanka_projeto_ativo') || 'global';}
+  function activeAgent(){return window.agenteId || 'zanka';}
+  function normalize(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ');}
+  function tokens(t){return [...new Set(normalize(t).split(/\s+/).filter(x=>x.length>=3))];}
+  function relevance(query,text){
+    const q=tokens(query); const d=tokens(text); if(!q.length||!d.length)return 0;
+    const set=new Set(d); let hit=0; for(const x of q) if(set.has(x))hit++;
+    return hit/q.length;
+  }
+  function memoryStore(){return safeRead(MEM_KEY,{});}
+  function docStore(){return safeRead(DOC_KEY,{});}
+  function bucket(store,project){return store[project]||(store[project]=[]);}
+
+  function addMemory(content,meta={}){
+    const text=String(content||'').trim(); if(text.length<12)return null;
+    const store=memoryStore(), p=activeProject(), arr=bucket(store,p);
+    const item={id:'mem_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),project:p,agent:meta.agent||activeAgent(),type:meta.type||'conversation',content:text,source:meta.source||'zanka',confidence:Number.isFinite(meta.confidence)?meta.confidence:0.8,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+    arr.push(item); if(arr.length>MAX_MEM) arr.splice(0,arr.length-MAX_MEM); safeWrite(MEM_KEY,store); return item;
+  }
+
+  function addKnowledge(content,meta={}){
+    const text=String(content||'').trim(); if(text.length<20)return null;
+    const store=docStore(), p=meta.project||activeProject(), arr=bucket(store,p);
+    const item={id:'doc_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),project:p,title:meta.title||'Conhecimento',content:text,source:meta.source||'manual',agent:meta.agent||activeAgent(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+    arr.push(item); if(arr.length>MAX_DOC)arr.splice(0,arr.length-MAX_DOC); safeWrite(DOC_KEY,store); return item;
+  }
+
+  function retrieve(query,limit=6){
+    const p=activeProject(), m=memoryStore()[p]||[], d=docStore()[p]||[];
+    const all=[...m.map(x=>({...x,_kind:'memory'})),...d.map(x=>({...x,_kind:'knowledge'}))];
+    return all.map(x=>({...x,_score:relevance(query,(x.title||'')+' '+x.content)})).filter(x=>x._score>0).sort((a,b)=>b._score-(a._score)).slice(0,limit);
+  }
+
+  function buildContext(query){
+    const hits=retrieve(query,6); if(!hits.length)return '';
+    return '\n\n[ZANKA MEMORY / RAG — CONTEXTO RECUPERADO]\n'+hits.map((x,i)=>`${i+1}. [${x._kind}] ${x.title||x.type||'Memória'} | fonte: ${x.source} | confiança: ${x.confidence??'n/a'}\n${x.content}`).join('\n\n')+'\n[ FIM DO CONTEXTO RECUPERADO ]\n';
+  }
+
+  window.ZANKA_MEMORY={version:S3_VERSION,add:addMemory,retrieve,knowledge:addKnowledge,context:buildContext,stats:function(){const m=memoryStore(),d=docStore(),p=activeProject();return {project:p,memories:(m[p]||[]).length,knowledge:(d[p]||[]).length};},clearProject:function(project=activeProject()){const m=memoryStore(),d=docStore();delete m[project];delete d[project];safeWrite(MEM_KEY,m);safeWrite(DOC_KEY,d);}};
+
+  /* Ingest a useful user message into project memory without storing secrets. */
+  function shouldRemember(t){
+    const n=normalize(t); return /\b(decid|prefer|objetiv|meta|estrateg|processo|regra|cliente|produto|mercado|orcamento|kpi|important|nao esquecer|lembre|memor)/.test(n);
+  }
+  function redact(t){return String(t||'').replace(/(api[_ -]?key|token|senha|password|secret)\s*[:=]\s*[^\s,;]+/ig,'$1: [REDACTED]');}
+
+  /* Wrap the already-correct API flow: inject retrieved context before inference,
+     then persist useful conversational facts after a successful answer. */
+  if(typeof window.chamarAPI==='function' && !window.__ZANKA_S3_API_WRAPPED){
+    const base=window.chamarAPI;
+    window.chamarAPI=async function(agId,mensagem){
+      const original=String(mensagem||'');
+      const ctx=buildContext(original);
+      const enriched=ctx ? original+ctx : original;
+      const result=await base.call(this,agId,enriched);
+      if(shouldRemember(original)) addMemory(redact(original),{agent:agId,type:'user_fact',source:'conversation',confidence:0.9});
+      if(result && shouldRemember(result)) addMemory(redact(result).slice(0,3000),{agent:agId,type:'assistant_insight',source:'conversation',confidence:0.7});
+      return result;
+    };
+    window.__ZANKA_S3_API_WRAPPED=true;
+  }
+
+  /* Project isolation: clear/rebuild knowledge UI when a project is deleted. */
+  const oldDelete=window.excluirProjeto;
+  if(typeof oldDelete==='function' && !window.__ZANKA_S3_DELETE_WRAPPED){
+    window.excluirProjeto=function(id){
+      const result=oldDelete.apply(this,arguments);
+      try{window.ZANKA_MEMORY.clearProject(id);}catch(e){}
+      return result;
+    };
+    window.__ZANKA_S3_DELETE_WRAPPED=true;
+  }
+
+  /* Explicit ingestion APIs for future file/connector adapters. */
+  window.zankaIngestKnowledge=function(text,meta){return addKnowledge(redact(text),meta||{});};
+  window.zankaRetrieveMemory=function(query,limit){return retrieve(query,limit||6);};
+
+  /* Supabase MCP adapter: deliberately NOT connected by this code.
+     It only exposes an integration contract for a VERIFIED MCP. */
+  window.ZANKA_SUPABASE_RAG_ADAPTER={
+    version:S3_VERSION,
+    requiredMcpId:'supabase',
+    isAvailable:function(){
+      try{const r=JSON.parse(localStorage.getItem('zanka_mcp_registry')||'{}');return !!(r.supabase&&r.supabase.status==='linked'&&r.supabase.verified===true);}catch(e){return false;}
+    },
+    status:function(){return this.isAvailable()?'verified-linked':'not-connected';},
+    contract:{read:['memory_search','knowledge_search','project_context'],write:['memory_upsert','knowledge_upsert'],writePolicy:'approval'},
+    note:'A execução remota exige um MCP Supabase realmente autenticado e vinculado. Nenhuma conexão é simulada.'
+  };
+
+  /* Lightweight diagnostics available from console/UI integrations. */
+  window.ZANKA_S3_DIAGNOSTICS=function(){
+    const st=window.ZANKA_MEMORY.stats();
+    return {version:S3_VERSION,project:st.project,memories:st.memories,knowledge:st.knowledge,supabaseMcp:window.ZANKA_SUPABASE_RAG_ADAPTER.status(),storage:{memory:!!localStorage.getItem(MEM_KEY),knowledge:!!localStorage.getItem(DOC_KEY)}};
+  };
+
+  /* Changelog entry */
+  window.ZANKA_CHANGELOG_S3={version:S3_VERSION,sprint:'3 — Memory + RAG',changes:[
+    'Memória persistente por projeto e agente.',
+    'Recuperação local por relevância lexical antes da chamada ao modelo.',
+    'Base de conhecimento por projeto.',
+    'Ingestão programática para documentos e conectores futuros.',
+    'Contrato de integração Supabase MCP sem declarar conexão fictícia.',
+    'Diagnóstico de memória e integração disponível para testes.'
+  ],practical:'O ZANKA passa a recuperar contexto relevante do projeto antes de responder e pode preservar fatos úteis da conversa para uso posterior, sem misturar projetos.'};
+  try{localStorage.setItem('zanka_sprint3_version',S3_VERSION);localStorage.setItem('zanka_sprint3_changelog',JSON.stringify(window.ZANKA_CHANGELOG_S3));}catch(e){}
+})();
+</script>
 </body>
 </html>
