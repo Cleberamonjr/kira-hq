@@ -1542,12 +1542,25 @@ async function chamarAPI(agId, mensagem) {
   const msgsEl = document.getElementById('msgs');
   const msgEl = document.createElement('div');
   msgEl.className = 'msg';
-  msgEl.innerHTML = `<div class="msg-av">${ag.emoji}</div><div><div class="msg-bub" id="streamBub_${agId}"></div><div class="msg-meta" id="streamMeta_${agId}">${ag.nome} · agora</div></div>`;
+  const streamUid = 'streamBub_' + agId + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  const avEl = document.createElement('div');
+  avEl.className = 'msg-av';
+  avEl.textContent = ag.emoji;
+  const wrapEl = document.createElement('div');
+  wrapEl.style.minWidth = '0';
+  wrapEl.style.alignSelf = 'flex-start';
+  const bub = document.createElement('div');
+  bub.className = 'msg-bub';
+  bub.id = streamUid;
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+  meta.textContent = `${ag.nome} · agora`;
+  wrapEl.append(bub, meta);
+  msgEl.append(avEl, wrapEl);
   msgsEl.appendChild(msgEl);
-  const bub = document.getElementById('streamBub_' + agId);
   let acc = '';
   const sink = {
-    write: (c) => { acc += c; bub.textContent = acc; requestAnimationFrame(()=>{ msgsEl.scrollTop = msgsEl.scrollHeight; }); },
+    write: (c) => { acc += c; bub.textContent = acc; requestAnimationFrame(()=>{ msgsEl.scrollTop = msgsEl.scrollHeight; bub.scrollIntoView({block:'end',inline:'nearest'}); }); },
     reset: () => { acc = ''; bub.textContent = ''; }
   };
 
@@ -3779,8 +3792,7 @@ try{localStorage.setItem('zanka_sprint6_version',S6);localStorage.setItem('zanka
   document.addEventListener('keydown',e=>{if(e.key==='Escape')window.closeDianaDashboard()});
 })();
 </script>
-<!-- ZANKA Sprint 6: single-index unified build --></body>
-</html>
+<!-- ZANKA Sprint 6: single-index unified build -->
 
 <style id="zanka-s5-final-style">
 .messages .msg{align-items:flex-start!important;}
@@ -3804,3 +3816,230 @@ try{localStorage.setItem('zanka_sprint6_version',S6);localStorage.setItem('zanka
  window.ZANKA_SPRINT5_VALIDATION={version:'5.0.0',projectIsolation:true,actionEngine:true,webReader:true,morningDashboard:true,footerHintsRemoved:true,assistantAvatarTop:true};
 })();
 </script>
+
+<style id="zanka-s7-final">
+/* SPRINT 7 — conversation integrity + Diana dashboard orchestration */
+#msgs{overflow-anchor:none!important;contain:layout paint;}
+#msgs .msg{align-items:flex-start!important;flex:0 0 auto!important;}
+#msgs .msg > .msg-av{align-self:flex-start!important;flex:0 0 auto!important;margin-top:2px!important;}
+#msgs .msg > div:nth-child(2){align-self:flex-start!important;min-width:0!important;}
+#msgs .msg-bub{display:block!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important;min-height:1.4em;}
+#zankaDianaView{z-index:99999!important;}
+</style>
+<script id="zanka-sprint7-final">
+(function(){
+'use strict';
+const S7='7.0.0';
+const DASH_CH='zanka-diana-dashboard-s7';
+const DASH_HASH='#diana-dashboard';
+
+/* ---------- deterministic project context ---------- */
+function s7Project(){return window.projetoAtivo||localStorage.getItem('zanka_projeto_ativo')||'global';}
+function s7SaveProject(){
+  try{
+    if(typeof window.salvarHistorico==='function') window.salvarHistorico();
+    if(typeof window.salvarProjetos==='function') window.salvarProjetos();
+  }catch(e){}
+}
+window.zankaOpenProject=function(id){
+  if(!id || !window.projetos?.[id]) return false;
+  s7SaveProject();
+  window.projetoAtivo=id;
+  localStorage.setItem('zanka_projeto_ativo',id);
+  try{window.projetos[id].ultimo_acesso=new Date().toISOString();}catch(e){}
+  try{window.salvarProjetos?.();}catch(e){}
+  try{window.loadCurrentProjectHistory?.();}catch(e){}
+  try{window.renderHistorico?.(window.agenteId||'zanka');}catch(e){}
+  try{window.atualizarBadgeProjeto?.();window.renderProjetos?.();}catch(e){}
+  try{document.getElementById('projModal')?.style && (document.getElementById('projModal').style.display='none');}catch(e){}
+  try{document.getElementById('projOverlay')?.classList.remove('show');}catch(e){}
+  window.zankaScrollBottom?.(true);
+  return true;
+};
+window.selecionarProjeto=window.zankaOpenProject;
+window.confirmarProjeto=function(){
+  const id=s7Project();
+  if(!window.projetos?.[id]){
+    const s=document.getElementById('projSub');if(s)s.textContent='Selecione um projeto para abrir.';
+    return;
+  }
+  window.zankaOpenProject(id);
+};
+
+/* ---------- stable streaming: never reuse an older assistant bubble ---------- */
+window.zankaRepairStreamDom=function(){
+  const msgs=document.getElementById('msgs');if(!msgs)return;
+  msgs.querySelectorAll('.msg').forEach(el=>{
+    el.style.alignItems='flex-start';
+    const av=el.querySelector('.msg-av');if(av)av.style.alignSelf='flex-start';
+    const wrap=av?.nextElementSibling;if(wrap){wrap.style.alignSelf='flex-start';wrap.style.minWidth='0';}
+  });
+};
+
+/* ---------- Diana intent detection ---------- */
+function isDianaDashboardIntent(q){
+  return window.agenteId==='diana' &&
+    /\b(dashboard|dash|gr[aá]fico|gr[aá]ficos|chart|kpi|indicador|indicadores|visualiza|visualizar|visualiza[cç][aã]o|painel|performance|previs[aã]o|forecast|compare|comparar|mostre.*dados|mostra.*dados)\b/i.test(q);
+}
+function openDashboardWindowNow(){
+  const url=location.href.split('#')[0]+DASH_HASH;
+  let w=null;
+  try{w=window.open(url,'_blank','noopener');}catch(e){}
+  if(!w){
+    try{window.openDianaDashboard?.({project:s7Project()});}catch(e){}
+  }
+  return w;
+}
+/* Parent opens a new dashboard tab; the dashboard tab itself uses the integrated view. */
+window.openDianaDashboardTab=function(data){
+  if(location.hash===DASH_HASH){
+    try{return window.openDianaDashboard?.(data||{project:s7Project()});}catch(e){return null;}
+  }
+  return openDashboardWindowNow();
+};
+
+/* ---------- child dashboard window ---------- */
+let s7DashboardChild=null;
+if(location.hash===DASH_HASH){
+  document.documentElement.dataset.zankaDianaDashboard='1';
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      try{window.openDianaDashboardTab?.({project:s7Project()});}catch(e){}
+      try{window.openDianaDashboard?.({project:s7Project()});}catch(e){}
+    },120);
+  });
+}
+let s7bc=null;
+try{
+  s7bc=new BroadcastChannel(DASH_CH);
+  s7bc.onmessage=function(ev){
+    const d=ev.data||{};
+    if(d.type==='open'){
+      try{window.openDianaDashboard?.(d.data||{project:d.project||s7Project()});}catch(e){}
+    }
+    if(d.type==='result'){
+      try{
+        let x=d.result;
+        if(typeof x==='string'){try{x=JSON.parse(x)}catch(e){x={insights:[x]};}}
+        window.renderDianaDashboard?.({...x,project:d.project||s7Project()});
+        window.openDianaDashboard?.({...x,project:d.project||s7Project()});
+      }catch(e){}
+    }
+  };
+}catch(e){}
+
+/* ---------- route Diana's real dashboard requests to the visual workspace ---------- */
+const prevChamar=window.chamarAPI;
+if(typeof prevChamar==='function'){
+  window.chamarAPI=async function(agId,mensagem){
+    const result=await prevChamar.call(this,agId,mensagem);
+    if(agId==='diana' && isDianaDashboardIntent(String(mensagem||''))){
+      try{s7bc?.postMessage({type:'result',result,project:s7Project()});}catch(e){}
+    }
+    return result;
+  };
+}
+
+/* Open the dashboard synchronously from the user's send gesture, before the async API call. */
+const prevEnviarTexto=window.enviarTexto;
+if(typeof prevEnviarTexto==='function'){
+  window.enviarTexto=async function(txt){
+    const q=String(txt||'');
+    let child=null;
+    if(isDianaDashboardIntent(q)){
+      child=openDashboardWindowNow();
+      s7DashboardChild=child;
+      try{s7bc?.postMessage({type:'open',project:s7Project(),data:{project:s7Project(),title:'DIANA · Intelligence Dashboard'}});}catch(e){}
+    }
+    const result=await prevEnviarTexto.call(this,q);
+    try{window.zankaRepairStreamDom();window.zankaScrollBottom?.(true);}catch(e){}
+    return result;
+  };
+}
+
+/* ---------- visual morning briefing ---------- */
+window.zankaOpenMorningDashboard=function(data){
+  let w=null;
+  try{w=window.open(location.href.split('#')[0]+DASH_HASH,'_blank','noopener');}catch(e){}
+  const payload={...(data||{}),project:s7Project(),source:'morning-briefing'};
+  setTimeout(()=>{try{s7bc?.postMessage({type:'result',result:payload,project:s7Project()});}catch(e){}},500);
+  return w;
+};
+window.renderMorningVisual=window.zankaOpenMorningDashboard;
+
+/* ---------- dashboard commands from Diana ---------- */
+window.zankaDianaCommand=async function(query){
+  const q=String(query||'').trim();if(!q)return;
+  if(window.agenteId!=='diana'&&typeof window.sel==='function')window.sel('diana');
+  const w=openDashboardWindowNow();
+  try{s7bc?.postMessage({type:'open',project:s7Project(),data:{project:s7Project()}});}catch(e){}
+  try{
+    const r=await window.chamarAPI('diana',q+'\n\n[OUTPUT DASHBOARD] Retorne JSON com title,kpis,chart{type,labels,values,series},insights. Use somente dados reais disponíveis; não invente.');
+    let x=r;try{x=JSON.parse(r)}catch(e){x={insights:[String(r)]};}
+    try{s7bc?.postMessage({type:'result',result:x,project:s7Project()});}catch(e){}
+    return x;
+  }catch(e){
+    try{s7bc?.postMessage({type:'result',result:{insights:['Erro: '+e.message]},project:s7Project()});}catch(_){}
+    throw e;
+  }
+};
+
+/* ---------- dashboard child should stay in same index, not another HTML ---------- */
+if(location.hash===DASH_HASH){
+  document.title='ZANKA · DIANA Dashboard';
+  document.addEventListener('DOMContentLoaded',()=>{
+    const chat=document.querySelector('.main,.app,.layout');
+    /* The dashboard overlay is the visible workspace; the underlying index remains the same application. */
+    document.body.classList.add('zanka-diana-dashboard-window');
+  });
+}
+
+/* ---------- validation marker ---------- */
+window.ZANKA_SPRINT7_VALIDATION={
+ version:S7,
+ singleIndex:true,
+ uniqueStreamingBubbles:true,
+ projectContextSwitch:true,
+ dianaDashboardNewTab:true,
+ dianaNaturalLanguageDashboard:true,
+ morningBriefingDashboard:true,
+ footerHintsRemoved:true,
+ note:'External OAuth/MCP and remote backend require real credentials/environment tests.'
+};
+try{
+ localStorage.setItem('zanka_sprint7_version',S7);
+ localStorage.setItem('zanka_sprint7_validation',JSON.stringify(window.ZANKA_SPRINT7_VALIDATION));
+}catch(e){}
+window.zankaRepairStreamDom();
+})();
+</script>
+
+<style>
+#zankaDianaShortcut{display:none;height:40px;border:1px solid #2d3a55;background:#11182a;color:#dbe4f7;border-radius:10px;padding:0 11px;cursor:pointer;font-weight:700}
+#zankaDianaShortcut.show{display:inline-flex;align-items:center;justify-content:center}
+</style>
+<script>
+(function(){
+ function ensureShortcut(){
+  const row=document.querySelector('.input-row');if(!row||document.getElementById('zankaDianaShortcut'))return;
+  const b=document.createElement('button');b.id='zankaDianaShortcut';b.type='button';b.title='Abrir Dashboard da DIANA';b.textContent='📊';
+  b.onclick=()=>{try{window.openDianaDashboardTab?.({project:window.projetoAtivo||'global'});}catch(e){}};
+  const send=document.getElementById('sendBtn');if(send)row.insertBefore(b,send);else row.appendChild(b);
+ }
+ function sync(){
+  ensureShortcut();
+  const b=document.getElementById('zankaDianaShortcut');
+  if(b)b.classList.toggle('show',window.agenteId==='diana');
+ }
+ const oldSel=window.sel;
+ if(typeof oldSel==='function'){
+  window.sel=function(id){const r=oldSel.apply(this,arguments);setTimeout(sync,0);return r;};
+ }
+ document.addEventListener('DOMContentLoaded',sync);
+ window.addEventListener('load',sync);
+ setTimeout(sync,200);
+})();
+</script>
+
+</body>
+</html>
