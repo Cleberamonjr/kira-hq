@@ -565,7 +565,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     </div>
 
     <div class="proj-btn-row" style="margin-top:14px;">
-      <button class="proj-btn proj-btn-ok" onclick="confirmarProjeto()">▶ Iniciar com este projeto</button>
+      <button class="proj-btn proj-btn-ok" onclick="confirmarProjeto()">▶ Abrir projeto</button>
       <button class="proj-btn proj-btn-add" onclick="document.getElementById('projForm').classList.toggle('show')">+ Novo projeto</button>
     </div>
   </div>
@@ -3446,7 +3446,340 @@ window.ZANKA_CHANGELOG_SPRINT5={
  validation:{javascript:'6/6 blocks parsed',e2e:'not executed in external OAuth/MCP environment'}
 };
 </script>
-</body>
+
+<style id="zanka-sprint6-style">
+/* Sprint 6 — conversation stability, project context, Diana dashboard */
+.messages{overflow-y:auto;overflow-anchor:none!important;scroll-behavior:auto!important;}
+.messages .msg{flex:0 0 auto;align-items:flex-start!important;}
+.messages .msg-av{align-self:flex-start!important;margin-top:2px!important;}
+.messages .msg-bub{white-space:pre-wrap;overflow-wrap:anywhere;transform:none!important;}
+.z6-dashboard{position:fixed;inset:0;background:rgba(4,7,14,.78);backdrop-filter:blur(12px);z-index:12000;display:none;align-items:center;justify-content:center;padding:24px}
+.z6-dashboard.show{display:flex}.z6-card{width:min(1180px,96vw);height:min(820px,92vh);background:#0b1020;border:1px solid #27314a;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden}.z6-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #202a40}.z6-title{font-weight:800}.z6-sub{font-size:11px;color:#8d99b2;margin-top:3px}.z6-close{background:transparent;border:1px solid #303b55;color:#b8c1d4;border-radius:9px;padding:7px 10px;cursor:pointer}.z6-body{padding:18px;overflow:auto}.z6-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.z6-kpi{background:#11182a;border:1px solid #25304a;border-radius:14px;padding:14px}.z6-kpi b{display:block;font-size:22px;margin-top:6px}.z6-chart{height:250px;background:#0f1627;border:1px solid #25304a;border-radius:14px;margin-top:14px;padding:12px}.z6-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.z6-btn{border:1px solid #33405c;background:#141d31;color:#dbe4f7;border-radius:9px;padding:8px 12px;cursor:pointer}.z6-btn.primary{background:#6d43f5;border-color:#7c5cff;color:white}.z6-note{font-size:11px;color:#8490aa;line-height:1.6}.z6-dashboard-layout{display:grid;grid-template-columns:1fr 300px;gap:14px}.z6-chatbox{width:100%;min-height:110px;background:#0f1627;border:1px solid #25304a;border-radius:12px;color:#e8edf8;padding:12px;resize:vertical}.z6-list{margin-top:10px;font-size:12px;color:#c8d0df;line-height:1.7}
+@media(max-width:900px){.z6-grid{grid-template-columns:repeat(2,1fr)}.z6-dashboard-layout{grid-template-columns:1fr}}
+</style>
+<script id="zanka-sprint6">
+(function(){
+'use strict';
+const S6='6.0.0';
+const HIST_KEY='zanka_project_histories_v6';
+const MEM_KEY='zanka_project_memory_v6';
+const DASH_KEY='zanka_diana_dashboard_v6';
+const WEB_PROXY_KEY='zanka_web_proxy_v6';
+
+function jget(k,d){try{const x=localStorage.getItem(k);return x?JSON.parse(x):d}catch(e){return d}}
+function jput(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){console.warn('[ZANKA S6]',e)}}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function currentProject(){return window.projetoAtivo||localStorage.getItem('zanka_projeto_ativo')||'global'}
+function projectHistories(){return jget(HIST_KEY,{})}
+function projectMemory(){return jget(MEM_KEY,{})}
+function ensureProjectHistory(pid){
+ const all=projectHistories(); if(!all[pid]) all[pid]={};
+ for(const id of Object.keys(window.AGENTES||{})) if(!Array.isArray(all[pid][id])) all[pid][id]=[];
+ return all;
+}
+function saveProjectHistory(){
+ const all=projectHistories(), pid=currentProject(); all[pid]={};
+ for(const id of Object.keys(window.AGENTES||{})){
+   const arr=Array.isArray(window.historico?.[id])?window.historico[id]:[];
+   all[pid][id]=arr.slice(-60).map(m=>({role:m.role,content:m.content,_display:m._display}));
+ }
+ jput(HIST_KEY,all);
+}
+function loadProjectHistory(pid){
+ const all=ensureProjectHistory(pid), h=all[pid]||{};
+ window.historico={};
+ for(const id of Object.keys(window.AGENTES||{})) window.historico[id]=Array.isArray(h[id])?h[id].slice():[];
+ return window.historico;
+}
+function migrateLegacy(){
+ const all=projectHistories(); if(Object.keys(all).length) return;
+ const legacy=jget('zanka_historico',null); if(!legacy)return;
+ const pid=currentProject(); all[pid]={};
+ for(const id of Object.keys(window.AGENTES||{})) all[pid][id]=Array.isArray(legacy[id])?legacy[id].slice(-60):[];
+ jput(HIST_KEY,all);
+}
+function scrollBottom(force=true){
+ const m=document.getElementById('msgs'); if(!m)return;
+ const doIt=()=>{m.scrollTop=m.scrollHeight-m.clientHeight; if(force) m.lastElementChild?.scrollIntoView({block:'end',inline:'nearest'});};
+ requestAnimationFrame(()=>{doIt();requestAnimationFrame(doIt);setTimeout(doIt,40);setTimeout(doIt,140)});
+}
+window.zankaScrollBottom=scrollBottom;
+
+// Render history strictly from active project. No synthetic messages.
+window.renderHistorico=function(agId){
+ const msgs=document.getElementById('msgs'); if(!msgs)return;
+ const hist=Array.isArray(window.historico?.[agId])?window.historico[agId]:[];
+ msgs.innerHTML='';
+ const ag=window.AGENTES?.[agId]||{emoji:'🤖',nome:agId};
+ for(const m of hist){
+   const user=m.role==='user'; const text=user?(m._display??m.content??''):(m.content??'');
+   const el=document.createElement('div');el.className='msg'+(user?' user':'');
+   const av=document.createElement('div');av.className='msg-av';av.textContent=user?'👤':ag.emoji;
+   const wrap=document.createElement('div');wrap.style.minWidth='0';
+   const bub=document.createElement('div');bub.className='msg-bub';bub.textContent=String(text);
+   const meta=document.createElement('div');meta.className='msg-meta';meta.textContent=user?'Você':ag.nome+' · histórico';
+   wrap.append(bub,meta);el.append(av,wrap);msgs.appendChild(el);
+ }
+ scrollBottom(true);
+};
+
+// Save/load API used by existing code.
+window.salvarHistorico=function(){saveProjectHistory()};
+window.carregarHistorico=function(){migrateLegacy();loadProjectHistory(currentProject())};
+window.loadCurrentProjectHistory=function(){loadProjectHistory(currentProject());window.renderHistorico(window.agenteId||'zanka');scrollBottom(true)};
+
+// Replace project selection: context switch only; never creates an artificial briefing.
+window.selecionarProjeto=function(id){
+ if(!window.projetos?.[id])return;
+ saveProjectHistory();
+ window.projetoAtivo=id;localStorage.setItem('zanka_projeto_ativo',id);
+ window.projetos[id].ultimo_acesso=new Date().toISOString();
+ if(typeof window.salvarProjetos==='function')window.salvarProjetos();
+ loadProjectHistory(id);
+ if(typeof window.atualizarBadgeProjeto==='function')window.atualizarBadgeProjeto();
+ if(typeof window.renderProjetos==='function')window.renderProjetos();
+ window.renderHistorico(window.agenteId||'zanka');
+ const modal=document.getElementById('projOverlay');if(modal)modal.classList.remove('show');
+ scrollBottom(true);
+};
+window.confirmarProjeto=function(){
+ if(!window.projetoAtivo){const s=document.getElementById('projSub');if(s)s.textContent='Selecione um projeto para abrir.';return}
+ saveProjectHistory();loadProjectHistory(window.projetoAtivo);
+ localStorage.setItem('zanka_projeto_ativo',window.projetoAtivo);
+ if(typeof window.salvarProjetos==='function')window.salvarProjetos();
+ if(typeof window.atualizarBadgeProjeto==='function')window.atualizarBadgeProjeto();
+ const modal=document.getElementById('projOverlay');if(modal)modal.classList.remove('show');
+ window.renderHistorico(window.agenteId||'zanka');scrollBottom(true);
+};
+
+// New-message renderer: always creates a new DOM node, avatar at the top/left.
+window.addMsg=function(txt,isUser){
+ const ws=document.getElementById('wlScreen');if(ws)ws.style.display='none';
+ const ag=window.AGENTES?.[window.agenteId]||{emoji:'🤖',nome:window.agenteId||'ZANKA'};
+ const el=document.createElement('div');el.className='msg'+(isUser?' user':'');
+ const av=document.createElement('div');av.className='msg-av';av.textContent=isUser?'👤':ag.emoji;
+ const wrap=document.createElement('div');wrap.style.minWidth='0';wrap.style.alignSelf='flex-start';
+ const bub=document.createElement('div');bub.className='msg-bub';bub.textContent=String(txt??'');
+ const meta=document.createElement('div');meta.className='msg-meta';meta.textContent=isUser?'Você':ag.nome+' · agora';
+ wrap.append(bub,meta);el.append(av,wrap);document.getElementById('msgs').appendChild(el);scrollBottom(true);return el;
+};
+window.showTyping=function(){
+ const ag=window.AGENTES?.[window.agenteId]||{emoji:'🤖'};const el=document.createElement('div');el.className='msg';el.id='typing';
+ const av=document.createElement('div');av.className='msg-av';av.textContent=ag.emoji;const wrap=document.createElement('div');wrap.style.alignSelf='flex-start';
+ const b=document.createElement('div');b.className='typing-bub';b.innerHTML='<div class="td"></div><div class="td"></div><div class="td"></div>';wrap.appendChild(b);el.append(av,wrap);document.getElementById('msgs').appendChild(el);scrollBottom(true);
+};
+window.hideTyping=function(){document.getElementById('typing')?.remove();scrollBottom(true)};
+window.scroll=scrollBottom;
+
+// Project-aware API wrapper: swaps the active project's history before inference and saves after.
+const originalChamarAPI=window.chamarAPI;
+if(typeof originalChamarAPI==='function'){
+ window.chamarAPI=async function(agId,mensagem){
+   loadProjectHistory(currentProject());
+   const result=await originalChamarAPI.call(this,agId,mensagem);
+   saveProjectHistory();
+   return result;
+ };
+}
+
+// Keep DOM and history consistent after agent switch.
+const originalSel=window.sel;
+window.sel=function(id){saveProjectHistory();if(typeof originalSel==='function')originalSel(id);loadProjectHistory(currentProject());window.renderHistorico(id);scrollBottom(true)};
+
+// Diana dashboard — a separate visual workspace.
+function ensureDashboard(){
+ let d=document.getElementById('z6Dashboard');if(d)return d;
+ d=document.createElement('div');d.id='z6Dashboard';d.className='z6-dashboard';
+ d.innerHTML=`<div class="z6-card"><div class="z6-head"><div><div class="z6-title">📊 DIANA · Intelligence Dashboard</div><div class="z6-sub" id="z6DashSub">Projeto atual</div></div><button class="z6-close" onclick="window.closeDianaDashboard()">Fechar</button></div><div class="z6-body"><div class="z6-dashboard-layout"><div><div class="z6-grid" id="z6Kpis"></div><div class="z6-chart" id="z6Chart"></div><div class="z6-actions"><button class="z6-btn primary" onclick="window.dianaDashboardAsk()">Atualizar análise</button><button class="z6-btn" onclick="window.dianaDashboardApplyPreset('performance')">Mostrar performance</button><button class="z6-btn" onclick="window.dianaDashboardApplyPreset('forecast')">Mostrar previsão</button></div></div><aside><div class="z6-note">Converse com a DIANA e peça alterações no dashboard. Exemplos:</div><div class="z6-list">• "Diana, mostre ROAS por país"<br>• "Diana, troque para leads por semana"<br>• "Diana, compare os últimos 30 dias"<br>• "Diana, faça uma previsão"</div><textarea id="z6DashPrompt" class="z6-chatbox" placeholder="Peça uma alteração no dashboard..."></textarea><div class="z6-actions"><button class="z6-btn primary" onclick="window.dianaDashboardAsk()">Enviar à DIANA</button></div><div class="z6-note" id="z6DashStatus" style="margin-top:12px">Somente dados realmente conectados serão usados.</div></aside></div></div></div>`;
+ document.body.appendChild(d);return d;
+}
+window.openDianaDashboard=function(data){const d=ensureDashboard();const p=window.projetos?.[currentProject()];document.getElementById('z6DashSub').textContent=(p?.emoji||'🎯')+' '+(p?.nome||'Projeto atual');
+ const k=data?.kpis||{};document.getElementById('z6Kpis').innerHTML=[['Leads',k.leads??'—'],['Receita',k.receita??'—'],['ROAS',k.roas??'—'],['Conversão',k.conversao??'—']].map(x=>`<div class="z6-kpi"><span>${esc(x[0])}</span><b>${esc(x[1])}</b></div>`).join('');
+ document.getElementById('z6Chart').innerHTML=data?.svg||'<div class="z6-note">Aguardando dados reais conectados. A DIANA poderá montar o gráfico assim que a fonte de dados estiver disponível.</div>';
+ d.classList.add('show');};
+window.closeDianaDashboard=function(){document.getElementById('z6Dashboard')?.classList.remove('show')};
+window.dianaDashboardApplyPreset=function(preset){document.getElementById('z6DashPrompt').value=preset==='forecast'?'Diana, mostre uma previsão com os dados disponíveis.':'Diana, mostre a performance por período e destaque os principais desvios.';window.dianaDashboardAsk()};
+window.dianaDashboardAsk=async function(){const q=document.getElementById('z6DashPrompt')?.value.trim();if(!q)return;const st=document.getElementById('z6DashStatus');st.textContent='DIANA processando...';
+ try{ if(window.agenteId!=='diana'&&typeof window.sel==='function')window.sel('diana'); const r=await window.chamarAPI('diana',q+'\n\n[INSTRUÇÃO DASHBOARD] Se houver dados reais disponíveis, retorne uma especificação de dashboard: KPIs, dimensões, métricas, filtros e série temporal. Não invente dados.');st.textContent='DIANA respondeu. O dashboard pode ser atualizado somente com dados disponíveis.';if(r)document.getElementById('z6Chart').innerHTML='<div class="z6-note" style="white-space:pre-wrap">'+esc(r)+'</div>';}
+ catch(e){st.textContent='Erro: '+e.message}}
+
+// Morning briefing is visual by default and can open Diana's dashboard.
+window.renderMorningVisual=function(data){window.openDianaDashboard(data||{})};
+
+// Web reader through backend proxy when configured; direct fetch remains fallback.
+window.ZANKA_WEB_READER_V6={
+ async read(url){
+   const u=new URL(url); if(!/^https?:$/.test(u.protocol))throw new Error('URL deve usar http ou https.');
+   const proxy=localStorage.getItem(WEB_PROXY_KEY)||'';
+   if(proxy){const r=await fetch(proxy,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u.href})});if(!r.ok)throw new Error('Web Reader HTTP '+r.status);return await r.json()}
+   const r=await fetch(u.href,{redirect:'follow'});if(!r.ok)throw new Error('Não consegui acessar o site: HTTP '+r.status);const html=await r.text();const doc=new DOMParser().parseFromString(html,'text/html');['script','style','noscript','svg'].forEach(x=>doc.querySelectorAll(x).forEach(n=>n.remove()));return {url:u.href,title:doc.title||u.hostname,text:(doc.body?.innerText||'').replace(/\s+/g,' ').trim().slice(0,50000)};
+ },setProxy(url){localStorage.setItem(WEB_PROXY_KEY,String(url||''));return url}
+};
+
+// Remove all legacy hint cards from the input footer/welcome suggestions if still present.
+document.querySelectorAll('.hints,.hint,.suggestions').forEach(n=>n.remove());
+
+// Initial migration and project render after legacy onload has completed.
+window.addEventListener('load',()=>setTimeout(()=>{try{migrateLegacy();loadProjectHistory(currentProject());if(window.agenteId)window.renderHistorico(window.agenteId);scrollBottom(true);}catch(e){console.warn('[ZANKA S6 init]',e)}},80));
+
+window.ZANKA_CHANGELOG_S6={version:S6,sprint:'6 — Autonomous Operations + Project Context + Diana Dashboard',changes:[
+ 'Histórico agora é armazenado por projeto e agente; migração automática do histórico legado.',
+ 'Troca de projeto limpa e recarrega exclusivamente o contexto do projeto selecionado.',
+ 'Mensagem do usuário e resposta do agente sempre são elementos DOM independentes.',
+ 'Avatar do ZANKA fica alinhado no topo/início da resposta.',
+ 'Scroll com ancoragem explícita e múltiplos frames durante alterações de altura.',
+ 'Botão de projeto renomeado para Abrir projeto e confirmação não cria briefing artificial.',
+ 'Dashboard independente da DIANA preparado para KPIs, gráficos e comandos em linguagem natural.',
+ 'Web Reader preparado para proxy backend, necessário para contornar CORS com segurança.',
+ 'Base para execução autônoma em backend Supabase Edge Functions.'
+],not_claimed:['OAuth/MCP externo real','cron remoto real','dados Meta/Supermetrics reais','E2E em navegador externo']};
+try{localStorage.setItem('zanka_sprint6_version',S6);localStorage.setItem('zanka_sprint6_changelog',JSON.stringify(window.ZANKA_CHANGELOG_S6))}catch(e){}
+})();
+</script>
+
+
+<script id="zanka-sprint6-dashboard-tab">
+(function(){
+ const CHANNEL='zanka-diana-dashboard-v6';
+ function dashboardUrl(){return location.href.split('#')[0]}
+ window.openDianaDashboardTab=function(data){
+   const w=window.open(dashboardUrl(),'_blank','noopener');
+   if(!w){alert('O navegador bloqueou a nova aba do Dashboard. Permita pop-ups para o ZANKA.');return null;}
+   setTimeout(()=>{try{const bc=new BroadcastChannel(CHANNEL);bc.postMessage({type:'init',project:window.projetoAtivo||'global',data:data||{}});setTimeout(()=>bc.close(),1000)}catch(e){}},700);
+   return w;
+ };
+ try{
+   const bc=new BroadcastChannel(CHANNEL);
+   bc.onmessage=async ev=>{
+     const d=ev.data||{};
+     if(d.type==='diana_query'){
+       try{
+         if(window.agenteId!=='diana'&&typeof window.sel==='function')window.sel('diana');
+         const r=await window.chamarAPI('diana',String(d.query||'')+'\n\n[CONTEXTO: DASHBOARD DIANA] Responda em JSON quando possível com title,kpis,chart{type,labels,values,series},insights. Use somente dados reais disponíveis; não invente.');
+         bc.postMessage({type:'diana_result',result:r,project:window.projetoAtivo||'global'});
+       }catch(e){bc.postMessage({type:'diana_error',error:e.message})}
+     }
+   };
+   window.addEventListener('beforeunload',()=>bc.close());
+ }catch(e){console.warn('[ZANKA dashboard channel]',e)}
+ // Prefer a real new tab for the visual morning briefing; modal remains available as fallback.
+ const oldVisual=window.renderMorningVisual;
+ window.renderMorningVisual=function(data){return window.openDianaDashboardTab(data||{})||oldVisual?.(data)};
+})();
+</script>
+
+
+
+
+
+<style id="zanka-integrated-diana-css">
+#zankaDianaView{display:none;position:fixed;inset:0;z-index:9999;background:#070b14;color:#e8edf7;overflow:auto;font:14px Inter,system-ui,sans-serif}
+#zankaDianaView.show{display:block}
+.zd-wrap{max-width:1200px;margin:auto;padding:24px}
+.zd-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #202a40;padding-bottom:16px}
+.zd-muted{color:#8995aa;font-size:12px}
+.zd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.zd-card{background:#0f1626;border:1px solid #25304a;border-radius:14px;padding:16px}
+.zd-kpi{font-size:24px;font-weight:800;margin-top:6px}
+.zd-main{display:grid;grid-template-columns:1fr 320px;gap:14px}
+.zd-panel{background:#0f1626;border:1px solid #25304a;border-radius:14px;padding:16px}
+.zd-chart{height:420px}
+.zd-chart svg{width:100%;height:100%}
+.zd-textarea{width:100%;box-sizing:border-box;min-height:130px;background:#0a101c;color:#e8edf7;border:1px solid #2a3650;border-radius:10px;padding:12px;resize:vertical}
+.zd-btn{border:1px solid #35415c;background:#151f33;color:#fff;border-radius:9px;padding:9px 12px;cursor:pointer;margin-top:8px}
+.zd-btn.primary{background:#6d43f5;border-color:#7d5df8}
+.zd-ins{line-height:1.7;color:#cdd6e7}
+.zd-status{margin-top:10px;color:#8dd9b3;font-size:12px}
+@media(max-width:900px){.zd-grid{grid-template-columns:repeat(2,1fr)}.zd-main{grid-template-columns:1fr}}
+</style>
+
+<div id="zankaDianaView" aria-hidden="true">
+  <div class="zd-wrap">
+    <div class="zd-head">
+      <div>
+        <h2 style="margin:0">📊 DIANA · Intelligence Dashboard</h2>
+        <div class="zd-muted" id="zdProject">Projeto</div>
+      </div>
+      <div>
+        <button class="zd-btn" onclick="window.closeDianaDashboard()">← Voltar ao ZANKA</button>
+      </div>
+    </div>
+    <div class="zd-grid" id="zdKpis"></div>
+    <div class="zd-main">
+      <div class="zd-panel zd-chart" id="zdChart"><div class="zd-muted">Aguardando dados.</div></div>
+      <div class="zd-panel">
+        <b>Comandar a DIANA</b>
+        <p class="zd-muted">Peça uma alteração no gráfico, uma nova análise ou uma demonstração.</p>
+        <textarea id="zdQ" class="zd-textarea" placeholder="Ex.: Diana, mostre ROAS por país nos últimos 30 dias"></textarea>
+        <button class="zd-btn primary" onclick="window.askDianaDashboard()">Enviar</button>
+        <button class="zd-btn" onclick="window.presetDiana('performance')">Performance</button>
+        <button class="zd-btn" onclick="window.presetDiana('forecast')">Previsão</button>
+        <div class="zd-status" id="zdStatus">Dashboard integrado ao ZANKA.</div>
+      </div>
+    </div>
+    <div class="zd-panel" style="margin-top:14px">
+      <b>Insights</b>
+      <div class="zd-ins" id="zdInsights">Nenhum insight recebido.</div>
+    </div>
+  </div>
+</div>
+
+<script id="zanka-integrated-diana-js">
+(function(){
+  function escD(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+  function renderD(d){
+    d=d||{};
+    const view=document.getElementById('zankaDianaView'); if(!view)return;
+    if(d.project)document.getElementById('zdProject').textContent='Projeto: '+d.project;
+    const k=Array.isArray(d.kpis)?d.kpis:[];
+    document.getElementById('zdKpis').innerHTML=k.map(x=>`<div class="zd-card"><div class="zd-muted">${escD(x.label)}</div><div class="zd-kpi">${escD(x.value)}</div></div>`).join('');
+    const c=d.chart||{}, vals=Array.isArray(c.values)?c.values:[];
+    if(vals.length){
+      const labels=c.labels||vals.map((_,i)=>String(i+1)), max=Math.max(...vals,1), w=900,h=380,p=45;
+      let path='';
+      vals.forEach((v,i)=>{const x=p+i*((w-2*p)/Math.max(vals.length-1,1)),y=h-p-(Number(v)/max)*(h-2*p);path+=(i?' L ':'M ')+x+' '+y});
+      document.getElementById('zdChart').innerHTML=`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><path d="M ${p} ${h-p} H ${w-p}" stroke="#33405c"/><path d="M ${p} ${p} V ${h-p}" stroke="#33405c"/><path d="${path}" fill="none" stroke="#8b6cff" stroke-width="4"/><text x="${p}" y="20" fill="#cdd6e7">${escD(c.series||'Série')}</text></svg>`;
+    } else document.getElementById('zdChart').innerHTML='<div class="zd-muted">Não há dados numéricos reais disponíveis para desenhar o gráfico.</div>';
+    const ins=Array.isArray(d.insights)?d.insights:[];
+    document.getElementById('zdInsights').innerHTML=ins.map(x=>'<div>• '+escD(x)+'</div>').join('')||'Nenhum insight.';
+  }
+  window.openDianaDashboardTab=function(data){
+    const v=document.getElementById('zankaDianaView'); if(!v)return;
+    v.classList.add('show'); v.setAttribute('aria-hidden','false');
+    renderD({...data,project:data?.project||window.projetoAtivo||localStorage.getItem('zanka_projeto_ativo')||'global'});
+    document.body.style.overflow='hidden';
+    return v;
+  };
+  window.closeDianaDashboard=function(){
+    const v=document.getElementById('zankaDianaView'); if(!v)return;
+    v.classList.remove('show'); v.setAttribute('aria-hidden','true'); document.body.style.overflow='';
+  };
+  window.renderDianaDashboard=renderD;
+  window.askDianaDashboard=async function(){
+    const q=document.getElementById('zdQ').value.trim(); if(!q)return;
+    document.getElementById('zdStatus').textContent='Consultando DIANA...';
+    try{
+      if(typeof window.chamarAPI!=='function') throw new Error('Motor de IA indisponível.');
+      if(window.agenteId!=='diana'&&typeof window.sel==='function') window.sel('diana');
+      let r=await window.chamarAPI('diana',q+'\n\n[CONTEXTO: DASHBOARD DIANA] Responda preferencialmente em JSON com title,kpis,chart{type,labels,values,series},insights. Use apenas dados reais disponíveis; não invente dados.');
+      let x=r; try{x=JSON.parse(r)}catch(e){x={insights:[String(r)]}}
+      renderD(x); document.getElementById('zdStatus').textContent='DIANA atualizou o dashboard.';
+    }catch(e){document.getElementById('zdStatus').textContent='Erro: '+e.message;}
+  };
+  window.presetDiana=function(p){
+    document.getElementById('zdQ').value=p==='forecast'?'Diana, faça uma previsão com os dados disponíveis.':'Diana, mostre a performance por período e destaque os principais desvios.';
+    window.askDianaDashboard();
+  };
+  // Preserve the existing public API name but make it internal, not a second HTML.
+  window.openDianaDashboard=window.openDianaDashboardTab;
+  // Any old dashboard-channel message is no longer needed; dashboard is same document.
+  const oldVisual=window.renderMorningVisual;
+  window.renderMorningVisual=function(data){window.openDianaDashboardTab(data||{});return true};
+  // keyboard escape
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')window.closeDianaDashboard()});
+})();
+</script>
+<!-- ZANKA Sprint 6: single-index unified build --></body>
 </html>
 
 <style id="zanka-s5-final-style">
